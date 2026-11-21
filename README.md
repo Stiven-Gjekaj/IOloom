@@ -1,6 +1,11 @@
 <div align="center">
 
-![IOloom](assets/wordmark.svg)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
+  <img src="assets/logo.svg" alt="IOloom" width="160">
+</picture>
+
+# IOloom
 
 ### Electrical schematics and PLC programs in one project
 
