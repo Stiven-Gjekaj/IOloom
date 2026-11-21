@@ -13,7 +13,8 @@ holds it. Do not start a phase until the phase it depends on passes its exit
 test. The times are estimates for part-time work by one student. Each time
 includes 20 percent for the faults that the phase finds.
 
-IOloom has no code yet. P0 is next.
+P0 is almost complete. [docs/spikes/p0.md](spikes/p0.md) holds the results.
+Only S5, the build workflow for Windows and Linux, is still open.
 
 ---
 

@@ -33,7 +33,9 @@ _A sensor that you wire to an input becomes a variable in the program. Rename it
 ---
 
 > [!NOTE]
-> **IOloom is in the planning stage, and it has no code yet.**
+> **IOloom is in the spike phase. It holds the code of OpenPLC Editor v4.3.5
+> and no IOloom feature yet.**
+> [docs/spikes/p0.md](docs/spikes/p0.md) holds the spike results.
 > [docs/research.md](docs/research.md) holds the facts and the risks.
 > [docs/roadmap.md](docs/roadmap.md) says what comes next, and
 > [docs/milestones.md](docs/milestones.md) holds every decision and the
