@@ -5,8 +5,6 @@
   <img src="assets/logo.svg" alt="IOloom" width="160">
 </picture>
 
-# IOloom
-
 ### Electrical schematics and PLC programs in one project
 
 _A sensor that you wire to an input becomes a variable in the program. Rename it in one place, and it changes in both._
