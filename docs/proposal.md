@@ -1,4 +1,4 @@
-# Rungwire: research, architecture, and plan
+# IOloom: research, architecture, and plan
 
 Status: proposal. The human did not approve it yet.
 Research date: 2026-11-21.
@@ -48,7 +48,7 @@ Address registry. The document `docs/iec-address-registry.md` describes a
 central IEC address registry ("approved design, in implementation"). It has
 consumers, channels with a stable `channelId`, address classes, and aliases
 that are unique in the project. An alias attaches to the channel, not to the
-address. This is almost the shared signal model that Rungwire needs.
+address. This is almost the shared signal model that IOloom needs.
 
 ### 1.2 QElectroTech
 
@@ -75,7 +75,7 @@ project uses.
 
 ### 1.3 Compilers and runtimes
 
-| Project | License | State | Use for Rungwire |
+| Project | License | State | Use for IOloom |
 |---------|---------|-------|------------------|
 | STruC++ (`Autonomy-Logic/STruCpp`) | GPL-3.0 | Active. TypeScript. ST to C++. Has a test runner and a REPL. | Keep. It is already the compiler of the editor. |
 | RuSTy (`PLC-lang/rusty`) | LGPL-3.0 | Active. ST to native code through LLVM. | Do not use. LLVM is a large dependency. It adds no feature that we need. |
@@ -103,10 +103,10 @@ of language faults and no gain.
    text in ST and IL, and a label in LD and FBD. A rename is a refactor across
    all POUs. Upstream has `src/frontend/utils/variable-references`, which can
    help. A safe rename needs a parser, not a text search.
-5. QElectroTech elements carry no PLC meaning. Rungwire needs its own
+5. QElectroTech elements carry no PLC meaning. IOloom needs its own
    metadata on top of each element (for example "terminal 3 is a digital
    input channel").
-6. Element license. If Rungwire ships the element library, that is
+6. Element license. If IOloom ships the element library, that is
    redistribution outside a diagram. You must give CC-BY 3.0 attribution. The
    machine learning clause is an extra limit that CC-BY 3.0 does not have. Its
    legal effect is not clear, and some Linux distributions may refuse it. Do
@@ -118,7 +118,7 @@ of language faults and no gain.
    Machine Expert can import POUs from PLCopen XML, but not the hardware
    configuration. Expect some changes for each target tool.
 9. Course fit. Class work in SoMachine or Machine Expert does not open in
-   Rungwire. Rungwire is a second tool for practice, not a replacement.
+   IOloom. IOloom is a second tool for practice, not a replacement.
 
 ## 3. Architecture
 
@@ -127,7 +127,7 @@ of language faults and no gain.
 The fork stays close to upstream. All new code is in new folders. Upstream
 files change only at a small number of "seams".
 
-    src/rungwire/
+    src/ioloom/
       model/        signal list, schematic model, schemas (no React, no Electron)
       qet/          .elmt reader, later .qet reader
       schematic/    schematic editor (React, @xyflow/react or SVG)
@@ -139,11 +139,11 @@ files change only at a small number of "seams".
 Seams (upstream files that change):
 
 1. Navigation: add a "Schematic" tab and a "Signals" table.
-2. Address registry: Rungwire registers a PLC module as a consumer with its
+2. Address registry: IOloom registers a PLC module as a consumer with its
    channels.
 3. Variables: create and rename global variables from signals.
 4. Simulation: read and write the I/O image of the running program.
-5. Project files: add `rungwire/` to the list of project folders.
+5. Project files: add `ioloom/` to the list of project folders.
 
 The `model/` folder has no dependency on upstream. Tests for it run with no
 Electron.
@@ -164,12 +164,12 @@ The milestone M0 decides between the two.
 
 ### 4.1 Files
 
-Rungwire adds one folder to the OpenPLC project folder. The upstream files do
+IOloom adds one folder to the OpenPLC project folder. The upstream files do
 not change format.
 
     project.json, devices/, pous/, datatypes/     upstream, unchanged
-    rungwire/
-      rungwire.json        format version, settings
+    ioloom/
+      ioloom.json        format version, settings
       signals.json         the shared signal list
       devices.json         schematic devices (designations, properties)
       sheets/<id>.json     one file for each sheet: symbol placements, wires
@@ -213,7 +213,7 @@ JSON with one file for each sheet gives small git diffs. Each file has a
 - The link key is the signal UUID. It is never the name.
 - The name of the signal and the name of the program variable are the same.
   A rename changes both in one operation, with undo.
-- The IEC address (`%IX0.0`) comes from the address registry. Rungwire does
+- The IEC address (`%IX0.0`) comes from the address registry. IOloom does
   not store it as the source of truth.
 - The first release links a signal to a channel by hand (in the signal
   table). A later check compares the hand links with the wires and reports
@@ -234,7 +234,7 @@ The times are for part-time work by one student. They are estimates.
 | M6: export | PDF of sheets. Terminal and wire reports (CSV and PDF). PLCopen XML export. | A PLCopen file opens in a CODESYS-based tool. | 4 weeks |
 | M7: more | DXF export. Read-only `.qet` import. Windows and Linux builds. | | open |
 
-M4 is the first point where Rungwire is useful in class.
+M4 is the first point where IOloom is useful in class.
 
 ## 6. Open questions for the human
 

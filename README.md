@@ -1,6 +1,6 @@
-# Rungwire
+# IOloom
 
-Rungwire is an open-source tool for electrical schematics and PLC programs.
+IOloom is an open-source tool for electrical schematics and PLC programs.
 It puts the two in one project.
 
 The project is in the planning stage.
@@ -19,7 +19,7 @@ No free tool links the two.
 
 ## The idea
 
-Rungwire keeps one shared list of signals.
+IOloom keeps one shared list of signals.
 A signal is one PLC input or output, for example a sensor or a lamp.
 
 - A sensor that you wire to a PLC input in the schematic becomes a variable
@@ -29,7 +29,7 @@ A signal is one PLC input or output, for example a sensor or a lamp.
 
 ## Scope
 
-Rungwire is for design and simulation on a laptop.
+IOloom is for design and simulation on a laptop.
 It does not connect to a real PLC.
 
 In scope:
@@ -55,7 +55,7 @@ Windows and Linux follow.
 
 ## Foundation
 
-Rungwire is a fork of
+IOloom is a fork of
 [OpenPLC Editor](https://github.com/Autonomy-Logic/openplc-editor)
 version 4 (GPL-3.0).
 It reads the element files of
