@@ -26,13 +26,8 @@ jobs:
     needs: [architecture, build-check, lint]
     uses: ./.github/workflows/ci-format.yml
 
-  sync:
-    needs: [format]
-    uses: ./.github/workflows/ci-sync.yml
-    secrets: inherit
-
   complete-build:
-    needs: [sync]
+    needs: [format]
     # Full 3-OS packaging is release work: the tag-triggered release
     # workflow builds it for real, so PRs into development skip it and
     # only the promotion PRs into main still prove the app packages.
