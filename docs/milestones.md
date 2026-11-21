@@ -1,7 +1,53 @@
-# Decisions
+<div align="center">
+  <a href="../README.md"><b>IOloom</b></a>
+</div>
 
-This file records each decision that the human makes.
-The newest decision is at the top.
+# Milestones
+
+This file holds the decisions that shape the work, and the reason behind each
+one. It also holds the options that lost, because the reason a choice lost is
+the part that a later reader needs. The newest decision is at the top.
+[The roadmap](roadmap.md) says what comes next.
+
+## 2026-11-21: development runs without a stop
+
+Decision: the agent works through the roadmap without a stop for approval at
+each phase. It cuts the releases that [docs/releasing.md](releasing.md)
+describes, and pushes them.
+
+- A separate session is allowed for a one-off job, such as one fault fix.
+  The agent archives each session when it is done.
+- A background subagent is not used, because the human cannot see it.
+
+## 2026-11-21: semantic versions with codenames
+
+Decision: `MAJOR.MINOR.PATCH`, a minor release at each phase, a patch release
+for each hotfix, and a codename for each minor release.
+[docs/releasing.md](releasing.md) gives the rules.
+
+Reasons:
+
+- The project format decides what a version means to a user. A semantic
+  version shows if a file opens in an older IOloom.
+- A patch number has no limit, so frequent hotfixes need no new scheme.
+- The other repositories of the owner use semantic versions (Burnout,
+  inkland) and codenames (AllTheOddities).
+
+Rejected options:
+
+- A date version (`YYYY.MM.N`), as in AllTheOddities. It hides changes to the
+  project format.
+- A version that holds the upstream version. Upstream releases each week, so
+  the version of IOloom would follow a schedule that IOloom does not control.
+
+## 2026-11-21: the roadmap holds formats and all platforms
+
+Decision: imports and exports of the common formats, and builds for macOS,
+Windows, and Linux, are part of the roadmap. The builds start in P1, the
+first release.
+
+Reason: upstream already builds for the three operating systems, so the
+builds cost little at the start and much more later.
 
 ## 2026-11-21: fork OpenPLC Editor
 
