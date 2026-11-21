@@ -65,6 +65,7 @@ It reads the element files of
 
 - [docs/proposal.md](docs/proposal.md): research, architecture, data model,
   and milestones.
+- [docs/decisions.md](docs/decisions.md): the decisions that the human made.
 - [AGENTS.md](AGENTS.md): rules for the work in this repository.
 
 ## License
