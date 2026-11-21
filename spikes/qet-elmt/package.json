@@ -7,6 +7,6 @@
     "run": "node run.ts"
   },
   "dependencies": {
-    "fast-xml-parser": "^5.3.0"
+    "fast-xml-parser": "^5.12.1"
   }
 }
