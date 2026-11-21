@@ -1,0 +1,12 @@
+{
+  "name": "ioloom-spike-qet-elmt",
+  "private": true,
+  "type": "module",
+  "description": "P0 spike: read the QElectroTech elements and draw them as SVG.",
+  "scripts": {
+    "run": "node run.ts"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^5.3.0"
+  }
+}
