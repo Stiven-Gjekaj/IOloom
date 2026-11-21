@@ -223,7 +223,7 @@ Builds start in P1. Each release holds all six.
 
 **F1: upstream fixes in P1 (course critical)**
 
-- #1172: the compiler requires a remote library. IOloom must work offline.
+- #1172: a library that you remove stays in `project.json`, and the compiler still asks for it.
 - #1202: the ladder editor cannot make nested parallel branches.
 - #1232: local constants are not in the auto-completion list.
 - #553: rising or falling edge on a negated contact.
