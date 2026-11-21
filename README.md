@@ -66,7 +66,7 @@ It reads the element files of
 - [docs/research.md](docs/research.md): the research and the risks.
 - [docs/architecture.md](docs/architecture.md): the architecture and the data model.
 - [docs/roadmap.md](docs/roadmap.md): the phases of the work.
-- [docs/decisions.md](docs/decisions.md): the decisions that the human made.
+- [docs/milestones.md](docs/milestones.md): the decisions and the reason for each one.
 - [AGENTS.md](AGENTS.md): rules for the work in this repository.
 
 ## License
