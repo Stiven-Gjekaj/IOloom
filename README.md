@@ -15,7 +15,7 @@ _A sensor that you wire to an input becomes a variable in the program. Rename it
 ![Windows](https://img.shields.io/badge/windows-22d3ee?style=for-the-badge&logo=windows&logoColor=082f49)
 ![Linux](https://img.shields.io/badge/linux-67e8f9?style=for-the-badge&logo=linux&logoColor=082f49)
 [![GPL-3.0](https://img.shields.io/badge/gpl--3.0-a5f3fc?style=for-the-badge&logoColor=082f49)](#licence)
-[![Release](https://img.shields.io/github/v/release/Stiven-Gjekaj/ioloom?style=for-the-badge&label=release&labelColor=cffafe&color=cffafe&include_prereleases)](https://github.com/Stiven-Gjekaj/ioloom/releases/latest)
+[![Release](https://img.shields.io/github/v/release/Stiven-Gjekaj/IOloom?style=for-the-badge&label=release&labelColor=cffafe&color=cffafe&include_prereleases)](https://github.com/Stiven-Gjekaj/IOloom/releases/latest)
 
 <p align="center">
   <a href="#overview"><b>Overview</b></a> |

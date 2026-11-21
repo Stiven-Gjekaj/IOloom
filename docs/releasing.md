@@ -96,7 +96,7 @@ Each release has `SHA256SUMS`:
 
 Check the build provenance of a file:
 
-    gh attestation verify <file> --repo Stiven-Gjekaj/ioloom
+    gh attestation verify <file> --repo Stiven-Gjekaj/IOloom
 
 ## Pass the warnings of an unsigned build
 
