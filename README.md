@@ -63,8 +63,9 @@ It reads the element files of
 
 ## Documents
 
-- [docs/proposal.md](docs/proposal.md): research, architecture, data model,
-  and milestones.
+- [docs/research.md](docs/research.md): the research and the risks.
+- [docs/architecture.md](docs/architecture.md): the architecture and the data model.
+- [docs/roadmap.md](docs/roadmap.md): the phases of the work.
 - [docs/decisions.md](docs/decisions.md): the decisions that the human made.
 - [AGENTS.md](AGENTS.md): rules for the work in this repository.
 

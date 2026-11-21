@@ -26,6 +26,6 @@ Rejected options:
 
 Consequences:
 
-- The risks in section 2 of `docs/proposal.md` stay: upstream changes, the
+- The risks in section 2 of `docs/research.md` stay: upstream changes, the
   emulated Arduino simulator, and the features that are out of scope.
 - The fork follows upstream release tags, not the `main` branch.
