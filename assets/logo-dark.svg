@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="IOloom">
+  <title>IOloom</title>
+  <!-- A gear for the machine. Inside it, an I and an O weave over and under
+       each other, as threads do on a loom: the inputs and outputs of a PLC,
+       linked. -->
+  <defs>
+    <!-- The O passes under the I at the top. -->
+    <mask id="o-under" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect width="512" height="512" fill="#fff"/>
+      <rect x="220.0" y="114" width="72.0" height="88" fill="#000"/>
+    </mask>
+    <!-- The I passes under the O at the bottom. -->
+    <mask id="i-under" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect width="512" height="512" fill="#fff"/>
+      <rect x="212" y="318.0" width="88" height="72.0" fill="#000"/>
+    </mask>
+  </defs>
+  <path d="M233.35 43.20 L239.72 12.54 L272.28 12.54 L278.65 43.20 L300.22 46.62 L315.75 19.43 L346.71 29.49 L343.30 60.62 L362.76 70.53 L385.93 49.47 L412.27 68.61 L399.40 97.15 L414.85 112.60 L443.39 99.73 L462.53 126.07 L441.47 149.24 L451.38 168.70 L482.51 165.29 L492.57 196.25 L465.38 211.78 L468.80 233.35 L499.46 239.72 L499.46 272.28 L468.80 278.65 L465.38 300.22 L492.57 315.75 L482.51 346.71 L451.38 343.30 L441.47 362.76 L462.53 385.93 L443.39 412.27 L414.85 399.40 L399.40 414.85 L412.27 443.39 L385.93 462.53 L362.76 441.47 L343.30 451.38 L346.71 482.51 L315.75 492.57 L300.22 465.38 L278.65 468.80 L272.28 499.46 L239.72 499.46 L233.35 468.80 L211.78 465.38 L196.25 492.57 L165.29 482.51 L168.70 451.38 L149.24 441.47 L126.07 462.53 L99.73 443.39 L112.60 414.85 L97.15 399.40 L68.61 412.27 L49.47 385.93 L70.53 362.76 L60.62 343.30 L29.49 346.71 L19.43 315.75 L46.62 300.22 L43.20 278.65 L12.54 272.28 L12.54 239.72 L43.20 233.35 L46.62 211.78 L19.43 196.25 L29.49 165.29 L60.62 168.70 L70.53 149.24 L49.47 126.07 L68.61 99.73 L97.15 112.60 L112.60 97.15 L99.73 68.61 L126.07 49.47 L149.24 70.53 L168.70 60.62 L165.29 29.49 L196.25 19.43 L211.78 46.62 Z M256 68 A188 188 0 1 0 256 444 A188 188 0 1 0 256 68 Z" fill="#e6f6fa" fill-rule="evenodd"/>
+  <circle cx="256" cy="256" r="98" fill="none" stroke="#e6f6fa" stroke-width="44" mask="url(#o-under)"/>
+  <path d="M256 106 V406" fill="none" stroke="#e6f6fa" stroke-width="44" stroke-linecap="round" mask="url(#i-under)"/>
+</svg>
