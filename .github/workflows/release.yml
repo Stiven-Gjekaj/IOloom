@@ -44,11 +44,19 @@ jobs:
       - name: Cache tool binaries
         uses: actions/cache@v4
         with:
-          path: resources/bin
+          path: |
+            resources/bin
+            resources/arduino-core
           key: binaries-macOS-${{ hashFiles('binary-versions.json') }}
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Download the arduino:avr core for ARM64
+        run: node scripts/download-arduino-core.js --arch arm64
+
+      - name: Download the arduino:avr core for x64
+        run: node scripts/download-arduino-core.js --arch x64
 
       - name: Download binaries for x64
         run: npx ts-node scripts/download-binaries.ts --arch x64
@@ -156,11 +164,16 @@ jobs:
       - name: Cache tool binaries
         uses: actions/cache@v4
         with:
-          path: resources/bin
+          path: |
+            resources/bin
+            resources/arduino-core
           key: binaries-Windows-x64-${{ hashFiles('binary-versions.json') }}
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Download the arduino:avr core for x64
+        run: node scripts/download-arduino-core.js --arch x64
 
       - name: Download binaries for x64
         run: npx ts-node scripts/download-binaries.ts --arch x64
@@ -239,11 +252,16 @@ jobs:
       - name: Cache tool binaries
         uses: actions/cache@v4
         with:
-          path: resources/bin
+          path: |
+            resources/bin
+            resources/arduino-core
           key: binaries-Windows-arm64-${{ hashFiles('binary-versions.json') }}
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Download the arduino:avr core for ARM64
+        run: node scripts/download-arduino-core.js --arch arm64 --cli-arch x64
 
       - name: Download binaries for ARM64
         run: npx ts-node scripts/download-binaries.ts --arch arm64
@@ -317,11 +335,16 @@ jobs:
       - name: Cache tool binaries
         uses: actions/cache@v4
         with:
-          path: resources/bin
+          path: |
+            resources/bin
+            resources/arduino-core
           key: binaries-Linux-x64-${{ hashFiles('binary-versions.json') }}
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Download the arduino:avr core for x64
+        run: node scripts/download-arduino-core.js --arch x64
 
       - name: Get version and build date
         id: version
@@ -376,11 +399,16 @@ jobs:
       - name: Cache tool binaries
         uses: actions/cache@v4
         with:
-          path: resources/bin
+          path: |
+            resources/bin
+            resources/arduino-core
           key: binaries-Linux-arm64-${{ hashFiles('binary-versions.json') }}
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Download the arduino:avr core for ARM64
+        run: node scripts/download-arduino-core.js --arch arm64
 
       - name: Get version and build date
         id: version

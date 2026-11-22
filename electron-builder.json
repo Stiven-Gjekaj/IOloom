@@ -40,6 +40,10 @@
         "to": "./bin"
       },
       {
+        "from": "./resources/arduino-core/darwin/${arch}/data",
+        "to": "./arduino-core/data"
+      },
+      {
         "from": "./resources/sources",
         "to": "./sources"
       }
@@ -84,6 +88,10 @@
         "to": "./bin"
       },
       {
+        "from": "./resources/arduino-core/win32/${arch}/data",
+        "to": "./arduino-core/data"
+      },
+      {
         "from": "./resources/sources",
         "to": "./sources"
       }
@@ -108,6 +116,10 @@
       {
         "from": "./resources/bin/linux/${arch}",
         "to": "./bin"
+      },
+      {
+        "from": "./resources/arduino-core/linux/${arch}/data",
+        "to": "./arduino-core/data"
       },
       {
         "from": "./resources/sources",
