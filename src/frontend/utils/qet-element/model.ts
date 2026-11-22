@@ -2,11 +2,16 @@
 // The reader fills it. The SVG renderer draws it.
 // All coordinates are in element units, relative to the hotspot.
 
+/** A Qt hatch brush. QElectroTech draws it in black. */
+export type Hatch = 'hor' | 'ver' | 'bdiag' | 'fdiag'
+
 export interface StrokeStyle {
   /** A CSS colour name, a hex colour, or "none". */
   stroke: string
   /** A CSS colour name, a hex colour, or "none". */
   fill: string
+  /** A hatch fill. When it is set, `fill` is "none". */
+  hatch: Hatch | null
   width: number
   /** An SVG `stroke-dasharray` value, or null for a solid line. */
   dash: string | null

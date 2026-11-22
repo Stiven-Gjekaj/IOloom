@@ -1,17 +1,42 @@
 // Draws the symbol model as an SVG document.
-import type { ElementSymbol, Primitive, StrokeStyle } from './model'
+import type { ElementSymbol, Hatch, Primitive, StrokeStyle } from './model'
 
 export interface RenderOptions {
   /** Draw a red dot on each terminal. The default is true. */
   showTerminals?: boolean
   /** The SVG width and height are the element size times this value. The default is 2. */
   scale?: number
+  /**
+   * The prefix of the pattern IDs. Give each SVG a different prefix if many SVGs go
+   * inline into one HTML document. The default is "qet-".
+   */
+  idPrefix?: string
 }
 
 const esc = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const f = (n: number): string => (Math.round(n * 100) / 100).toString()
-const paint = (s: StrokeStyle): string =>
-  `stroke="${s.stroke}" stroke-width="${s.width}" fill="${s.fill}"${s.dash ? ` stroke-dasharray="${s.dash}"` : ''}`
+
+// A Qt hatch brush is a bitmap of 8 by 8 pixels. At a zoom of 100 %, one pixel is one element unit.
+// Thus each pattern has a period of 8 units, and lines of 1 unit.
+const HATCH_PATH: Record<Hatch, string> = {
+  hor: 'M0 4H8',
+  ver: 'M4 0V8',
+  bdiag: 'M-1 1L1 -1M0 8L8 0M7 9L9 7',
+  fdiag: 'M-1 7L1 9M0 0L8 8M7 -1L9 1',
+}
+
+const hatchPattern = (h: Hatch, prefix: string): string =>
+  `<pattern id="${prefix}hatch-${h}" width="8" height="8" patternUnits="userSpaceOnUse">` +
+  `<path d="${HATCH_PATH[h]}" stroke="black" stroke-width="1" fill="none"/></pattern>`
+
+type Paint = (s: StrokeStyle) => string
+const painter =
+  (prefix: string): Paint =>
+  (s) => {
+    const fill = s.hatch ? `url(#${prefix}hatch-${s.hatch})` : s.fill
+    return `stroke="${s.stroke}" stroke-width="${s.width}" fill="${fill}"${s.dash ? ` stroke-dasharray="${s.dash}"` : ''}`
+  }
+const noFill = (s: StrokeStyle): StrokeStyle => ({ ...s, fill: 'none', hatch: null })
 
 // Qt angles go counterclockwise from 3 o'clock, in degrees, on a canvas where y goes down.
 export function arcPath(p: Extract<Primitive, { kind: 'arc' }>): string {
@@ -30,7 +55,7 @@ export function arcPath(p: Extract<Primitive, { kind: 'arc' }>): string {
   return `M${f(x1)} ${f(y1)} A${f(p.rx)} ${f(p.ry)} 0 ${large} ${sweepFlag} ${f(x2)} ${f(y2)}`
 }
 
-function drawPrimitive(p: Primitive): string {
+function drawPrimitive(p: Primitive, paint: Paint): string {
   switch (p.kind) {
     case 'line':
       return `<line x1="${f(p.x1)}" y1="${f(p.y1)}" x2="${f(p.x2)}" y2="${f(p.y2)}" ${paint(p.style)}/>`
@@ -39,12 +64,12 @@ function drawPrimitive(p: Primitive): string {
     case 'ellipse':
       return `<ellipse cx="${f(p.cx)}" cy="${f(p.cy)}" rx="${f(p.rx)}" ry="${f(p.ry)}" ${paint(p.style)}/>`
     case 'arc':
-      return `<path d="${arcPath(p)}" ${paint({ ...p.style, fill: 'none' })}/>`
+      return `<path d="${arcPath(p)}" ${paint(noFill(p.style))}/>`
     case 'polygon': {
       const pts = p.points.map(([x, y]) => `${f(x)},${f(y)}`).join(' ')
       return p.closed
         ? `<polygon points="${pts}" ${paint(p.style)}/>`
-        : `<polyline points="${pts}" ${paint({ ...p.style, fill: 'none' })}/>`
+        : `<polyline points="${pts}" ${paint(noFill(p.style))}/>`
     }
     case 'text': {
       const rot = p.rotation ? ` transform="rotate(${f(p.rotation)} ${f(p.x)} ${f(p.y)})"` : ''
@@ -57,8 +82,16 @@ function drawPrimitive(p: Primitive): string {
 
 /** Draws one element as an SVG document. The view box puts the hotspot at the origin. */
 export function renderSvg(s: ElementSymbol, options: RenderOptions = {}): string {
-  const { showTerminals = true, scale = 2 } = options
-  const out = s.primitives.map(drawPrimitive)
+  const { showTerminals = true, scale = 2, idPrefix = 'qet-' } = options
+  const paint = painter(idPrefix)
+  const hatches = new Set<Hatch>()
+  for (const p of s.primitives) {
+    if (p.kind === 'line' || p.kind === 'rect' || p.kind === 'ellipse' || (p.kind === 'polygon' && p.closed)) {
+      if (p.style.hatch) hatches.add(p.style.hatch)
+    }
+  }
+  const out = hatches.size ? [`<defs>${[...hatches].map((h) => hatchPattern(h, idPrefix)).join('')}</defs>`] : []
+  out.push(...s.primitives.map((p) => drawPrimitive(p, paint)))
   if (showTerminals) {
     for (const t of s.terminals) out.push(`<circle cx="${f(t.x)}" cy="${f(t.y)}" r="1.5" fill="red"/>`)
   }

@@ -1,7 +1,7 @@
 import type { ElementSymbol, Primitive, StrokeStyle } from '../model'
 import { arcPath, renderSvg } from '../render-svg'
 
-const plain: StrokeStyle = { stroke: 'black', fill: 'none', width: 1, dash: null }
+const plain: StrokeStyle = { stroke: 'black', fill: 'none', hatch: null, width: 1, dash: null }
 
 const symbol = (primitives: Primitive[], extra: Partial<ElementSymbol> = {}): ElementSymbol => ({
   uuid: '',
@@ -96,6 +96,73 @@ describe('renderSvg', () => {
     const s = symbol([], { terminals: [{ id: 't', name: '', x: 0, y: -10, orientation: 'n' }] })
     expect(renderSvg(s)).toContain('<circle cx="0" cy="-10" r="1.5" fill="red"/>')
     expect(renderSvg(s, { showTerminals: false })).not.toContain('<circle')
+  })
+})
+
+describe('renderSvg with hatch fills', () => {
+  const hatched = (hatch: StrokeStyle['hatch']): Primitive => ({
+    kind: 'rect',
+    x: 0,
+    y: 0,
+    w: 10,
+    h: 10,
+    rx: 0,
+    ry: 0,
+    style: { ...plain, hatch },
+  })
+
+  it('fills a shape with a black pattern for each hatch', () => {
+    for (const h of ['hor', 'ver', 'bdiag', 'fdiag'] as const) {
+      const svg = renderSvg(symbol([hatched(h)]))
+      expect(svg).toContain(`fill="url(#qet-hatch-${h})"`)
+      expect(svg).toMatch(
+        new RegExp(
+          `<defs><pattern id="qet-hatch-${h}" width="8" height="8" patternUnits="userSpaceOnUse"><path d="[^"]+" stroke="black"`,
+        ),
+      )
+    }
+  })
+
+  it('draws the lines of each pattern in the correct direction', () => {
+    const path = (h: 'hor' | 'ver' | 'bdiag' | 'fdiag'): string =>
+      /<pattern id="qet-hatch-\w+"[^>]*><path d="([^"]+)"/.exec(renderSvg(symbol([hatched(h)])))?.[1] ?? ''
+    expect(path('hor')).toBe('M0 4H8')
+    expect(path('ver')).toBe('M4 0V8')
+    // "bdiag" goes from the bottom left to the top right, "fdiag" from the top left to the bottom right.
+    expect(path('bdiag')).toContain('M0 8L8 0')
+    expect(path('fdiag')).toContain('M0 0L8 8')
+  })
+
+  it('adds each pattern only one time, and only the patterns that it uses', () => {
+    const svg = renderSvg(symbol([hatched('hor'), hatched('hor'), hatched('ver')]))
+    expect(svg.match(/<pattern /g)).toHaveLength(2)
+    expect(renderSvg(symbol([hatched(null)]))).not.toContain('<defs>')
+  })
+
+  it('gives no fill and no pattern to an arc or an open polyline', () => {
+    const style = { ...plain, hatch: 'hor' as const }
+    const svg = renderSvg(
+      symbol([
+        { kind: 'arc', cx: 0, cy: 0, rx: 1, ry: 1, start: 0, sweep: 90, style },
+        {
+          kind: 'polygon',
+          points: [
+            [0, 0],
+            [1, 1],
+          ],
+          closed: false,
+          style,
+        },
+      ]),
+    )
+    expect(svg).not.toContain('url(')
+    expect(svg).not.toContain('<defs>')
+  })
+
+  it('uses the ID prefix of the options', () => {
+    const svg = renderSvg(symbol([hatched('fdiag')]), { idPrefix: 'sym7-' })
+    expect(svg).toContain('<pattern id="sym7-hatch-fdiag"')
+    expect(svg).toContain('fill="url(#sym7-hatch-fdiag)"')
   })
 })
 

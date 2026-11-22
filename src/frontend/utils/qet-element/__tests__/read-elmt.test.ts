@@ -47,7 +47,7 @@ describe('readElmt', () => {
         y1: -5,
         x2: 0,
         y2: 5.5,
-        style: { stroke: 'darkblue', fill: 'none', width: 2, dash: '4 2' },
+        style: { stroke: 'darkblue', fill: 'none', hatch: null, width: 2, dash: '4 2' },
       },
     ])
   })
@@ -156,7 +156,7 @@ describe('readElmt', () => {
 
 describe('parseStyle', () => {
   it('gives the defaults for an empty style', () => {
-    expect(parseStyle(undefined)).toEqual({ stroke: 'black', fill: 'none', width: 1, dash: null })
+    expect(parseStyle(undefined)).toEqual({ stroke: 'black', fill: 'none', hatch: null, width: 1, dash: null })
   })
 
   it('reads each line weight and line style', () => {
@@ -166,6 +166,12 @@ describe('parseStyle', () => {
     expect(parseStyle('line-style:dotted').dash).toBe('1 2')
     expect(parseStyle('line-style:dashdotted').dash).toBe('4 2 1 2')
     expect(parseStyle('line-style:wavy').dash).toBeNull()
+  })
+
+  it('reads each hatch fill, with no colour fill', () => {
+    for (const h of ['hor', 'ver', 'bdiag', 'fdiag']) {
+      expect(parseStyle(`filling:${h}`)).toMatchObject({ fill: 'none', hatch: h })
+    }
   })
 
   it('draws no stroke for the line weight "none"', () => {

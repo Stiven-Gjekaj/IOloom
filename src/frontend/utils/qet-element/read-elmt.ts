@@ -1,7 +1,7 @@
 // Reads a QElectroTech `.elmt` file into the symbol model.
 import { XMLParser, XMLValidator } from 'fast-xml-parser'
 
-import type { ElementSymbol, Orientation, Primitive, StrokeStyle } from './model'
+import type { ElementSymbol, Hatch, Orientation, Primitive, StrokeStyle } from './model'
 
 /** The error that the reader gives for a file that it cannot read. */
 export class ElmtError extends Error {
@@ -45,7 +45,7 @@ const DASH: Record<string, string | null> = {
   dotted: '1 2',
   dashdotted: '4 2 1 2',
 }
-const HATCH = new Set(['hor', 'ver', 'bdiag', 'fdiag'])
+const HATCH = new Set<string>(['hor', 'ver', 'bdiag', 'fdiag'])
 
 export function parseStyle(s: string | undefined): StrokeStyle {
   const kv: Record<string, string> = {}
@@ -58,6 +58,7 @@ export function parseStyle(s: string | undefined): StrokeStyle {
   return {
     stroke: weight === 'none' ? 'none' : colour(kv.color, 'black'),
     fill: HATCH.has(filling) ? 'none' : colour(filling, 'none'),
+    hatch: HATCH.has(filling) ? (filling as Hatch) : null,
     width: WEIGHT[weight] ?? 1,
     dash: DASH[kv['line-style'] ?? 'normal'] ?? null,
   }
