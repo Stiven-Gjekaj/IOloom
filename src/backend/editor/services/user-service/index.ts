@@ -1,7 +1,9 @@
+import { seedArduinoData } from '@root/backend/shared/packages/seed-arduino-data'
 import { getErrorMessage } from '@root/frontend/utils/get-error-message'
+import type { ArduinoSeedMechanisms } from '@root/middleware/shared/ports/arduino-seed-mechanisms'
 import { exec } from 'child_process'
 import { app } from 'electron'
-import { access, constants, mkdir, readFile, rename, rm, writeFile } from 'fs/promises'
+import { access, constants, cp, mkdir, readdir, readFile, rename, rm, stat, writeFile } from 'fs/promises'
 import { basename, join } from 'path'
 import { promisify } from 'util'
 
@@ -14,6 +16,30 @@ import {
   SETTINGS_DATA,
 } from './data/types'
 import type { ArduinoListOutput } from './types'
+
+/** The file system operations that the seed of the arduino-cli data folder needs. */
+const arduinoSeedDisk: ArduinoSeedMechanisms = {
+  join,
+  exists: async (path) => {
+    try {
+      await stat(path)
+      return true
+    } catch {
+      return false
+    }
+  },
+  list: (dir) => readdir(dir),
+  copyTree: (source, destination, { overwrite, skip }) =>
+    cp(source, destination, {
+      recursive: true,
+      force: overwrite,
+      errorOnExist: false,
+      verbatimSymlinks: true,
+      filter: (path) => path !== skip,
+    }),
+  remove: (path) => rm(path, { recursive: true, force: true }),
+  rename,
+}
 
 /**
  * UserService class responsible for user settings and history management.
@@ -250,6 +276,26 @@ class UserService {
     }
   }
 
+  /**
+   * The arduino-cli data folder with the simulator core that the installer
+   * holds. In development, `npm run setup:arduino-core` fills it.
+   */
+  static bundledArduinoDataPath(): string {
+    return process.env.NODE_ENV === 'development'
+      ? join(process.cwd(), 'resources', 'arduino-core', process.platform, process.arch, 'data')
+      : join(process.resourcesPath, 'arduino-core', 'data')
+  }
+
+  /** Copies the bundled simulator core into the managed data folder when it is not there. */
+  async #seedBundledArduinoCore(): Promise<void> {
+    const result = await seedArduinoData(
+      arduinoSeedDisk,
+      UserService.bundledArduinoDataPath(),
+      join(managedArduinoRoot(app.getPath('userData')), 'data'),
+    )
+    if (result === 'seeded') console.warn('Copied the bundled Arduino core of the simulator.')
+  }
+
   async #executeArduinoCliCommand(command: string): Promise<{ stderr: string; stdout: string }> {
     const developmentMode = process.env.NODE_ENV === 'development'
     const executeCommand = promisify(exec)
@@ -312,6 +358,7 @@ class UserService {
     await this.#checkIfLogFolderExists()
     await this.#checkIfUserHistoryFolderExists()
     await this.#checkIfArduinoCliConfigExists()
+    await this.#tolerate('copy the bundled Arduino core', () => this.#seedBundledArduinoCore())
     await this.#tolerate('refresh the installed-core list', () => this.#checkIfArduinoCoreControlFileExists())
   }
 
