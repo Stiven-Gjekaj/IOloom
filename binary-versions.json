@@ -2,5 +2,8 @@
   "strucpp": {
     "version": "v0.8.0",
     "repository": "Autonomy-Logic/STruCpp"
+  },
+  "arduino-avr": {
+    "version": "1.8.8"
   }
 }
