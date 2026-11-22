@@ -6,6 +6,7 @@
   "author": {
     "name": "Autonomy Logic"
   },
+  "homepage": "https://github.com/Stiven-Gjekaj/IOloom",
   "main": "./configs/dll/main.js",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",

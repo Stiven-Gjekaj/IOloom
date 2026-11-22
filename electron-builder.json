@@ -104,6 +104,9 @@
     ],
     "artifactName": "${productName}_${version}.${ext}"
   },
+  "deb": {
+    "artifactName": "${name}_${version}_${arch}.${ext}"
+  },
   "nsis": {
     "oneClick": false,
     "perMachine": false,
@@ -130,9 +133,14 @@
       {
         "target": "AppImage",
         "arch": ["x64"]
+      },
+      {
+        "target": "deb",
+        "arch": ["x64"]
       }
     ],
     "category": "Development",
+    "maintainer": "IOloom <https://github.com/Stiven-Gjekaj/IOloom>",
     "artifactName": "${productName}-${version}.${ext}"
   }
 }
