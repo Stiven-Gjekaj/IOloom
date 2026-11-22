@@ -34,7 +34,16 @@ export function displayName(entry: SymbolEntry, lang: string): string {
 /** Makes a text ready for a search: lower case, with no accents. */
 export const fold = (s: string): string => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
 
-const haystack = (e: SymbolEntry): string => fold([...Object.values(e.names), ...e.category, baseName(e.id)].join('\n'))
+// The folded text of each entry. A search runs at each key press, so the index keeps this text.
+const folded = new WeakMap<SymbolEntry, string>()
+const haystack = (e: SymbolEntry): string => {
+  let h = folded.get(e)
+  if (h === undefined) {
+    h = fold([...Object.values(e.names), ...e.category, baseName(e.id)].join('\n'))
+    folded.set(e, h)
+  }
+  return h
+}
 
 /**
  * Finds the entries that match a query. Each word of the query must occur in a name (in any
