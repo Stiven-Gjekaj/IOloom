@@ -247,7 +247,12 @@ const createMainWindow = async () => {
     ...titlebarStyles,
     webPreferences: {
       sandbox: true,
-      preload: app.isPackaged ? join(__dirname, 'preload.js') : join(__dirname, '../../configs/dll/preload.js'),
+      // A production build puts preload.js next to main.js, packaged or not. Only the dev build
+      // runs main from configs/dll, where start:preload writes it.
+      preload:
+        process.env.NODE_ENV === 'production'
+          ? join(__dirname, 'preload.js')
+          : join(__dirname, '../../configs/dll/preload.js'),
     },
   })
 
