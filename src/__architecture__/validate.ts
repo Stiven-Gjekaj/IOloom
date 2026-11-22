@@ -35,6 +35,8 @@ type LayerName =
   | 'hooks'
   | 'components'
   | 'architecture'
+  | 'ioloom'
+  | 'ioloom-seams'
 
 interface LayerRule {
   /** Human-readable layer name */
@@ -110,7 +112,18 @@ const LAYER_RULES: Record<LayerName, LayerRule> = {
   },
   components: {
     name: 'Components (frontend/components/)',
-    allowedDeps: ['ports', 'provider', 'store', 'hooks', 'services', 'components', 'data', 'utils', 'assets'],
+    allowedDeps: [
+      'ports',
+      'provider',
+      'store',
+      'hooks',
+      'services',
+      'components',
+      'data',
+      'utils',
+      'assets',
+      'ioloom-seams',
+    ],
   },
   main: {
     name: 'Main (main/) — the Electron main process entry point',
@@ -133,6 +146,7 @@ const LAYER_RULES: Record<LayerName, LayerRule> = {
       'adapters',
       'cli',
       'main',
+      'ioloom-seams',
     ],
   },
   'backend-editor': {
@@ -178,6 +192,30 @@ const LAYER_RULES: Record<LayerName, LayerRule> = {
     name: 'Architecture (__architecture__/)',
     allowedDeps: [],
   },
+  ioloom: {
+    name: 'IOloom (ioloom/, except ioloom/seams/)',
+    /**
+     * IOloom code does not import upstream code. Only the seams do. This keeps the fork
+     * close to upstream (see docs/architecture.md).
+     */
+    allowedDeps: [],
+  },
+  'ioloom-seams': {
+    name: 'IOloom seams (ioloom/seams/)',
+    allowedDeps: [
+      'ports',
+      'provider',
+      'store',
+      'services',
+      'hooks',
+      'components',
+      'utils',
+      'data',
+      'assets',
+      'types',
+      'ioloom',
+    ],
+  },
 }
 
 // ---------------------------------------------------------------------------
@@ -210,6 +248,10 @@ function getLayer(filePath: string): LayerName | null {
   const rel = relative(SRC_ROOT, filePath).replace(/\\/g, '/')
 
   if (rel.startsWith('__architecture__/')) return 'architecture'
+
+  // IOloom code. The seams are the only IOloom files that import upstream code.
+  if (rel.startsWith('ioloom/seams/')) return 'ioloom-seams'
+  if (rel.startsWith('ioloom/')) return 'ioloom'
 
   // Static resources (icons, locales, board definitions, firmware metadata)
   if (rel.startsWith('frontend/assets/')) return 'assets'
