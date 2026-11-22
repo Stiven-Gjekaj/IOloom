@@ -6,28 +6,8 @@ import { basename, dirname, join, relative, resolve, sep } from 'node:path'
 
 import { readElmt } from '../qet/read-elmt'
 import { renderSvg } from '../qet/render-svg'
+import type { FileError, ImportResult, ListResult } from './api'
 import { type SymbolEntry, toEntry } from './library-index'
-
-export interface FileError {
-  /** The path of the file. In a list result, it is the path in the library. */
-  path: string
-  message: string
-}
-
-export interface ListResult {
-  entries: SymbolEntry[]
-  /** The files in the library that do not load. */
-  errors: FileError[]
-}
-
-export interface ImportResult {
-  /** The library paths of the new or changed files. */
-  imported: string[]
-  /** The library paths of the files that were already in the library with the same content. */
-  unchanged: string[]
-  /** The source files that are not valid elements. The library does not get them. */
-  failed: FileError[]
-}
 
 const isElmt = (name: string): boolean => name.toLowerCase().endsWith('.elmt')
 const toPosix = (p: string): string => p.split(sep).join('/')
