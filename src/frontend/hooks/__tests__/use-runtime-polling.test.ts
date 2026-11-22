@@ -130,6 +130,15 @@ describe('useRuntimePolling — EtherCAT branches', () => {
     expect(mockRuntime.getEthercatRuntimeStatus).not.toHaveBeenCalled()
   })
 
+  it('removes each newline from a text status, not only the first', async () => {
+    mockRuntime.getStatus.mockResolvedValue({ success: true, status: 'STATUS:RUN\nN\nING\n' })
+
+    renderPolling()
+    await flushAll()
+
+    expect(spies.setPlcRuntimeStatus).toHaveBeenCalledWith('RUNNING')
+  })
+
   it('skips cleanly when the optional getEthercatRuntimeStatus method is not on the runtime', async () => {
     store.getState().deviceActions.setIncludeEthercatStatsInPolling(true)
     mockRuntime.getEthercatRuntimeStatus = undefined
