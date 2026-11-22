@@ -8,7 +8,7 @@
  */
 import { hasOpenEditSessions, releaseAllEditSessions } from '@root/backend/editor/edge-edit-sessions'
 import { isWebUrl } from '@root/backend/editor/utils/is-web-url'
-import { app, BrowserWindow, dialog, ipcMain, Menu, protocol, shell } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, Menu, protocol, screen, shell } from 'electron'
 import Installer from 'electron-devtools-installer'
 import log from 'electron-log'
 import { existsSync } from 'fs'
@@ -36,6 +36,7 @@ import { getErrorMessage } from '../frontend/utils/get-error-message'
 import { registerSymbolLibraryIpc } from '../ioloom/seams/symbol-library-main'
 import type { EdgeOAuthProviderId } from '../middleware/shared/ports/edge-account-port'
 import { VENDOR_DOCUMENT_SCHEME } from '../middleware/shared/vendor-document/document-url'
+import { applyHiddenWindowsMode } from './hidden-windows'
 import MenuBuilder from './menu'
 import MainProcessBridge from './modules/ipc/main'
 import { createQuitCoordinator } from './modules/lifecycle/quit-coordinator'
@@ -112,6 +113,10 @@ const titlebarOptionsMap: Record<string, OptTitlebar> = {
 }
 
 const titlebarStyles = titlebarOptionsMap[systemInfo] || titlebarOptionsMap.default
+
+// End-to-end tests keep every window off the screen. See hidden-windows.ts.
+// The screen module is read only after app ready, when the first window maximizes.
+applyHiddenWindowsMode(process.env, BrowserWindow, app, screen)
 
 const isDebug = process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true'
 

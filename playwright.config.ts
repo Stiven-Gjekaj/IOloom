@@ -11,6 +11,10 @@ import { defineConfig, devices } from '@playwright/test'
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
+// The app windows stay off the screen during a test run. Set IOLOOM_E2E_HIDDEN=0 to watch them.
+// Each spec passes process.env to the app, so the app gets this value.
+process.env.IOLOOM_E2E_HIDDEN ??= '1'
+
 export default defineConfig({
   testDir: './e2e',
   /* Run tests in files in parallel */
