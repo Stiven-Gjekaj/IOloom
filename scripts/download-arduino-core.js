@@ -124,6 +124,10 @@ function downloadArduinoCore({
   fs.rmSync(path.join(dataDir, 'staging'), { recursive: true, force: true })
   fs.rmSync(path.join(dataDir, 'tmp'), { recursive: true, force: true })
   fs.rmSync(path.join(seedRoot, 'user'), { recursive: true, force: true })
+  // inventory.yaml holds an installation id and a secret of this arduino-cli.
+  // Each install of the editor must make its own, so it does not go into the
+  // installer.
+  fs.rmSync(path.join(dataDir, 'inventory.yaml'), { force: true })
 
   if (!hasCore(dataDir, version)) throw new Error(`arduino-cli did not install ${CORE_ID}@${version} into ${dataDir}`)
   console.log(`installed ${CORE_ID}@${version} into ${dataDir}`)

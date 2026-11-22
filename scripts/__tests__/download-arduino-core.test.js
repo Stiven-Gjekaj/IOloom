@@ -30,6 +30,7 @@ function fakeCli(calls) {
       fs.writeFileSync(path.join(installedCoreDir(dataDir, version), 'installed.json'), '{}')
       fs.mkdirSync(path.join(dataDir, 'staging', 'packages'), { recursive: true })
       fs.mkdirSync(path.join(dataDir, 'tmp'), { recursive: true })
+      fs.writeFileSync(path.join(dataDir, 'inventory.yaml'), 'installation:\n  id: x\n  secret: y\n')
     }
   }
 }
@@ -46,6 +47,7 @@ test('installs the pinned core and removes the download archives', () => {
   assert.strictEqual(hasCore(dataDir, '1.2.3'), true)
   assert.strictEqual(fs.existsSync(path.join(dataDir, 'staging')), false)
   assert.strictEqual(fs.existsSync(path.join(dataDir, 'tmp')), false)
+  assert.strictEqual(fs.existsSync(path.join(dataDir, 'inventory.yaml')), false, 'the installation id must not ship')
 })
 
 test('does not download again when the pinned core is there', () => {
