@@ -10,7 +10,8 @@
     />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'" />
+    <!-- worker-src: the editor starts its language workers from blob: URLs. Without this, Electron 45 blocks them. -->
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'; worker-src 'self' blob:" />
   </head>
   <body class="h-full">
     <div class="h-full bg-neutral-50 text-gray-500 dark:bg-neutral-950 dark:text-gray-400" id="root"></div>
