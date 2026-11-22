@@ -55,7 +55,9 @@ const configuration: webpack.Configuration = {
   target: ['web', 'electron-renderer'],
 
   entry: [
-    `webpack-dev-server/client?http://localhost:${port}/dist`,
+    // The dev server adds no client for this web and electron-renderer target, so the entry names it.
+    // Version 6 exports the client only as client/*, so the path names the file.
+    `webpack-dev-server/client/index.js?http://localhost:${port}/dist`,
     'webpack/hot/only-dev-server',
     join(srcPath, 'main.tsx'),
   ],

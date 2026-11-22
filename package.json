@@ -117,7 +117,7 @@
     "@electron/rebuild": "^4.2.1",
     "@eslint/js": "^9.20.0",
     "@playwright/test": "^1.52.0",
-    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.6.3",
     "@svgr/webpack": "^8.1.0",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
     "@testing-library/jest-dom": "^6.6.4",
@@ -188,7 +188,7 @@
     "webpack": "^5.97.1",
     "webpack-bundle-analyzer": "^4.9.1",
     "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^5.2.2",
+    "webpack-dev-server": "^6.1.0",
     "webpack-merge": "^6.0.1"
   },
   "engines": {
