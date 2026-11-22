@@ -72,5 +72,18 @@ describe('search/utils', () => {
       expect(result).not.toContain('<script>')
       expect(result).toContain('World')
     })
+
+    it('escapes HTML in the body when the query does not match', () => {
+      const result = extractSearchQuery('<img src=x onerror=alert(1)>', 'xyz')
+      expect(result).not.toContain('<img')
+      expect(result).toBe('&lt;img src=x onerror=alert(1)&gt;')
+    })
+
+    it('escapes HTML in the body around a match', () => {
+      const result = extractSearchQuery('<b>Motor</b>', 'Motor')
+      expect(result).not.toContain('<b>')
+      expect(result).toContain('&lt;b&gt;')
+      expect(result.match(/<span/g)).toHaveLength(1)
+    })
   })
 })
