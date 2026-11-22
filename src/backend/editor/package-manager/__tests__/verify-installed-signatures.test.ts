@@ -9,9 +9,9 @@ import { canonicalize, SIGNATURE_FILENAME } from '../../../shared/utils/vpp/veri
 
 // Heavy/side-effecting deps that the module pulls in transitively but this
 // suite has no use for. Mocking them keeps `import { PackageManagerModule }`
-// free of winston file transports and extract-zip's ESM entry point.
+// free of winston file transports and the zip extractor.
 jest.mock('electron', () => ({ app: { getPath: jest.fn(() => '/mock/path') } }))
-jest.mock('extract-zip', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('../../utils/extract-zip', () => ({ extractZip: jest.fn() }))
 jest.mock('../../services/logger-service', () => ({
   logger: { warn: jest.fn(), info: jest.fn(), error: jest.fn() },
 }))

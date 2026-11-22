@@ -8,9 +8,9 @@ import { app } from 'electron'
 import { canonicalize, SIGNATURE_FILENAME } from '../../../shared/utils/vpp/verify-package-signature'
 
 // Same transitive-dependency stubs as the sweep suite: winston file transports
-// and extract-zip's ESM entry point are irrelevant to a signature check.
+// and the zip extractor are irrelevant to a signature check.
 jest.mock('electron', () => ({ app: { getPath: jest.fn(() => '/mock/path') } }))
-jest.mock('extract-zip', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('../../utils/extract-zip', () => ({ extractZip: jest.fn() }))
 jest.mock('../../services/logger-service', () => ({
   logger: { warn: jest.fn(), info: jest.fn(), error: jest.fn() },
 }))

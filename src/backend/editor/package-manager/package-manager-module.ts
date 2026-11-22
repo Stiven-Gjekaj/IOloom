@@ -1,6 +1,5 @@
 import { createHash } from 'crypto'
 import { app } from 'electron'
-import extract from 'extract-zip'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
@@ -22,6 +21,7 @@ import {
 import { TRUSTED_PACKAGE_KEYS } from '../../shared/utils/vpp/trusted-keys'
 import { verifyPackageSignature } from '../../shared/utils/vpp/verify-package-signature'
 import { logger } from '../services/logger-service'
+import { extractZip } from '../utils/extract-zip'
 import { assertPathContained } from '../utils/path-containment'
 import type { DependencyInstallResult } from './arduino-dependency-installer'
 import type { ImportResult, InstalledPackage, PackageIntegrityResult, PackageManifest, PackageRegistry } from './types'
@@ -61,7 +61,7 @@ class PackageManagerModule {
     try {
       tempDir = mkdtempSync(join(this.packagesDir, '.import-'))
 
-      await extract(vppFilePath, { dir: tempDir })
+      await extractZip(vppFilePath, tempDir)
 
       const manifestPath = join(tempDir, 'manifest.json')
       if (!existsSync(manifestPath)) {

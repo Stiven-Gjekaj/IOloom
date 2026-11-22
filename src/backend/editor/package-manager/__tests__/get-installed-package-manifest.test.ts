@@ -5,9 +5,9 @@ import { join } from 'node:path'
 import { app } from 'electron'
 
 // Same trimming as the signature suite: this module pulls in winston transports
-// and extract-zip's ESM entry point that this suite has no use for.
+// and the zip extractor that this suite has no use for.
 jest.mock('electron', () => ({ app: { getPath: jest.fn(() => '/mock/path') } }))
-jest.mock('extract-zip', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('../../utils/extract-zip', () => ({ extractZip: jest.fn() }))
 jest.mock('../../services/logger-service', () => ({
   logger: { warn: jest.fn(), info: jest.fn(), error: jest.fn() },
 }))

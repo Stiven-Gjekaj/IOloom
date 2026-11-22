@@ -4,12 +4,12 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 
 import { app } from 'electron'
-import extract from 'extract-zip'
+import { extractZip } from '../../utils/extract-zip'
 
 import { canonicalize, SIGNATURE_FILENAME } from '../../../shared/utils/vpp/verify-package-signature'
 
 jest.mock('electron', () => ({ app: { getPath: jest.fn(() => '/mock/path') } }))
-jest.mock('extract-zip', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('../../utils/extract-zip', () => ({ extractZip: jest.fn() }))
 jest.mock('../../services/logger-service', () => ({
   logger: { warn: jest.fn(), info: jest.fn(), error: jest.fn() },
 }))
@@ -76,7 +76,7 @@ describe('PackageManagerModule.importFromFile with a dependency install', () => 
     packagesDir = join(userDataDir, 'packages')
     ;(app.getPath as jest.Mock).mockReturnValue(userDataDir)
     archives.clear()
-    ;(extract as jest.Mock).mockImplementation((path: string, { dir }: { dir: string }) => {
+    ;(extractZip as jest.Mock).mockImplementation((path: string, dir: string) => {
       for (const [rel, content] of Object.entries(archives.get(path) ?? {})) {
         mkdirSync(dirname(join(dir, rel)), { recursive: true })
         writeFileSync(join(dir, rel), content)
