@@ -1,4 +1,5 @@
 // Draws the symbol model as an SVG document.
+import { dynamicTextBox, PX_PER_PT } from './measure-text'
 import type { ElementSymbol, Hatch, Primitive, StrokeStyle } from './model'
 
 export interface RenderOptions {
@@ -28,6 +29,11 @@ const HATCH_PATH: Record<Hatch, string> = {
 const hatchPattern = (h: Hatch, prefix: string): string =>
   `<pattern id="${prefix}hatch-${h}" width="8" height="8" patternUnits="userSpaceOnUse">` +
   `<path d="${HATCH_PATH[h]}" stroke="black" stroke-width="1" fill="none"/></pattern>`
+
+const rotate = (deg: number, x: number, y: number): string =>
+  deg ? ` transform="rotate(${f(deg)} ${f(x)} ${f(y)})"` : ''
+const font = (sizePt: number, color: string): string =>
+  `font-size="${f(sizePt * PX_PER_PT)}" fill="${color}" font-family="Liberation Sans, Arial, sans-serif"`
 
 type Paint = (s: StrokeStyle) => string
 const painter =
@@ -72,10 +78,21 @@ function drawPrimitive(p: Primitive, paint: Paint): string {
         : `<polyline points="${pts}" ${paint(noFill(p.style))}/>`
     }
     case 'text': {
-      const rot = p.rotation ? ` transform="rotate(${f(p.rotation)} ${f(p.x)} ${f(p.y)})"` : ''
-      const base = p.anchorTop ? ' dominant-baseline="hanging"' : ''
-      // A Qt point is 1.33 pixels at 96 dpi.
-      return `<text x="${f(p.x)}" y="${f(p.y)}" font-size="${f(p.size * 1.33)}" fill="${p.color}" font-family="Liberation Sans, Arial, sans-serif"${base}${rot}>${esc(p.text)}</text>`
+      // (x, y) is the left end of the baseline.
+      const rot = rotate(p.rotation, p.x, p.y)
+      return `<text x="${f(p.x)}" y="${f(p.y)}" ${font(p.size, p.color)}${rot}>${esc(p.text)}</text>`
+    }
+    case 'dynamic_text': {
+      // (x, y) is the top left corner of the text box. Qt turns the box about this point.
+      const box = dynamicTextBox(p)
+      const frame = p.frame
+        ? `<rect x="${f(box.x)}" y="${f(box.y)}" width="${f(box.width)}" height="${f(box.height)}" stroke="${p.color}" stroke-width="1" fill="none"/>`
+        : ''
+      const lines = box.lines
+        .filter((l) => l.text !== '')
+        .map((l) => `<text x="${f(l.x)}" y="${f(l.baseline)}" ${font(p.size, p.color)}>${esc(l.text)}</text>`)
+      if (!frame && lines.length === 0) return ''
+      return `<g${rotate(p.rotation, p.x, p.y)}>${frame}${lines.join('')}</g>`
     }
   }
 }

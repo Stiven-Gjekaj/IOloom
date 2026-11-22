@@ -1,6 +1,7 @@
 // The symbol model of one QElectroTech element (a `.elmt` file).
 // The reader fills it. The SVG renderer draws it.
 // All coordinates are in element units, relative to the hotspot.
+import type { HAlign } from './measure-text'
 
 /** A Qt hatch brush. QElectroTech draws it in black. */
 export type Hatch = 'hor' | 'ver' | 'bdiag' | 'fdiag'
@@ -43,8 +44,22 @@ export type Primitive =
       size: number
       color: string
       rotation: number
-      /** True for `dynamic_text`: the anchor is the top left corner, not the baseline. */
-      anchorTop: boolean
+    }
+  | {
+      /** A text that the user fills in a schematic. (x, y) is the top left corner of its box. */
+      kind: 'dynamic_text'
+      x: number
+      y: number
+      text: string
+      /** The font size in points. */
+      size: number
+      color: string
+      rotation: number
+      /** The width of the text box. A value of 0 or less is an automatic width. */
+      textWidth: number
+      hAlign: HAlign
+      /** True if a frame goes around the text box. */
+      frame: boolean
     }
 
 export type Orientation = 'n' | 'e' | 's' | 'w'

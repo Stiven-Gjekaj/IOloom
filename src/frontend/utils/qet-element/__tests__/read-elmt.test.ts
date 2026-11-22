@@ -97,15 +97,48 @@ describe('readElmt', () => {
     const s = readElmt(
       element(
         '<text x="1" y="2" text="K1" font="Sans Serif,7,-1,5,50,0,0,0,0,0" color="#ff0000" rotation="90"/>' +
-          '<dynamic_text x="3" y="4" text_size="8" font="Arial,11,-1"><text>-Q1</text></dynamic_text>' +
+          '<dynamic_text x="3" y="4" text_size="8" font="Arial,11,-1" text_width="40" Halignment="AlignRight" frame="true">' +
+          '<text>-Q1</text><info_name>label</info_name><color>#FF00FF</color></dynamic_text>' +
           '<input x="5" y="6" text="_" size="6"/>',
       ),
     )
     expect(s.primitives).toEqual([
-      { kind: 'text', x: 1, y: 2, text: 'K1', size: 7, color: '#ff0000', rotation: 90, anchorTop: false },
-      { kind: 'text', x: 3, y: 4, text: '-Q1', size: 11, color: 'black', rotation: 0, anchorTop: true },
-      { kind: 'text', x: 5, y: 6, text: '_', size: 6, color: 'black', rotation: 0, anchorTop: false },
+      { kind: 'text', x: 1, y: 2, text: 'K1', size: 7, color: '#ff0000', rotation: 90 },
+      {
+        kind: 'dynamic_text',
+        x: 3,
+        y: 4,
+        text: '-Q1',
+        size: 11,
+        color: '#ff00ff',
+        rotation: 0,
+        textWidth: 40,
+        hAlign: 'right',
+        frame: true,
+      },
+      { kind: 'text', x: 5, y: 6, text: '_', size: 6, color: 'black', rotation: 0 },
     ])
+  })
+
+  it('gives the defaults to a dynamic text with no attributes and no children', () => {
+    const s = readElmt(element('<dynamic_text/>'))
+    expect(s.primitives[0]).toEqual({
+      kind: 'dynamic_text',
+      x: 0,
+      y: 0,
+      text: '',
+      size: 9,
+      color: 'black',
+      rotation: 0,
+      textWidth: -1,
+      hAlign: 'left',
+      frame: false,
+    })
+  })
+
+  it('reads the centre alignment of a dynamic text', () => {
+    const s = readElmt(element('<dynamic_text Halignment="AlignHCenter"><text>A</text></dynamic_text>'))
+    expect(s.primitives[0]).toHaveProperty('hAlign', 'center')
   })
 
   it('uses the size attribute of a text before its font', () => {

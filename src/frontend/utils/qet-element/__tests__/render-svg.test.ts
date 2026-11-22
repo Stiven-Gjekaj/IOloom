@@ -80,22 +80,64 @@ describe('renderSvg', () => {
     expect(svg).toContain('<path d="M4 0 A4 2 0 0 0 0 -2" stroke="black" stroke-width="1" fill="none"/>')
   })
 
-  it('escapes the text and anchors dynamic text at the top', () => {
+  it('escapes the text and puts its baseline at the position', () => {
     const svg = renderSvg(
       symbol([
-        { kind: 'text', x: 1, y: 2, text: 'a<b>&c', size: 9, color: 'red', rotation: 0, anchorTop: false },
-        { kind: 'text', x: 3, y: 4, text: 'Q', size: 9, color: 'black', rotation: 90, anchorTop: true },
+        { kind: 'text', x: 1, y: 2, text: 'a<b>&c', size: 9, color: 'red', rotation: 0 },
+        { kind: 'text', x: 3, y: 4, text: 'Q', size: 9, color: 'black', rotation: 90 },
       ]),
     )
-    expect(svg).toContain('font-size="11.97" fill="red"')
+    expect(svg).toContain('<text x="1" y="2" font-size="12" fill="red"')
     expect(svg).toContain('>a&lt;b&gt;&amp;c</text>')
-    expect(svg).toContain('dominant-baseline="hanging" transform="rotate(90 3 4)">Q</text>')
+    expect(svg).toContain('transform="rotate(90 3 4)">Q</text>')
   })
-
   it('draws a dot on each terminal, if the option is not off', () => {
     const s = symbol([], { terminals: [{ id: 't', name: '', x: 0, y: -10, orientation: 'n' }] })
     expect(renderSvg(s)).toContain('<circle cx="0" cy="-10" r="1.5" fill="red"/>')
     expect(renderSvg(s, { showTerminals: false })).not.toContain('<circle')
+  })
+})
+
+describe('renderSvg with dynamic text', () => {
+  const dyn = (extra: Partial<Extract<Primitive, { kind: 'dynamic_text' }>> = {}): Primitive => ({
+    kind: 'dynamic_text',
+    x: -2,
+    y: -80,
+    text: 'K1',
+    size: 7.5,
+    color: 'black',
+    rotation: 0,
+    textWidth: -1,
+    hAlign: 'left',
+    frame: false,
+    ...extra,
+  })
+
+  it('puts the text inside the margin of its box, with the baseline below the ascent', () => {
+    // At 7.5 points, the ascent is 9.05 and the margin is 4.
+    const svg = renderSvg(symbol([dyn()]))
+    expect(svg).toContain('<g><text x="2" y="-66.95" font-size="10" fill="black"')
+    expect(svg).not.toContain('dominant-baseline')
+  })
+
+  it('draws one text for each line', () => {
+    const svg = renderSvg(symbol([dyn({ text: 'A\nB' })]))
+    expect(svg.match(/<text /g)).toHaveLength(2)
+  })
+
+  it('draws a frame around the box, if the frame is on', () => {
+    const svg = renderSvg(symbol([dyn({ frame: true, color: 'blue' })]))
+    expect(svg).toContain(
+      '<rect x="-2" y="-80" width="20.23" height="19.17" stroke="blue" stroke-width="1" fill="none"/>',
+    )
+  })
+
+  it('turns the box about its top left corner', () => {
+    expect(renderSvg(symbol([dyn({ rotation: 270 })]))).toContain('<g transform="rotate(270 -2 -80)">')
+  })
+
+  it('draws nothing for an empty text with no frame', () => {
+    expect(renderSvg(symbol([dyn({ text: '' })]))).not.toContain('<g')
   })
 })
 

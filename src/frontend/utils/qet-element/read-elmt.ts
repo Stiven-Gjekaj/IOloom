@@ -1,6 +1,7 @@
 // Reads a QElectroTech `.elmt` file into the symbol model.
 import { XMLParser, XMLValidator } from 'fast-xml-parser'
 
+import type { HAlign } from './measure-text'
 import type { ElementSymbol, Hatch, Orientation, Primitive, StrokeStyle } from './model'
 
 /** The error that the reader gives for a file that it cannot read. */
@@ -80,6 +81,8 @@ const fontSize = (font: string | undefined, d: number): number => {
   const n = Number.parseFloat((font ?? '').split(',')[1] ?? '')
   return Number.isFinite(n) && n > 0 ? n : d
 }
+
+const H_ALIGN: Record<string, HAlign> = { AlignLeft: 'left', AlignHCenter: 'center', AlignRight: 'right' }
 
 const orientation = (o: string | undefined): Orientation => (o === 'e' || o === 's' || o === 'w' ? o : 'n')
 
@@ -174,19 +177,23 @@ function readPrimitive(t: string, n: Node, a: Record<string, string>): Primitive
         size: num(a.size, fontSize(a.font, 9)),
         color: colour(a.color, 'black'),
         rotation: num(a.rotation),
-        anchorTop: false,
       }
     case 'dynamic_text': {
-      const txt = kids(n).find((k) => tagOf(k) === 'text')
+      const child = (tag: string): string | undefined => {
+        const k = kids(n).find((c) => tagOf(c) === tag)
+        return k ? textOf(k) : undefined
+      }
       return {
-        kind: 'text',
+        kind: 'dynamic_text',
         x: num(a.x),
         y: num(a.y),
-        text: txt ? textOf(txt) : '',
+        text: child('text') ?? '',
         size: fontSize(a.font, num(a.text_size, 9)),
-        color: colour(a.color, 'black'),
+        color: colour(child('color'), 'black'),
         rotation: num(a.rotation),
-        anchorTop: true,
+        textWidth: num(a.text_width, -1),
+        hAlign: H_ALIGN[a.Halignment] ?? 'left',
+        frame: a.frame === 'true',
       }
     }
     case 'input':
@@ -198,7 +205,6 @@ function readPrimitive(t: string, n: Node, a: Record<string, string>): Primitive
         size: num(a.size, 9),
         color: 'black',
         rotation: 0,
-        anchorTop: false,
       }
     default:
       return null
