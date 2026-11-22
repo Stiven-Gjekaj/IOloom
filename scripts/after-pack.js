@@ -3,10 +3,12 @@
  * signature must come after each change to the bundle.
  */
 
+const checkArduinoCore = require('./check-arduino-core').default
 const injectLocalNetworkUsage = require('./mac-inject-local-network-usage').default
 const signAdhoc = require('./mac-adhoc-sign').default
 
 async function afterPack(context) {
+  await checkArduinoCore(context)
   await injectLocalNetworkUsage(context)
   await signAdhoc(context)
 }
