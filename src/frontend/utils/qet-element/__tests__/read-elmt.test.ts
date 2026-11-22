@@ -168,6 +168,10 @@ describe('parseStyle', () => {
     expect(parseStyle('line-style:wavy').dash).toBeNull()
   })
 
+  it('draws no stroke for the line weight "none"', () => {
+    expect(parseStyle('line-weight:none;color:red;filling:blue')).toMatchObject({ stroke: 'none', fill: 'blue' })
+  })
+
   it('ignores a part with no colon and spaces around the values', () => {
     expect(parseStyle(' color : red ;junk; filling : white ')).toMatchObject({ stroke: 'red', fill: 'white' })
   })

@@ -37,7 +37,8 @@ export const colour = (v: string | undefined, d: string): string => {
   return SAFE_COLOUR.test(c) ? c : d
 }
 
-const WEIGHT: Record<string, number> = { none: 0.5, thin: 0.5, normal: 1, hight: 2, eleve: 5 }
+// QElectroTech draws the weight "none" with a transparent pen, and "thin" with a cosmetic pen of 1 pixel.
+const WEIGHT: Record<string, number> = { thin: 0.5, normal: 1, hight: 2, eleve: 5 }
 const DASH: Record<string, string | null> = {
   normal: null,
   dashed: '4 2',
@@ -53,10 +54,11 @@ export function parseStyle(s: string | undefined): StrokeStyle {
     if (i > 0) kv[part.slice(0, i).trim()] = part.slice(i + 1).trim()
   }
   const filling = kv.filling ?? 'none'
+  const weight = kv['line-weight'] ?? 'normal'
   return {
-    stroke: colour(kv.color, 'black'),
+    stroke: weight === 'none' ? 'none' : colour(kv.color, 'black'),
     fill: HATCH.has(filling) ? 'none' : colour(filling, 'none'),
-    width: WEIGHT[kv['line-weight'] ?? 'normal'] ?? 1,
+    width: WEIGHT[weight] ?? 1,
     dash: DASH[kv['line-style'] ?? 'normal'] ?? null,
   }
 }
