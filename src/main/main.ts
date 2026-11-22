@@ -33,6 +33,7 @@ import { logger, PouService, ProjectService, UserService } from '../backend/edit
 import { resolveHtmlPath } from '../backend/editor/utils'
 import { getDesktopWasmCompileService } from '../backend/editor/wasm-toolchain/desktop-wasm-toolchain'
 import { getErrorMessage } from '../frontend/utils/get-error-message'
+import { registerSymbolLibraryIpc } from '../ioloom/seams/symbol-library-main'
 import type { EdgeOAuthProviderId } from '../middleware/shared/ports/edge-account-port'
 import { VENDOR_DOCUMENT_SCHEME } from '../middleware/shared/vendor-document/document-url'
 import MenuBuilder from './menu'
@@ -441,6 +442,12 @@ const createMainWindow = async () => {
     arduinoDependencies,
   } as unknown as MainIpcModuleConstructor)
   mainIpcModule.setupMainIpcListener()
+  registerSymbolLibraryIpc({
+    ipcMain,
+    dialog,
+    getWindow: () => mainWindow,
+    root: join(app.getPath('userData'), 'ioloom', 'symbols'),
+  })
   if (firstWindow) arduinoDependencies.startup.start(userService.initialize())
 }
 
