@@ -33,3 +33,11 @@ export interface SymbolLibraryApi {
   /** Asks the user for a folder and imports each `.elmt` file in it. Gives null if the user cancels. */
   importFolder(): Promise<ImportResult | null>
 }
+
+/** The IPC channels of the user library. */
+export const SYMBOL_CHANNELS = {
+  list: 'ioloom:symbols:list',
+  svg: 'ioloom:symbols:svg',
+  importFile: 'ioloom:symbols:import-file',
+  importFolder: 'ioloom:symbols:import-folder',
+} as const
