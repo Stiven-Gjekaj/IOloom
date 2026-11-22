@@ -19,7 +19,8 @@
     "allowJs": true,
     "outDir": "configs/dll",
     "paths": {
-      "@root/*": ["./src/*"]
+      "@root/*": ["./src/*"],
+      "monaco-editor": ["./node_modules/monaco-editor/esm/vs/editor.d.ts"]
     }
   },
   "include": ["src"],
