@@ -224,10 +224,15 @@ Builds start in P1. Each release holds all six.
 
 **F1: upstream fixes in P1 (course critical)**
 
+The numbers in F1, F2, F3, Q1, and Q3 are upstream issues. Each one has an
+issue in this repository that names the upstream number.
+
 - #1172: a library that you remove stays in `project.json`, and the compiler still asks for it.
 - #1202: the ladder editor cannot make nested parallel branches.
 - #1232: local constants are not in the auto-completion list.
 - #553: rising or falling edge on a negated contact.
+- #1189: the serial port stays busy after the debugger disconnects.
+- #1188: the CLI debug daemon fails on Windows with "Malformed daemon config".
 
 **F2: upstream fixes in P5 (simulation and debug)**
 
