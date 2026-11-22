@@ -38,7 +38,7 @@ const ConflictBodySchema = z.object({
 })
 
 /** Edge's exception filter nests the Nest body under `error`; a few routes answer it bare. */
-const WrappedErrorSchema = z.object({ error: z.record(z.unknown()) })
+const WrappedErrorSchema = z.object({ error: z.record(z.string(), z.unknown()) })
 
 function unwrapErrorBody(body: string): unknown {
   const parsed = parseJsonBody(body)
@@ -228,7 +228,7 @@ export function listBranches(projectId: string) {
 }
 
 export function createBranch(projectId: string, name: string) {
-  return call(route`/projects/${projectId}/branches`, z.object({ branch: z.unknown() }), {
+  return call(route`/projects/${projectId}/branches`, z.object({ branch: z.unknown().optional() }), {
     method: 'POST',
     json: { name },
   })
@@ -286,7 +286,7 @@ export function getCommitFiles(projectId: string, hash: string, branch?: string)
 
   return call(
     withQuery(route`/projects/${projectId}/commits/${hash}/files`, params),
-    z.object({ files: z.array(z.unknown()), parentFiles: z.array(z.unknown()), commit: z.unknown() }),
+    z.object({ files: z.array(z.unknown()), parentFiles: z.array(z.unknown()), commit: z.unknown().optional() }),
   )
 }
 
@@ -297,7 +297,7 @@ export function restoreCommit(projectId: string, hash: string, branch?: string) 
 
   return call(
     route`/projects/${projectId}/commits/${hash}/restore`,
-    z.object({ message: CaptionSchema, restoredCommit: z.unknown() }),
+    z.object({ message: CaptionSchema, restoredCommit: z.unknown().optional() }),
     { method: 'POST', json },
   )
 }
@@ -333,7 +333,7 @@ export function createStash(projectId: string, message?: string, files?: string[
   if (message) json.message = message
   if (files && files.length > 0) json.files = files
 
-  return call(route`/projects/${projectId}/stashes`, z.object({ stash: z.unknown() }), { method: 'POST', json })
+  return call(route`/projects/${projectId}/stashes`, z.object({ stash: z.unknown().optional() }), { method: 'POST', json })
 }
 
 export function applyStash(projectId: string, ref: string) {

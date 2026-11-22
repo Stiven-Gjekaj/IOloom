@@ -4,7 +4,7 @@ import { z } from 'zod'
 const variableXMLSchema = z.object({
   '@name': z.string(),
   '@address': z.string().optional(),
-  type: z.object(baseTypes.reduce((acc, type) => ({ ...acc, [type]: z.string().optional() }), {})).optional(),
+  type: z.object(baseTypes.reduce((acc, type) => ({ ...acc, [type]: z.string().optional() }), {} as Record<string, z.ZodType>)).optional(),
   initialValue: z
     .object({
       simpleValue: z.object({

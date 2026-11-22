@@ -8,7 +8,7 @@ const dataTypeArraySchema = z.object({
       '@upper': z.string(),
     }),
   ),
-  baseType: z.object(baseTypes.reduce((acc, type) => ({ ...acc, [type]: z.string().optional() }), {})),
+  baseType: z.object(baseTypes.reduce((acc, type) => ({ ...acc, [type]: z.string().optional() }), {} as Record<string, z.ZodType>)),
 })
 
 export { dataTypeArraySchema }

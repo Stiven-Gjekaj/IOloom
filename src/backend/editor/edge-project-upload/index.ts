@@ -27,7 +27,7 @@ async function isProjectRoot(directory: string): Promise<boolean> {
 const PROJECT_MANIFEST = 'project.json'
 
 /** Loose on purpose: a folder that cannot be understood is one destination missing, not a failure. */
-const FoldersResponseSchema = z.object({ data: z.object({ folders: z.unknown() }).nullish() })
+const FoldersResponseSchema = z.object({ data: z.object({ folders: z.unknown().optional() }).nullish() })
 
 /** Validated because the value lands in `failure.message`, which is typed `string`. */
 const ImportErrorSchema = z.object({
