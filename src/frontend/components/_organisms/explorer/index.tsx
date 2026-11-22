@@ -1,5 +1,6 @@
 import { ReactElement, useMemo, useState } from 'react'
 
+import { SymbolLibraryPanel } from '../../../../ioloom/seams/symbol-library-panel'
 import { useOpenPLCStore } from '../../../store'
 import type { BlockVariant } from '../../_atoms/graphical-editor/types/block'
 import { getBlockDocumentation } from '../../_atoms/graphical-editor/utils'
@@ -92,14 +93,14 @@ const Explorer = (): ReactElement => {
   return (
     <>
       <ResizablePanelGroup id='explorerPanelGroup' direction='vertical' className='h-full flex-1'>
-        <ResizablePanel id='projectExplorerPanel' order={1} defaultSize={50} minSize={25} collapsible>
+        <ResizablePanel id='projectExplorerPanel' order={1} defaultSize={40} minSize={25} collapsible>
           <Project />
         </ResizablePanel>
         <ResizableHandle
           style={{ height: '1px' }}
           className={`bg-neutral-200 transition-colors duration-200 data-[resize-handle-active='pointer']:bg-brand-light data-[resize-handle-state='hover']:bg-brand-light dark:bg-neutral-850 data-[resize-handle-active='pointer']:dark:bg-neutral-700  data-[resize-handle-state='hover']:dark:bg-neutral-700 `}
         />
-        <ResizablePanel id='libraryExplorerPanel' order={2} defaultSize={50} collapsible minSize={20}>
+        <ResizablePanel id='libraryExplorerPanel' order={2} defaultSize={30} collapsible minSize={20}>
           <Library
             filterText={filterText}
             setFilterText={setFilterText}
@@ -108,6 +109,13 @@ const Explorer = (): ReactElement => {
             filteredLibraries={filteredLibraries}
             filteredUserLibraries={filteredUserLibraries}
           />
+        </ResizablePanel>
+        <ResizableHandle
+          style={{ height: '1px' }}
+          className={`bg-neutral-200 transition-colors duration-200 data-[resize-handle-active='pointer']:bg-brand-light data-[resize-handle-state='hover']:bg-brand-light dark:bg-neutral-850 data-[resize-handle-active='pointer']:dark:bg-neutral-700  data-[resize-handle-state='hover']:dark:bg-neutral-700 `}
+        />
+        <ResizablePanel id='symbolLibraryExplorerPanel' order={3} defaultSize={30} collapsible minSize={15}>
+          <SymbolLibraryPanel />
         </ResizablePanel>
       </ResizablePanelGroup>
       <Info selectedPouDocumentation={selectedPouDocumentation} />
