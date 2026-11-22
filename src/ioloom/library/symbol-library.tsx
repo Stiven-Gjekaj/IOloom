@@ -92,7 +92,7 @@ export function SymbolLibrary({ api, lang }: SymbolLibraryProps): ReactElement {
         <input
           type='search'
           aria-label='Search symbols'
-          placeholder='Search'
+          placeholder='Search symbols'
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className='h-8 min-w-0 flex-1 rounded-lg bg-neutral-100 px-2 font-caption text-xs focus:outline-none dark:bg-brand-dark'

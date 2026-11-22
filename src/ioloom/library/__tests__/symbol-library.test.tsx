@@ -64,6 +64,8 @@ describe('SymbolLibrary', () => {
   it('filters the list with the search, in all languages', async () => {
     render(<SymbolLibrary api={fakeApi({ entries: [lamp, contactor], errors: [] })} lang='en' />)
     await screen.findByText('2 symbols')
+    // The project search in the explorer has the placeholder 'Search'. Two boxes with one placeholder confuse the user.
+    expect(screen.getByRole('searchbox', { name: 'Search symbols' })).toHaveAttribute('placeholder', 'Search symbols')
     await userEvent.type(screen.getByRole('searchbox', { name: 'Search symbols' }), 'schutz')
     expect(names()).toEqual(['Contactor'])
     expect(screen.getByText('1 symbol')).toBeInTheDocument()

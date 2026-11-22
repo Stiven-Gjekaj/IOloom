@@ -133,8 +133,8 @@ async function launch(userData: string): Promise<{ app: ElectronApplication; pag
 
 async function search(page: Page, query: string): Promise<void> {
   await page.getByRole('button', { name: 'Search' }).click({ timeout: 30000 })
-  await page.getByPlaceholder('Search').fill(query)
-  await page.getByPlaceholder('Search').blur()
+  await page.getByPlaceholder('Search', { exact: true }).fill(query)
+  await page.getByPlaceholder('Search', { exact: true }).blur()
   await page.getByRole('button', { name: 'Find', exact: true }).click()
 }
 
