@@ -108,7 +108,7 @@
     "vscode-languageserver": "^9.0.1",
     "vscode-languageserver-protocol": "^3.17.5",
     "winston": "^3.17.0",
-    "xmlbuilder2": "^3.1.1",
+    "xmlbuilder2": "^4.0.3",
     "yaml": "^2.8.1",
     "zod": "^4.6.7",
     "zustand": "^5.0.5"
