@@ -25,6 +25,7 @@ import {
 import {
   asCoilVariant,
   asContactVariant,
+  isNegatedContact,
   BRAND_COLOR,
   COIL_BLOCK_HEIGHT,
   COIL_BLOCK_WIDTH,
@@ -106,7 +107,7 @@ function contactOps(node: Node): DrawOp[] {
     { kind: 'line', x1: railX2, y1: y, x2: railX2, y2: y + CONTACT_BLOCK_HEIGHT, color: INK_COLOR, widthPt: 1.5 },
   ]
 
-  if (variant === 'negated') {
+  if (isNegatedContact(variant)) {
     ops.push({
       kind: 'line',
       x1: x + CONTACT_NEGATION_LINE.x1 * scale,

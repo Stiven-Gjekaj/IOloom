@@ -1,4 +1,4 @@
-import { asCoilVariant, asContactVariant } from '../symbols'
+import { asCoilVariant, asContactVariant, CONTACT_VARIANT_GLYPHS, isNegatedContact } from '../symbols'
 
 describe('asCoilVariant', () => {
   it('passes through every recognized variant', () => {
@@ -25,5 +25,17 @@ describe('asContactVariant', () => {
   it('falls back to default for unrecognized or missing values', () => {
     expect(asContactVariant('bogus')).toBe('default')
     expect(asContactVariant(undefined)).toBe('default')
+  })
+})
+
+describe('negated edge contacts (upstream issue 553)', () => {
+  it('pass through, draw the slash, and keep their P or N', () => {
+    expect(asContactVariant('negatedRisingEdge')).toBe('negatedRisingEdge')
+    expect(asContactVariant('negatedFallingEdge')).toBe('negatedFallingEdge')
+    expect(isNegatedContact('negatedRisingEdge')).toBe(true)
+    expect(isNegatedContact('negatedFallingEdge')).toBe(true)
+    expect(isNegatedContact('risingEdge')).toBe(false)
+    expect(CONTACT_VARIANT_GLYPHS.negatedRisingEdge).toBe('P')
+    expect(CONTACT_VARIANT_GLYPHS.negatedFallingEdge).toBe('N')
   })
 })

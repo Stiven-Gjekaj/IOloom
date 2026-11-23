@@ -34,7 +34,13 @@ export const COIL_NEGATION_LINE = { x1: 10.2366, y1: 20.4967, x2: 24.3787, y2: 6
 export const CONTACT_NEGATION_LINE = { x1: 4.4274, y1: 22.9004, x2: 22.8122, y2: 4.5156 }
 
 export type CoilVariant = 'default' | 'negated' | 'risingEdge' | 'fallingEdge' | 'set' | 'reset'
-export type ContactVariant = 'default' | 'negated' | 'risingEdge' | 'fallingEdge'
+export type ContactVariant =
+  | 'default'
+  | 'negated'
+  | 'risingEdge'
+  | 'fallingEdge'
+  | 'negatedRisingEdge'
+  | 'negatedFallingEdge'
 
 /** Modifier glyph drawn near the lower-right of the symbol; `''` for `default`. */
 export const COIL_VARIANT_GLYPHS: Record<CoilVariant, string> = {
@@ -51,6 +57,13 @@ export const CONTACT_VARIANT_GLYPHS: Record<ContactVariant, string> = {
   negated: '',
   risingEdge: 'P',
   fallingEdge: 'N',
+  negatedRisingEdge: 'P',
+  negatedFallingEdge: 'N',
+}
+
+/** True for a contact drawn with the negation slash: alone, or over its P or N. */
+export function isNegatedContact(variant: ContactVariant): boolean {
+  return variant === 'negated' || variant === 'negatedRisingEdge' || variant === 'negatedFallingEdge'
 }
 
 export function asCoilVariant(value: string | undefined): CoilVariant {
@@ -71,6 +84,8 @@ export function asContactVariant(value: string | undefined): ContactVariant {
     case 'negated':
     case 'risingEdge':
     case 'fallingEdge':
+    case 'negatedRisingEdge':
+    case 'negatedFallingEdge':
       return value
     default:
       return 'default'
