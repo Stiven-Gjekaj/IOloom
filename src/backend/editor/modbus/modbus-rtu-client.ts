@@ -200,19 +200,35 @@ export class ModbusRtuClient implements DeviceModbusTransport {
    * never noticed, because they keep running after a disconnect.
    */
   disconnect(): void {
-    if (this.serialPort && this.serialPort.isOpen) {
-      const port = this.serialPort
-      this.serialPort = null
-      this.closing = new Promise<void>((resolve) => {
+    const port = this.serialPort
+    this.serialPort = null
+    if (!port) return
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const isOpen = Boolean(port.isOpen)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const isOpening = Boolean(port.opening)
+    if (!isOpen && !isOpening) return
+
+    this.closing = new Promise<void>((resolve) => {
+      const close = (): void => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         port.close((error: Error | null) => {
           if (error) console.warn(`Warning: failed to close serial port: ${error.message}`)
           resolve()
         })
-      })
-      return
-    }
-    this.serialPort = null
+      }
+      if (isOpen) {
+        close()
+        return
+      }
+      // The port is still opening. Close it when it opens. Without this, the
+      // open completes after the client let go, and the port stays busy until
+      // the editor quits (upstream issue 1189).
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      port.once('open', close)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      port.once('error', () => resolve())
+    })
   }
 
   /** Resolves once a `disconnect()` has released the native handle. */
