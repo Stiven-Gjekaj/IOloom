@@ -102,4 +102,25 @@ describe('edge trigger instance naming', () => {
     const names = syntheticVars.filter((v) => v.type === 'R_TRIG').map((v) => v.name)
     expect(names).toEqual(['_TMP_R_TRIG7', 'R_TRIG1'])
   })
+
+  it('emits a negated edge contact as NOT of the trigger output (upstream issue 553)', () => {
+    const body: RFBody = {
+      rungs: [
+        rung(contact('C1', 'led', 'negatedRisingEdge', 68, '7001'), 'not_on', '21'),
+        rung(contact('C2', 'led', 'negatedFallingEdge', 68, '7002'), 'not_off', '22'),
+      ],
+    }
+    const { bodySt, syntheticVars, warnings } = emitLdBody(body)
+    expect(warnings).toEqual([])
+    expect(bodySt).toContain('_TMP_R_TRIG7001(CLK := led);')
+    expect(bodySt).toContain('not_on := NOT(_TMP_R_TRIG7001.Q);')
+    expect(bodySt).toContain('_TMP_F_TRIG7002(CLK := led);')
+    expect(bodySt).toContain('not_off := NOT(_TMP_F_TRIG7002.Q);')
+    expect(syntheticVars).toEqual(
+      expect.arrayContaining([
+        { name: '_TMP_R_TRIG7001', type: 'R_TRIG' },
+        { name: '_TMP_F_TRIG7002', type: 'F_TRIG' },
+      ]),
+    )
+  })
 })

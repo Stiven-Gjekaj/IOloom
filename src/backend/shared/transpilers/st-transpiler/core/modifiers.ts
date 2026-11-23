@@ -4,7 +4,8 @@
  * Mirrors `src/PLCGenerator/modifiers.ts` exactly — three modifier
  * kinds, byte-faithful emission:
  *
- *   - `negated` → wrap expression in `NOT(...)`
+ *   - `negated` → wrap expression in `NOT(...)`; with an edge, wrap the
+ *     trigger's `.Q`, so a negated edge contact is NOT(edge of x)
  *   - `storage` (`set` / `reset`) → side-effect on the trailing
  *     program chunks; return a short "TRUE; END_IF" / "FALSE; END_IF"
  *     reference the caller substitutes
@@ -42,7 +43,14 @@ export function extractModifier(
   varInfo: Location,
 ): ProgramChunk[] {
   if (modifier.negated) {
-    return [['NOT(', [...varInfo, 'negated']], ...expression, [')', []]]
+    // A negated edge contact is NOT(edge of x): the trigger runs on x, and its .Q is negated (upstream issue 553).
+    const edged =
+      modifier.edge === 'rising'
+        ? addTrigger(state, 'R_TRIG', expression, [...varInfo, 'rising'])
+        : modifier.edge === 'falling'
+          ? addTrigger(state, 'F_TRIG', expression, [...varInfo, 'falling'])
+          : expression
+    return [['NOT(', [...varInfo, 'negated']], ...edged, [')', []]]
   }
   if ('storage' in modifier) {
     const storage = modifier.storage

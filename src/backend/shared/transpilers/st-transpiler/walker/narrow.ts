@@ -11,7 +11,26 @@
 
 import type { CoilModifier, ContactModifier } from '../core/modifier-types'
 
-export type ContactVariant = 'default' | 'negated' | 'risingEdge' | 'fallingEdge'
+/**
+ * `negatedRisingEdge` and `negatedFallingEdge` are NOT(edge of x): TRUE on each
+ * scan except the scan of the edge (upstream issue 553).
+ */
+export type ContactVariant =
+  | 'default'
+  | 'negated'
+  | 'risingEdge'
+  | 'fallingEdge'
+  | 'negatedRisingEdge'
+  | 'negatedFallingEdge'
+
+const CONTACT_VARIANTS: readonly string[] = [
+  'default',
+  'negated',
+  'risingEdge',
+  'fallingEdge',
+  'negatedRisingEdge',
+  'negatedFallingEdge',
+]
 export type CoilVariant = ContactVariant | 'set' | 'reset'
 export type PowerRailSide = 'left' | 'right'
 export type VariableVariant = 'input' | 'output' | 'inout'
@@ -102,9 +121,8 @@ function readVariableName(v: unknown): string {
 
 export function asContactData(data: Record<string, unknown>): ContactData | null {
   const variant = data['variant']
-  if (variant !== 'default' && variant !== 'negated' && variant !== 'risingEdge' && variant !== 'fallingEdge')
-    return null
-  return { variant, variable: readVariableName(data['variable']) }
+  if (typeof variant !== 'string' || !CONTACT_VARIANTS.includes(variant)) return null
+  return { variant: variant as ContactVariant, variable: readVariableName(data['variable']) }
 }
 
 export function asCoilData(data: Record<string, unknown>): CoilData | null {
@@ -244,9 +262,9 @@ export function asVariableExpressionData(data: Record<string, unknown>): Variabl
 
 export function contactModifierFromVariant(variant: ContactVariant): ContactModifier {
   const mod: ContactModifier = {}
-  if (variant === 'negated') mod.negated = true
-  else if (variant === 'risingEdge') mod.edge = 'rising'
-  else if (variant === 'fallingEdge') mod.edge = 'falling'
+  if (variant === 'negated' || variant === 'negatedRisingEdge' || variant === 'negatedFallingEdge') mod.negated = true
+  if (variant === 'risingEdge' || variant === 'negatedRisingEdge') mod.edge = 'rising'
+  if (variant === 'fallingEdge' || variant === 'negatedFallingEdge') mod.edge = 'falling'
   return mod
 }
 
