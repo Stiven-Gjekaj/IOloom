@@ -282,7 +282,7 @@ export function buildAllProjectFileContents(store: OpenPLCStore): Record<string,
 }
 
 /** A `user` save on an ephemeral (device-retrieved) project is refused; `pre-build` is exempt. */
-export type SaveReason = 'user' | 'pre-build'
+export type SaveReason = 'user' | 'pre-build' | 'autosave'
 
 /** With no account surface to sign back into, a queued save could never fire. */
 function endedSessionCanBeRestored(capabilities: PlatformCapabilities): boolean {
