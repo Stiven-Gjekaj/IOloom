@@ -64,6 +64,9 @@ export const store = new Store<TStoreType>({
     auto_update_check: {
       type: 'boolean',
     },
+    autosave: {
+      type: 'boolean',
+    },
   },
   defaults: {
     last_projects: [],
@@ -77,5 +80,6 @@ export const store = new Store<TStoreType>({
       },
     },
     auto_update_check: true,
+    autosave: true,
   },
 })

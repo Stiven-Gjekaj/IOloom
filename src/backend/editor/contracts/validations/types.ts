@@ -26,6 +26,8 @@ const StoreSchema = z.object({
     .optional(),
   // The update check when the editor opens (DOPE-486). Manual "Check for Updates" works either way.
   auto_update_check: z.boolean(),
+  // Autosave every 10 minutes (upstream issue 443). On by default.
+  autosave: z.boolean(),
 })
 
 export { StoreSchema, ThemeSchema }

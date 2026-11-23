@@ -2,6 +2,7 @@ import { i18n } from '@root/frontend/locales/i18n'
 import { BrowserWindow, Menu, MenuItemConstructorOptions, nativeTheme, shell } from 'electron'
 
 import { ProjectService } from '../backend/editor/services'
+import type { AutosaveSetting } from './modules/autosave'
 import { store } from './modules/store'
 import type { UpdateService } from './modules/updater'
 
@@ -20,6 +21,7 @@ export default class MenuBuilder {
   private mainWindow: BrowserWindow
   private projectService: ProjectService
   private updates: UpdateService | undefined
+  private autosave: AutosaveSetting | undefined
   private projectOpen = false
   /** Whether a debug session is open, which makes the editing menu items read-only. */
   private debuggerActive = false
@@ -46,10 +48,23 @@ export default class MenuBuilder {
     { role: 'toggleDevTools' },
   ]
 
-  constructor(mainWindow: BrowserWindow, updates?: UpdateService) {
+  constructor(mainWindow: BrowserWindow, updates?: UpdateService, autosave?: AutosaveSetting) {
     this.mainWindow = mainWindow
     this.projectService = new ProjectService(mainWindow)
     this.updates = updates
+    this.autosave = autosave
+  }
+
+  /** The autosave toggle. English only, like the update toggle: menu.json is shared with the web editor. */
+  private autosaveItem(): MenuItemConstructorOptions {
+    const autosave = this.autosave
+    return {
+      label: 'Autosave Every 10 Minutes',
+      type: 'checkbox',
+      checked: autosave?.isEnabled() ?? false,
+      enabled: autosave !== undefined,
+      click: (item) => autosave?.setEnabled(item.checked),
+    }
   }
 
   /**
@@ -344,6 +359,7 @@ export default class MenuBuilder {
           click: () => this.handleSaveProjectAs(),
           enabled: this.projectOpen,
         },
+        this.autosaveItem(),
         {
           label: i18n.t('menu:file.submenu.closeTab'),
           accelerator: 'Cmd+W',
@@ -658,6 +674,7 @@ export default class MenuBuilder {
             click: () => this.handleSaveProjectAs(),
             enabled: this.projectOpen,
           },
+          this.autosaveItem(),
           {
             label: i18n.t('menu:file.submenu.closeTab'),
             accelerator: 'Ctrl+W',

@@ -38,6 +38,7 @@ import type { EdgeOAuthProviderId } from '../middleware/shared/ports/edge-accoun
 import { VENDOR_DOCUMENT_SCHEME } from '../middleware/shared/vendor-document/document-url'
 import { applyHiddenWindowsMode } from './hidden-windows'
 import MenuBuilder from './menu'
+import { createAutosaveSetting } from './modules/autosave'
 import MainProcessBridge from './modules/ipc/main'
 import { createQuitCoordinator } from './modules/lifecycle/quit-coordinator'
 import { store } from './modules/store'
@@ -64,6 +65,8 @@ const updateService = createElectronUpdateService({
   getWindow: () => mainWindow,
   requestQuit: () => quitCoordinator.requestQuit(),
 })
+// One per process too: it registers its IPC handlers once.
+const autosaveSetting = createAutosaveSetting(() => mainWindow)
 const quitCoordinator = createQuitCoordinator({
   platform: process.platform,
   getWindow: () => mainWindow,
@@ -413,7 +416,7 @@ const createMainWindow = async () => {
   // mainWindow.webContents.send('editor:getBaseTypes', _editorService.getBaseTypes())
 
   // Handles the creation of the menu
-  const menuBuilder = new MenuBuilder(mainWindow, updateService)
+  const menuBuilder = new MenuBuilder(mainWindow, updateService, autosaveSetting)
   void menuBuilder.buildMenu()
 
   /**
