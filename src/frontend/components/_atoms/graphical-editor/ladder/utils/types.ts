@@ -96,9 +96,21 @@ export type CoilType = {
 
 // contact
 
-export type ContactNode = Node<BasicNodeData & { variant: 'default' | 'negated' | 'risingEdge' | 'fallingEdge' }>
+/**
+ * The contact kinds. `negatedRisingEdge` and `negatedFallingEdge` are NOT(edge of x):
+ * TRUE on each scan except the scan of the edge (upstream issue 553).
+ */
+export type ContactVariant =
+  | 'default'
+  | 'negated'
+  | 'risingEdge'
+  | 'fallingEdge'
+  | 'negatedRisingEdge'
+  | 'negatedFallingEdge'
+
+export type ContactNode = Node<BasicNodeData & { variant: ContactVariant }>
 export type ContactProps = NodeProps<ContactNode>
-export type ContactBuilderProps = BuilderBasicProps & { variant: 'default' | 'negated' | 'risingEdge' | 'fallingEdge' }
+export type ContactBuilderProps = BuilderBasicProps & { variant: ContactVariant }
 
 export type ContactType = {
   [key in ContactNode['data']['variant']]: {

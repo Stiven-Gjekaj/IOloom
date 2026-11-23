@@ -249,6 +249,25 @@ for (const pou of POUS) {
     )
   })
 
+  test(`the contact dialog of ${pou} saves a negated rising edge (upstream issue 553)`, async () => {
+    await page.getByText(pou, { exact: true }).first().click()
+    const contact = page.locator('.react-flow__node-contact:visible').filter({ hasText: 'Motor' })
+    const box = await contact.boundingBox()
+    if (!box) throw new Error('contact has no box')
+    await contact.dblclick({ position: { x: box.width / 2, y: box.height - 4 } })
+
+    const title = page.getByText('Edit Contact Values', { exact: true })
+    await expect(title.first()).toBeVisible()
+    await clickTop(page, page.getByText('negated Rising Edge', { exact: true }))
+    await clickTop(page, page.locator('button', { hasText: /^Confirm$/ }))
+    await expect(title).toHaveCount(0)
+
+    await expectSaved(
+      () => savedNodes(pou)?.find((n) => n.type === 'contact' && n.data.variable?.name === 'Motor')?.data.variant,
+      'negatedRisingEdge',
+    )
+  })
+
   test(`with two ladder tabs open, the coil dialog of ${pou} applies a new modifier`, async () => {
     await page.getByText(pou, { exact: true }).first().click()
     const coil = page.locator('.react-flow__node-coil:visible').filter({ hasText: 'Lamp' })

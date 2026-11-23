@@ -26,8 +26,14 @@ export type { BlockVariant }
 /** The UI's default rung viewport — see `[workspace]/editor/graphical/ladder/index.tsx`. */
 const DEFAULT_BOUNDS: [number, number] = [300, 100]
 
-export type LadderContactVariant = 'default' | 'negated' | 'risingEdge' | 'fallingEdge'
-export type LadderCoilVariant = LadderContactVariant | 'set' | 'reset'
+export type LadderContactVariant =
+  | 'default'
+  | 'negated'
+  | 'risingEdge'
+  | 'fallingEdge'
+  | 'negatedRisingEdge'
+  | 'negatedFallingEdge'
+export type LadderCoilVariant = 'default' | 'negated' | 'risingEdge' | 'fallingEdge' | 'set' | 'reset'
 
 export type ContactElementSpec = { kind: 'contact'; variable: string; variant?: LadderContactVariant }
 export type CoilElementSpec = { kind: 'coil'; variable: string; variant?: LadderCoilVariant }

@@ -1,4 +1,4 @@
-import { edgeTriggerInstanceName, edgeTriggerTypeForVariant } from '../edge-trigger-instance'
+import { edgeTriggerInstanceName, edgeTriggerTypeForVariant, isNegatedContactVariant } from '../edge-trigger-instance'
 
 describe('edgeTriggerTypeForVariant', () => {
   it('maps only the edge variants', () => {
@@ -6,6 +6,22 @@ describe('edgeTriggerTypeForVariant', () => {
     expect(edgeTriggerTypeForVariant('fallingEdge')).toBe('F_TRIG')
     expect(edgeTriggerTypeForVariant('default')).toBeNull()
     expect(edgeTriggerTypeForVariant('negated')).toBeNull()
+  })
+
+  it('maps a negated edge contact to the trigger of its edge (upstream issue 553)', () => {
+    expect(edgeTriggerTypeForVariant('negatedRisingEdge')).toBe('R_TRIG')
+    expect(edgeTriggerTypeForVariant('negatedFallingEdge')).toBe('F_TRIG')
+  })
+})
+
+describe('isNegatedContactVariant', () => {
+  it('is true for the negated contact and the two negated edge contacts only', () => {
+    expect(['negated', 'negatedRisingEdge', 'negatedFallingEdge'].map(isNegatedContactVariant)).toEqual([
+      true,
+      true,
+      true,
+    ])
+    expect(['default', 'risingEdge', 'fallingEdge'].map(isNegatedContactVariant)).toEqual([false, false, false])
   })
 })
 

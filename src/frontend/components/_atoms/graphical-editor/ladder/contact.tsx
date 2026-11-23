@@ -8,7 +8,11 @@ import { forceDebugVariable, releaseDebugVariable } from '../../../../services/d
 import { isExpressionValidForType } from '../../../../services/graphical-scope'
 import { useOpenPLCStore, useOpenPLCStoreApi } from '../../../../store'
 import { cn } from '../../../../utils/cn'
-import { edgeTriggerInstanceName, edgeTriggerTypeForVariant } from '../../../../utils/PLC/edge-trigger-instance'
+import {
+  edgeTriggerInstanceName,
+  edgeTriggerTypeForVariant,
+  isNegatedContactVariant,
+} from '../../../../utils/PLC/edge-trigger-instance'
 import { useBoundPou } from '../../../_features/[workspace]/editor/graphical/active-context'
 import { HighlightedTextArea } from '../../highlighted-textarea'
 import { VariablesBlockAutoComplete } from './autocomplete'
@@ -112,7 +116,7 @@ const Contact = (block: ContactProps) => {
     if (shownValue === undefined) return undefined
 
     const isTrue = shownValue === '1' || shownValue.toUpperCase() === 'TRUE'
-    const displayState = data.variant === 'negated' ? !isTrue : isTrue
+    const displayState = isNegatedContactVariant(data.variant) ? !isTrue : isTrue
 
     return displayState ? '#00FF00' : '#0464FB'
   })()

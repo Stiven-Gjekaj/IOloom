@@ -175,6 +175,32 @@ export const DEFAULT_CONTACT_TYPES: ContactType = {
       />
     ),
   },
+  negatedRisingEdge: {
+    svg: (wrongVariable, debuggerColor): ReactNode => (
+      <RisingEdgeContact
+        negated
+        width={DEFAULT_CONTACT_BLOCK_WIDTH}
+        height={DEFAULT_CONTACT_BLOCK_HEIGHT}
+        strokeClassName={cn('stroke-neutral-1000 dark:stroke-neutral-100', {
+          'stroke-red-500 dark:stroke-red-500': wrongVariable,
+        })}
+        strokeColor={debuggerColor}
+      />
+    ),
+  },
+  negatedFallingEdge: {
+    svg: (wrongVariable, debuggerColor): ReactNode => (
+      <FallingEdgeContact
+        negated
+        width={DEFAULT_CONTACT_BLOCK_WIDTH}
+        height={DEFAULT_CONTACT_BLOCK_HEIGHT}
+        strokeClassName={cn('stroke-neutral-1000 dark:stroke-neutral-100', {
+          'stroke-red-500 dark:stroke-red-500': wrongVariable,
+        })}
+        strokeColor={debuggerColor}
+      />
+    ),
+  },
 }
 
 // parallel

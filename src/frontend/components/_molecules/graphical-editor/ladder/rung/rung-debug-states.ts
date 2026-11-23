@@ -1,5 +1,9 @@
 import type { RungLadderState } from '../../../../../store/slices/ladder'
-import { edgeTriggerInstanceName, edgeTriggerTypeForVariant } from '../../../../../utils/PLC/edge-trigger-instance'
+import {
+  edgeTriggerInstanceName,
+  edgeTriggerTypeForVariant,
+  isNegatedContactVariant,
+} from '../../../../../utils/PLC/edge-trigger-instance'
 
 export type LadderDebugContext = {
   isFunctionBlockPou: boolean
@@ -58,7 +62,7 @@ export const computeRungDebugStates = (
       if (value === undefined) return undefined
 
       const isTrue = value === '1' || value.toUpperCase() === 'TRUE'
-      const contactState = contactData.variant === 'negated' ? !isTrue : isTrue
+      const contactState = isNegatedContactVariant(contactData.variant) ? !isTrue : isTrue
 
       return isInputGreen && contactState
     }
