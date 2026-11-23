@@ -376,6 +376,29 @@ export const getNodesInsideAllParallels = (rung: RungLadderState): Node[] => {
 }
 
 /**
+ * Ids of the nodes on the top (serial) leg of a parallel, and on no bottom leg of
+ * any parallel.
+ *
+ * @param rung
+ *
+ * @returns Set<string>
+ */
+export const getNodesOnTopLegsOfParallels = (rung: RungLadderState): Set<string> => {
+  const closeParallels = rung.nodes.filter(
+    (node) => node.type === 'parallel' && (node as ParallelNode).data.type === 'close',
+  )
+  const top = new Set<string>()
+  const bottom = new Set<string>()
+  closeParallels.forEach((closeParallel) => {
+    const { serial, parallel } = getNodesInsideParallel(rung, closeParallel)
+    serial.forEach((node) => top.add(node.id))
+    parallel.forEach((node) => bottom.add(node.id))
+  })
+  bottom.forEach((id) => top.delete(id))
+  return top
+}
+
+/**
  * Get the nodes inside a parallel connection
  *
  * @param rung

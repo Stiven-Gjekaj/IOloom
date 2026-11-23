@@ -13,7 +13,12 @@ import {
   getNodesInsideAllBranchParallels,
   hasBranchOnHandle,
 } from '../handle-branch'
-import { getDeepestNodesInsideParallels, getNodesInsideAllParallels, getPlaceholderPositionBasedOnNode } from '../utils'
+import {
+  getDeepestNodesInsideParallels,
+  getNodesInsideAllParallels,
+  getNodesOnTopLegsOfParallels,
+  getPlaceholderPositionBasedOnNode,
+} from '../utils'
 
 export const removePlaceholderElements = (nodes: Node[]) => {
   return nodes.filter((node) => node.type !== 'placeholder' && node.type !== 'parallelPlaceholder')
@@ -39,9 +44,13 @@ export const renderPlaceholderElements = (rung: RungLadderState) => {
   // deepest level" rule applies to branch parallel-path elements too.
   const insideBranchParallels = getNodesInsideAllBranchParallels(rung)
   const deepestBranchParallels = getDeepestBranchParallelNodes(rung)
+  // Nodes on the top leg of a parallel. A parallel around one of them nests inside that
+  // leg, which the layout positions recursively (upstream issue 1202).
+  const topLegNodes = getNodesOnTopLegsOfParallels(rung)
   const allowsBottomPlaceholder = (node: Node): boolean => {
     const inBranchParallel = insideBranchParallels.has(node.id)
     if (inBranchParallel) return deepestBranchParallels.has(node.id)
+    if (topLegNodes.has(node.id)) return true
     return !nodesInsideParallels.includes(node) || deepestNodesParallels.includes(node)
   }
 
