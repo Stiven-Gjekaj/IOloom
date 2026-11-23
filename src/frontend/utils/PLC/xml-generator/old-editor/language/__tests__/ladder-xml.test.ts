@@ -69,7 +69,13 @@ const makeRightRail = (id = 'rr1', numericId = '200') => ({
 const makeContact = (
   id: string,
   numericId: string,
-  variant: 'default' | 'negated' | 'risingEdge' | 'fallingEdge' = 'default',
+  variant:
+    | 'default'
+    | 'negated'
+    | 'risingEdge'
+    | 'fallingEdge'
+    | 'negatedRisingEdge'
+    | 'negatedFallingEdge' = 'default',
   varName = 'A',
 ) => ({
   id,
@@ -206,6 +212,17 @@ describe('ladderToXml (old-editor)', () => {
     const rung = makeRung({ nodes: [makeLeftRail() as unknown as Node, contact as unknown as Node] })
     const result = ladderToXml([rung])
     expect(result.body.LD.contact[0]['@edge']).toBe('falling')
+  })
+
+  it.each([
+    ['negatedRisingEdge', 'rising'],
+    ['negatedFallingEdge', 'falling'],
+  ] as const)('converts a %s contact to negated plus edge %s (upstream issue 553)', (variant, edge) => {
+    const contact = makeContact('c1', '10', variant)
+    const rung = makeRung({ nodes: [makeLeftRail() as unknown as Node, contact as unknown as Node] })
+    const result = ladderToXml([rung])
+    expect(result.body.LD.contact[0]['@negated']).toBe(true)
+    expect(result.body.LD.contact[0]['@edge']).toBe(edge)
   })
 
   it('contact uses default variable A when name is empty', () => {

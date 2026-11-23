@@ -346,9 +346,13 @@ const contactToXML = (contact: ContactNode, rung: RungLadderState, offsetY: numb
 
   return {
     '@localId': contact.data.numericId,
-    '@negated': contact.data.variant === 'negated',
-    '@edge':
-      contact.data.variant === 'risingEdge' ? 'rising' : contact.data.variant === 'fallingEdge' ? 'falling' : undefined,
+    // A negated edge contact sets both attributes.
+    '@negated': ['negated', 'negatedRisingEdge', 'negatedFallingEdge'].includes(contact.data.variant),
+    '@edge': ['risingEdge', 'negatedRisingEdge'].includes(contact.data.variant)
+      ? 'rising'
+      : ['fallingEdge', 'negatedFallingEdge'].includes(contact.data.variant)
+        ? 'falling'
+        : undefined,
     '@width': contact.width as number,
     '@height': contact.height as number,
     position: {

@@ -7,6 +7,7 @@ import {
   BlockVariant,
   CoilNode,
   ContactNode,
+  type ContactVariant,
   LadderBlockConnectedVariables,
   ParallelNode,
   PowerRailNode,
@@ -161,11 +162,9 @@ function parseRightRailXml(entry: Record<string, unknown>): { node: PowerRailNod
 }
 
 // @negated/@edge(/@storage for coils) are independent XML attributes mapped
-// onto one mutually-exclusive domain variant enum; the generator only ever
-// emits one of them at a time (its own ternary chains enforce that), but
-// nothing in the XML shape prevents a foreign document from setting more
-// than one — priority storage > negated > edge is an arbitrary, documented
-// call for that (currently unseen-in-fixtures) case.
+// onto one domain variant enum. A coil has no negated edge, so for a coil
+// with more than one set, priority storage > negated > edge is an arbitrary,
+// documented call (currently unseen in fixtures).
 function parseCoilVariant(
   entry: Record<string, unknown>,
 ): 'default' | 'negated' | 'risingEdge' | 'fallingEdge' | 'set' | 'reset' {
@@ -178,11 +177,12 @@ function parseCoilVariant(
   return 'default'
 }
 
-function parseContactVariant(entry: Record<string, unknown>): 'default' | 'negated' | 'risingEdge' | 'fallingEdge' {
-  if (asString(entry['@negated']) === 'true') return 'negated'
-  if (entry['@edge'] === 'rising') return 'risingEdge'
-  if (entry['@edge'] === 'falling') return 'fallingEdge'
-  return 'default'
+/** A contact keeps both attributes: negated with an edge is NOT(edge of x) (upstream issue 553). */
+function parseContactVariant(entry: Record<string, unknown>): ContactVariant {
+  const negated = asString(entry['@negated']) === 'true'
+  if (entry['@edge'] === 'rising') return negated ? 'negatedRisingEdge' : 'risingEdge'
+  if (entry['@edge'] === 'falling') return negated ? 'negatedFallingEdge' : 'fallingEdge'
+  return negated ? 'negated' : 'default'
 }
 
 function parseContactXml(entry: Record<string, unknown>): { node: ContactNode; pendingEdges: PendingEdge[] } {

@@ -148,10 +148,20 @@ describe('parseLadderXml', () => {
         makeContact('2', { '@edge': 'rising' }),
         makeContact('3', { '@edge': 'falling' }),
         makeContact('4', {}),
+        makeContact('5', { '@negated': 'true', '@edge': 'rising' }),
+        makeContact('6', { '@negated': 'true', '@edge': 'falling' }),
       ],
     })
     const variants = body.rungs.flatMap((r) => r.nodes).map((n) => (n.data as { variant: string }).variant)
-    expect(variants).toEqual(['negated', 'risingEdge', 'fallingEdge', 'default'])
+    // A contact keeps both attributes: negated with an edge is NOT(edge of x) (upstream issue 553).
+    expect(variants).toEqual([
+      'negated',
+      'risingEdge',
+      'fallingEdge',
+      'default',
+      'negatedRisingEdge',
+      'negatedFallingEdge',
+    ])
   })
 
   it('parses a function-block instance and a plain function call', () => {
