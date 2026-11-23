@@ -21,6 +21,9 @@ jobs:
   audit:
     uses: ./.github/workflows/ci-audit.yml
 
+  windows-cli:
+    uses: ./.github/workflows/ci-windows-cli.yml
+
   unit-tests:
     uses: ./.github/workflows/ci-unit-tests.yml
 
