@@ -333,7 +333,10 @@ export function createStash(projectId: string, message?: string, files?: string[
   if (message) json.message = message
   if (files && files.length > 0) json.files = files
 
-  return call(route`/projects/${projectId}/stashes`, z.object({ stash: z.unknown().optional() }), { method: 'POST', json })
+  return call(route`/projects/${projectId}/stashes`, z.object({ stash: z.unknown().optional() }), {
+    method: 'POST',
+    json,
+  })
 }
 
 export function applyStash(projectId: string, ref: string) {

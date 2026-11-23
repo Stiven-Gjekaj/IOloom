@@ -15,7 +15,15 @@ const makeElectron = () => {
     dock: { hide: jest.fn() },
     on: jest.fn((_event: string, listener: (typeof listeners)[number]) => listeners.push(listener)),
   }
-  return { windowClass, app, screen, workArea, setBounds, listeners, original: { show, showInactive, focus, maximize, appFocus: app.focus } }
+  return {
+    windowClass,
+    app,
+    screen,
+    workArea,
+    setBounds,
+    listeners,
+    original: { show, showInactive, focus, maximize, appFocus: app.focus },
+  }
 }
 
 describe('applyHiddenWindowsMode', () => {

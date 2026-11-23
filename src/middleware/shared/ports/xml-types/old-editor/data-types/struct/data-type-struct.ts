@@ -6,7 +6,12 @@ const dataTypeStructSchema = z.object({
     z.object({
       '@name': z.string(),
       type: z
-        .object(baseTypes.reduce((acc, type) => Object.assign(acc, { [type]: z.string().optional() }), {} as Record<string, z.ZodType>))
+        .object(
+          baseTypes.reduce(
+            (acc, type) => Object.assign(acc, { [type]: z.string().optional() }),
+            {} as Record<string, z.ZodType>,
+          ),
+        )
         .optional(),
       initialValue: z
         .object({
