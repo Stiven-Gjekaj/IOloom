@@ -25,7 +25,6 @@ import {
 import {
   asCoilVariant,
   asContactVariant,
-  isNegatedContact,
   BRAND_COLOR,
   COIL_BLOCK_HEIGHT,
   COIL_BLOCK_WIDTH,
@@ -39,6 +38,7 @@ import {
   CONTACT_NEGATION_LINE,
   CONTACT_VARIANT_GLYPHS,
   INK_COLOR,
+  isNegatedContact,
 } from './symbols'
 import type { ContentBlock, DrawOp, PrintRenderMode } from './types'
 
