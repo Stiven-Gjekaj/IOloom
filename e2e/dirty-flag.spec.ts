@@ -31,6 +31,8 @@ import { join } from 'node:path'
 import type { ElectronApplication, Page } from '@playwright/test'
 import { _electron as electron, expect, test } from '@playwright/test'
 
+import { closeApp } from './helpers/close-app'
+
 const ROOT = join(tmpdir(), 'openplc-e2e-dirty-flag')
 const LOCAL_PACKAGES = join(homedir(), '.config', 'open-plc-editor', 'packages')
 
@@ -258,7 +260,7 @@ async function authorContent(paths: Paths): Promise<void> {
 
   await save(app)
   await expectTabLabel(page, 'fbdmain', false)
-  await app.close()
+  await closeApp(app)
 }
 
 /** Focus and blur every field and open every select on the current screen, changing nothing. */
@@ -393,7 +395,7 @@ async function sweep(board: string, slug: string, expectVpp = false): Promise<vo
       await expectTabLabel(page, 'Modbus', true)
     }
   } finally {
-    await app.close()
+    await closeApp(app)
   }
 }
 
@@ -434,6 +436,6 @@ test("Don't Save on close leaves the file on disk untouched", async () => {
 
     expect(readFileSync(stFile, 'utf-8'), "Don't Save must not write the file").toBe(before)
   } finally {
-    await app.close()
+    await closeApp(app)
   }
 })

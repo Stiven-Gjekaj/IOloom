@@ -17,6 +17,8 @@ import { join } from 'node:path'
 import type { ElectronApplication, Page } from '@playwright/test'
 import { _electron as electron, expect, test } from '@playwright/test'
 
+import { closeApp } from './helpers/close-app'
+
 const ROOT = join(tmpdir(), 'openplc-e2e-external-file-sync')
 
 // Each test gets its own project directory and its own Electron profile, keyed by
@@ -190,7 +192,7 @@ test.beforeEach(async ({}, testInfo) => {
 })
 
 test.afterEach(async () => {
-  await app?.close()
+  await closeApp(app)
 })
 
 test('ST: consecutive external edits all reach the editor', async () => {
