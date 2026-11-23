@@ -41,7 +41,8 @@ export const serializeTextualPouToString = (pou: SerializablePou): string => {
   result += buildDeclaration(pou)
   if (pou.pouType === 'interface') {
     // No VAR section: the VAR blocks of an interface belong to its METHOD prototypes.
-    return result + (pou.body.value ? `${pou.body.value}\n` : '') + getEndKeyword(pou.pouType)
+    const methods = typeof pou.body.value === 'string' ? pou.body.value : ''
+    return result + (methods ? `${methods}\n` : '') + getEndKeyword(pou.pouType)
   }
   result += buildVariables(pou) + '\n\n'
   result += pou.body.value + '\n\n'
