@@ -65,12 +65,15 @@ export function generateTextualPou(pou: TranspilePou, project: TranspileProject,
       program: 'PROGRAM',
       function: 'FUNCTION',
       'function-block': 'FUNCTION_BLOCK',
+      // METHOD prototypes only. It has no VAR block of its own, so the loop below writes none.
+      interface: 'INTERFACE',
     } as Record<string, string>
   )[pou.pouType]
 
   const program: ProgramChunk[] = []
   program.push([`${kindKeyword} `, []])
-  // A FUNCTION_BLOCK keeps its qualifier and its EXTENDS / IMPLEMENTS clauses (upstream issue 1264).
+  // A FUNCTION_BLOCK keeps its qualifier and its EXTENDS / IMPLEMENTS clauses (upstream issue 1264),
+  // and an INTERFACE keeps its EXTENDS clause (upstream issue 1266).
   if (pou.declarationQualifier) program.push([`${pou.declarationQualifier} `, []])
   program.push([pou.name, [tagName, 'name']])
   if (pou.declarationClauses) program.push([` ${pou.declarationClauses}`, []])

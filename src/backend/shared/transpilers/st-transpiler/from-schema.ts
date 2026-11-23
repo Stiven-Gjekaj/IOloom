@@ -136,11 +136,11 @@ function projectPou(pou: SchemaPou): TranspilePou {
     name: pou.data.name,
     pouType: pou.type,
     documentation: pou.data.documentation ?? '',
-    // A FUNCTION_BLOCK keeps its header qualifier and clauses (upstream issue 1264).
+    // A FUNCTION_BLOCK keeps its header qualifier and clauses (upstream issue 1264), an INTERFACE its EXTENDS.
     ...(pou.type === 'function-block' && pou.data.declarationQualifier
       ? { declarationQualifier: pou.data.declarationQualifier }
       : {}),
-    ...(pou.type === 'function-block' && pou.data.declarationClauses
+    ...((pou.type === 'function-block' || pou.type === 'interface') && pou.data.declarationClauses
       ? { declarationClauses: pou.data.declarationClauses }
       : {}),
     interface: {

@@ -99,7 +99,7 @@ function projectPou(pou: PLCPou): TranspilePou {
     ...(pou.pouType === 'function-block' && pou.declarationQualifier
       ? { declarationQualifier: pou.declarationQualifier }
       : {}),
-    ...(pou.pouType === 'function-block' && pou.declarationClauses
+    ...((pou.pouType === 'function-block' || pou.pouType === 'interface') && pou.declarationClauses
       ? { declarationClauses: pou.declarationClauses }
       : {}),
     interface: {
