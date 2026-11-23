@@ -9,6 +9,7 @@ import {
   type ScopeCompletion,
   scopeCompletionToVariable,
 } from '../../../../../services/graphical-scope'
+import { findDeclaredVariable } from '../../../../../services/project-scope-roots'
 import { useOpenPLCStore, useOpenPLCStoreApi } from '../../../../../store'
 import type { CreateGraphicalVariableModalData } from '../../../../../store/slices/modal/types'
 import { cn } from '../../../../../utils/cn'
@@ -230,6 +231,15 @@ const VariablesBlockAutoComplete = forwardRef<HTMLDivElement, VariablesBlockAuto
           nodeId: node.id,
           node: { ...node, data: { ...node.data, variable: { name: variableName } } },
         })
+        return
+      }
+
+      // A name the project already declares binds that variable. The dropdown can still be
+      // empty while the language server loads, and creating a variable then gave it a new
+      // name with a 0 suffix (upstream issue 1232).
+      const declared = findDeclaredVariable(project.data, pouName, variableName)
+      if (declared) {
+        submitVariableToBlock(declared)
         return
       }
 

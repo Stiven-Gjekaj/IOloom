@@ -6,7 +6,7 @@
  * completions filter by declaration instead.
  */
 
-import type { PLCProjectData } from '../../middleware/shared/ports/types'
+import type { PLCProjectData, PLCVariable } from '../../middleware/shared/ports/types'
 import { softMotionAxisNames } from '../../middleware/shared/utils/ethercat'
 
 /** Leading identifier of an expression: `arr[3].x` gives `ARR`. */
@@ -49,4 +49,19 @@ export function collectDeclaredConstantTypes(project: PLCProjectData, pouName: s
     types.set(variable.name.toUpperCase(), variable.type.value)
   }
   return types
+}
+
+/**
+ * The variable that `name` names in `pouName`'s scope: the POU's own first, then
+ * the resource globals, as the scope resolves it. Case does not matter in IEC
+ * names. Undefined when the project declares no such variable.
+ */
+export function findDeclaredVariable(project: PLCProjectData, pouName: string, name: string): PLCVariable | undefined {
+  const wanted = name.trim().toUpperCase()
+  if (!wanted) return undefined
+  const pou = project.pous.find((p) => p.name === pouName)
+  const matches = (variable: PLCVariable) => variable.name.toUpperCase() === wanted
+  return (
+    (pou?.interface?.variables ?? []).find(matches) ?? project.configurations.resource.globalVariables.find(matches)
+  )
 }

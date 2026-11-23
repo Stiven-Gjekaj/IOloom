@@ -8,7 +8,12 @@ import type { PLCProjectData, PLCVariable } from '../../../middleware/shared/por
 import type { OpenPLCStore } from '../../store'
 import { createTestStore } from '../../store/testing'
 import { getScopeCompletions, resolveScopeExpressionType } from '../graphical-scope'
-import { collectDeclaredConstantTypes, collectDeclaredRoots, rootIdentifierOf } from '../project-scope-roots'
+import {
+  collectDeclaredConstantTypes,
+  collectDeclaredRoots,
+  findDeclaredVariable,
+  rootIdentifierOf,
+} from '../project-scope-roots'
 import { registerScopedQueryApi, type ScopedCompletionItem } from '../st-lsp/scoped-query'
 
 /** strucpp emits Variable(6) for instance members, Field(5) for STRUCT members. */
@@ -348,5 +353,32 @@ describe('declared constants (upstream issue 1232)', () => {
     const types = new Map([['ACONST', 'INT']])
     expect(await resolveScopeExpressionType('main', 'aConst', types)).toEqual({ status: 'resolved', type: 'INT' })
     expect(await resolveScopeExpressionType('main', 'aConst')).toEqual({ status: 'unknown' })
+  })
+})
+
+describe('findDeclaredVariable (upstream issue 1232)', () => {
+  const data = () =>
+    projectData([variable('d', 'BOOL')], {
+      configurations: { resource: { tasks: [], instances: [], globalVariables: [variable('g', 'INT')] } },
+    })
+
+  it('finds a variable of the POU whatever the case', () => {
+    expect(findDeclaredVariable(data(), 'main', 'D')?.name).toBe('d')
+  })
+
+  it('finds a resource global', () => {
+    expect(findDeclaredVariable(data(), 'main', 'g')?.name).toBe('g')
+  })
+
+  it('prefers the POU variable over a global of the same name', () => {
+    const project = projectData([variable('x', 'BOOL')], {
+      configurations: { resource: { tasks: [], instances: [], globalVariables: [variable('x', 'INT')] } },
+    })
+    expect(findDeclaredVariable(project, 'main', 'x')?.type.value).toBe('BOOL')
+  })
+
+  it('finds nothing for an undeclared or empty name', () => {
+    expect(findDeclaredVariable(data(), 'main', 'missing')).toBeUndefined()
+    expect(findDeclaredVariable(data(), 'main', '  ')).toBeUndefined()
   })
 })
