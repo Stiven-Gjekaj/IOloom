@@ -274,9 +274,9 @@ const ladderElementsSchema = {
           },
           variant: {
             type: 'string',
-            enum: ['default', 'negated', 'risingEdge', 'fallingEdge'],
+            enum: ['default', 'negated', 'risingEdge', 'fallingEdge', 'negatedRisingEdge', 'negatedFallingEdge'],
             description:
-              'Contact variant. "default" is normally-open (NO), "negated" is normally-closed (NC). Defaults to "default".',
+              'Contact variant. "default" is normally-open (NO), "negated" is normally-closed (NC). "risingEdge" and "fallingEdge" pass power for one scan on the edge. "negatedRisingEdge" and "negatedFallingEdge" are NOT of that edge. Defaults to "default".',
           },
         },
         required: ['kind', 'variable'],
