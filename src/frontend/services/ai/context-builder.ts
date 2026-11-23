@@ -20,12 +20,14 @@ const POU_TYPE_KEYWORDS: Record<string, string> = {
   program: 'PROGRAM',
   function: 'FUNCTION',
   'function-block': 'FUNCTION_BLOCK',
+  interface: 'INTERFACE',
 }
 
 const POU_END_KEYWORDS: Record<string, string> = {
   program: 'END_PROGRAM',
   function: 'END_FUNCTION',
   'function-block': 'END_FUNCTION_BLOCK',
+  interface: 'END_INTERFACE',
 }
 
 let contextCache: {
