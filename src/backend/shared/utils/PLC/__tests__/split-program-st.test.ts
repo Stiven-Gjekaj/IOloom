@@ -34,6 +34,29 @@ describe('splitProgramSt', () => {
       expect(result!.files.get('Main.st')).toContain('PROGRAM Main')
     })
 
+    it('splits an INTERFACE apart from the FUNCTION_BLOCK that implements it', () => {
+      const source =
+        'INTERFACE I_Run\n' +
+        '\n' +
+        '  METHOD Run : INT\n' +
+        '    VAR_INPUT step : INT; END_VAR\n' +
+        '  END_METHOD\n' +
+        'END_INTERFACE\n' +
+        '\n' +
+        'FUNCTION_BLOCK FB_Base IMPLEMENTS I_Run\n' +
+        '  VAR n : INT; END_VAR\n' +
+        'END_FUNCTION_BLOCK\n'
+      const result = splitProgramSt(source, [
+        { name: 'I_Run', kind: 'INTERFACE' },
+        { name: 'FB_Base', kind: 'FUNCTION_BLOCK' },
+      ])
+      expect(result).not.toBeNull()
+      expect([...result!.files.keys()]).toEqual(['I_Run.st', 'FB_Base.st'])
+      expect(result!.files.get('I_Run.st')).toContain('END_INTERFACE')
+      expect(result!.files.get('FB_Base.st')).not.toContain('INTERFACE I_Run')
+      expect(result!.pouOffsets.get('I_Run')).toEqual({ kind: 'INTERFACE', startLine: 1, endLine: 6 })
+    })
+
     it('preserves indentation and blank lines inside each POU', () => {
       const source =
         'PROGRAM Main\n' +

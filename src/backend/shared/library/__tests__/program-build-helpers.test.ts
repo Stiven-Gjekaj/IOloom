@@ -70,6 +70,14 @@ describe('buildKnownPous', () => {
     ])
   })
 
+  it('maps an interface to the INTERFACE kind, so the splitter finds its header', () => {
+    const iface = {
+      type: 'interface',
+      data: { name: 'I_Run', language: 'st', variables: [], body: { language: 'st', value: '' }, documentation: '' },
+    } as unknown as PLCPou
+    expect(buildKnownPous([iface])).toEqual([{ name: 'I_Run', kind: 'INTERFACE', language: 'st' }])
+  })
+
   it('passes the POU language straight through', () => {
     // The splitter uses `language` to decide which serialised body
     // shape to expect for each entry.  Round-tripping every supported
