@@ -124,12 +124,14 @@ export const POU_TYPE_KEYWORDS: Record<string, string> = {
   program: 'PROGRAM',
   function: 'FUNCTION',
   'function-block': 'FUNCTION_BLOCK',
+  interface: 'INTERFACE',
 }
 
 export const POU_END_KEYWORDS: Record<string, string> = {
   program: 'END_PROGRAM',
   function: 'END_FUNCTION',
   'function-block': 'END_FUNCTION_BLOCK',
+  interface: 'END_INTERFACE',
 }
 
 export interface PouHeaderMatch {
@@ -147,6 +149,9 @@ export interface PouHeaderMatch {
 /** `EXTENDS` and `IMPLEMENTS` after the FB name, up to the end of the line or a VAR keyword on that line. */
 const FB_CLAUSES_PATTERN = '([ \\t]+(?:EXTENDS|IMPLEMENTS)\\b(?:(?!\\bVAR)[^\\n])*)?'
 
+/** `EXTENDS I_Base, I_Other` after an INTERFACE name, up to the end of the line. */
+const INTERFACE_CLAUSES_PATTERN = '([ \\t]+EXTENDS\\b[^\\n]*)?'
+
 /**
  * `PROGRAM Main` / `FUNCTION Add : INT` / `FUNCTION_BLOCK ABSTRACT B EXTENDS A` at the head of
  * `content`. A FUNCTION_BLOCK keeps its qualifier and its EXTENDS and IMPLEMENTS clauses, so the
@@ -155,6 +160,12 @@ const FB_CLAUSES_PATTERN = '([ \\t]+(?:EXTENDS|IMPLEMENTS)\\b(?:(?!\\bVAR)[^\\n]
 export const matchPouHeader = (content: string, pouType: string): PouHeaderMatch | undefined => {
   const keyword = POU_TYPE_KEYWORDS[pouType]
   if (!keyword) return undefined
+  if (pouType === 'interface') {
+    const match = content.match(new RegExp(`^\\s*(${keyword})\\s+(\\w+)${INTERFACE_CLAUSES_PATTERN}`, 'i'))
+    if (!match) return undefined
+    const clauses = match[3]?.trim()
+    return { text: match[0], name: match[2], ...(clauses ? { clauses } : {}) }
+  }
   if (pouType === 'function-block') {
     const match = content.match(
       new RegExp(`^\\s*(${keyword})\\s+(?:(ABSTRACT|FINAL)\\s+)?(\\w+)${FB_CLAUSES_PATTERN}`, 'i'),
@@ -364,6 +375,30 @@ const assertSectionTerminated = (section: VariablesSection, documentationLines: 
   }
 }
 
+/**
+ * An INTERFACE holds METHOD prototypes and no variables of its own. Its VAR blocks belong to
+ * its methods, so the full text between the header and END_INTERFACE is the body.
+ */
+const interfaceFromHeader = (
+  content: string,
+  header: PouHeaderMatch,
+  language: string,
+  documentation: string,
+): PLCPou => {
+  if (language !== 'st') throw new Error(formatParseError(`An INTERFACE must be ST, got: ${language}`))
+  const endMatch = content.slice(header.text.length).search(/\bEND_INTERFACE\b/i)
+  if (endMatch === -1) throw new Error(formatParseError('Could not find END_INTERFACE'))
+  return {
+    name: header.name,
+    ...headerFields(header),
+    pouType: 'interface',
+    interface: { variables: [] },
+    body: { language: 'st', value: content.slice(header.text.length, header.text.length + endMatch).trim() },
+    documentation,
+    variablesText: '',
+  }
+}
+
 export const parseTextualPouFromString = (content: string, language: string, type: string): PLCPou => {
   try {
     const { documentation, remainingContent } = extractDocumentation(content)
@@ -380,6 +415,7 @@ export const parseTextualPouFromString = (content: string, language: string, typ
     }
 
     const pouName = header.name
+    if (type === 'interface') return interfaceFromHeader(remainingContent, header, language, documentation)
     const returnType = header.returnType // Only present for functions
 
     if (type === 'function' && !returnType) {

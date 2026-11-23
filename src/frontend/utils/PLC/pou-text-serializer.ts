@@ -19,7 +19,10 @@ const buildDeclaration = (pou: SerializablePou): string => {
   }
   // A FUNCTION_BLOCK keeps its qualifier and its EXTENDS / IMPLEMENTS clauses (upstream issue 1264).
   const qualifier = pou.pouType === 'function-block' && pou.declarationQualifier ? `${pou.declarationQualifier} ` : ''
-  const clauses = pou.pouType === 'function-block' && pou.declarationClauses ? ` ${pou.declarationClauses}` : ''
+  const clauses =
+    (pou.pouType === 'function-block' || pou.pouType === 'interface') && pou.declarationClauses
+      ? ` ${pou.declarationClauses}`
+      : ''
   return `${startKeyword} ${qualifier}${pou.name}${clauses}\n`
 }
 
@@ -36,6 +39,10 @@ export const serializeTextualPouToString = (pou: SerializablePou): string => {
 
   let result = formatDocumentation(pou.documentation)
   result += buildDeclaration(pou)
+  if (pou.pouType === 'interface') {
+    // No VAR section: the VAR blocks of an interface belong to its METHOD prototypes.
+    return result + (pou.body.value ? `${pou.body.value}\n` : '') + getEndKeyword(pou.pouType)
+  }
   result += buildVariables(pou) + '\n\n'
   result += pou.body.value + '\n\n'
   result += getEndKeyword(pou.pouType)
