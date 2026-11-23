@@ -170,6 +170,19 @@ describe('parseProjectFiles — POU type detection from path', () => {
     const result = parseProjectFiles('/p', makeProjectJson(), makeDeviceConfig(), makePinMapping(), pouFiles, [], [])
     expect(result.projectData.pous[0].pouType).toBe('function')
   })
+
+  it('detects interface type from path and keeps the method VAR blocks in the body', () => {
+    const methods = 'METHOD Run : BOOL\n  VAR_INPUT\n    speed : INT;\n  END_VAR\nEND_METHOD'
+    const content = `INTERFACE I_Run EXTENDS I_Base\n${methods}\nEND_INTERFACE`
+    const pouFiles: RawProjectFile[] = [{ relativePath: 'pous/interfaces/I_Run.st', content }]
+    const result = parseProjectFiles('/p', makeProjectJson(), makeDeviceConfig(), makePinMapping(), pouFiles, [], [])
+    const pou = result.projectData.pous[0]
+    expect(pou.pouType).toBe('interface')
+    expect(pou.name).toBe('I_Run')
+    expect(pou.declarationClauses).toBe('EXTENDS I_Base')
+    expect(pou.interface?.variables).toEqual([])
+    expect(pou.body).toEqual({ language: 'st', value: methods })
+  })
 })
 
 // ---------------------------------------------------------------------------

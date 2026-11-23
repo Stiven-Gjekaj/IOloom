@@ -111,6 +111,7 @@ function detectPouTypeFromPath(relativePath: string): string {
   const normalized = relativePath.replace(/\\/g, '/')
   if (normalized.includes('/programs/')) return 'program'
   if (normalized.includes('/function-blocks/')) return 'function-block'
+  if (normalized.includes('/interfaces/')) return 'interface'
   if (normalized.includes('/functions/')) return 'function'
   throw new Error(`Cannot determine POU type from path: ${relativePath}`)
 }

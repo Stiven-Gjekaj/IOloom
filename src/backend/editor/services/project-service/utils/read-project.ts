@@ -157,6 +157,8 @@ function detectPouTypeFromPath(filePath: string): string {
     return 'program'
   } else if (normalizedPath.includes('/function-blocks/')) {
     return 'function-block'
+  } else if (normalizedPath.includes('/interfaces/')) {
+    return 'interface'
   } else if (normalizedPath.includes('/functions/')) {
     return 'function'
   }
@@ -206,6 +208,7 @@ function createFallbackPou(content: string, language: string, pouType: string, p
     program: 'PROGRAM',
     function: 'FUNCTION',
     'function-block': 'FUNCTION_BLOCK',
+    interface: 'INTERFACE',
   }
   const typeKeyword = pouTypeKeywords[pouType as keyof typeof pouTypeKeywords]
   const declarationRegex = new RegExp(`^\\s*(${typeKeyword})\\s+(\\w+)(?:\\s*:\\s*(\\w+))?`, 'i')
@@ -232,6 +235,7 @@ function createFallbackPou(content: string, language: string, pouType: string, p
       program: 'END_PROGRAM',
       function: 'END_FUNCTION',
       'function-block': 'END_FUNCTION_BLOCK',
+      interface: 'END_INTERFACE',
     }
     const endKeyword = endKeywords[pouType as keyof typeof endKeywords]
     const endKeywordRegex = new RegExp(`\\b${endKeyword}\\b`, 'i')
@@ -247,6 +251,7 @@ function createFallbackPou(content: string, language: string, pouType: string, p
       program: 'END_PROGRAM',
       function: 'END_FUNCTION',
       'function-block': 'END_FUNCTION_BLOCK',
+      interface: 'END_INTERFACE',
     }
     const endKeyword = endKeywords[pouType as keyof typeof endKeywords]
     const endKeywordRegex = new RegExp(`\\b${endKeyword}\\b`, 'i')
