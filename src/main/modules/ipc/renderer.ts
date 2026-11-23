@@ -412,6 +412,10 @@ const rendererProcessBridge = {
   appUpdateSetAutoCheck: (enabled: boolean) => ipcRenderer.send('app-update:set-auto-check', enabled),
   onAppUpdateStatus: (callback: (status: unknown) => void) =>
     subscribe('app-update:status', (_event, status) => callback(status)),
+  autosaveGetEnabled: (): Promise<unknown> => ipcRenderer.invoke('autosave:get-enabled'),
+  autosaveSetEnabled: (enabled: boolean) => ipcRenderer.send('autosave:set-enabled', enabled),
+  onAutosaveChanged: (callback: (enabled: unknown) => void) =>
+    subscribe('autosave:changed', (_event, enabled) => callback(enabled)),
   requestQuitApp: () => ipcRenderer.send('app:request-quit'),
   quitRequested: (callback: IpcRendererCallbacks) => {
     const unsubscribe = subscribe('app:quit-requested', callback)

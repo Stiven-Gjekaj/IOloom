@@ -4,6 +4,7 @@ export {
   useAccelerator,
   useAI,
   useAppUpdate,
+  useAutosave,
   useCapabilities,
   useCompiler,
   useDebugger,

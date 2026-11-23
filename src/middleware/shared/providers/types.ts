@@ -1,6 +1,7 @@
 import type { AcceleratorPort } from '../ports/accelerator-port'
 import type { AIPort } from '../ports/ai-port'
 import type { AppUpdatePort } from '../ports/app-update-port'
+import type { AutosavePort } from '../ports/autosave-port'
 import type { CompilerPort } from '../ports/compiler-port'
 import type { DebuggerPort } from '../ports/debugger-port'
 import type { DevicePort } from '../ports/device-port'
@@ -51,6 +52,8 @@ export interface PlatformPorts {
   editSession?: EditSessionPort
   // Desktop only: the notice that a newer editor is out. Absent on web, which is deployed rather than installed.
   appUpdate?: AppUpdatePort
+  // Desktop only: the autosave setting. Absent on web, which does not autosave.
+  autosave?: AutosavePort
   // Required when `capabilities.hasStLSP` is true.
   stlibSource?: StlibSourcePort
 }

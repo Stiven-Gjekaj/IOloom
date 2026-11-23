@@ -7,6 +7,7 @@ import type { OpenPLCStore } from '../frontend/store'
 import { createEditorAcceleratorAdapter } from './adapters/editor/accelerator-adapter'
 import { createEditorAIAdapter } from './adapters/editor/ai-adapter'
 import { createEditorAppUpdateAdapter } from './adapters/editor/app-update-adapter'
+import { createEditorAutosaveAdapter } from './adapters/editor/autosave-adapter'
 import { createEditorCompilerAdapter } from './adapters/editor/compiler-adapter'
 import { createEditorDebuggerAdapter } from './adapters/editor/debugger-adapter'
 import { createEditorDeviceAdapter } from './adapters/editor/device-adapter'
@@ -102,6 +103,7 @@ export function createEditorPorts(store: OpenPLCStore): PlatformPorts {
     edgeAccount: editorEdgeAccountPort,
     editSession: editorEditSessionPort,
     appUpdate: createEditorAppUpdateAdapter(),
+    autosave: createEditorAutosaveAdapter(),
     // Wired unconditionally; visibility is gated by capabilities/consent/sign-in, not by the port's absence.
     ai: createEditorAIAdapter({
       // No build-time kill switch: the main process is the only route to AI endpoints, so an absent proxy already fails closed.

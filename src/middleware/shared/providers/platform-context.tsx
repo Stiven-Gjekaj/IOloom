@@ -145,6 +145,10 @@ export function useAppUpdate() {
   return usePlatform().appUpdate
 }
 
+export function useAutosave() {
+  return usePlatform().autosave
+}
+
 export function useLibrary() {
   return usePlatform().library
 }
