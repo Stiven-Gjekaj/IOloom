@@ -225,6 +225,33 @@ const unterminatedSectionEnd = (
   return content.length
 }
 
+/**
+ * The index after the `END_VAR` of the last VAR block in the run of VAR blocks that starts at
+ * `varStartIndex`, or -1 when the first block has no `END_VAR`.
+ *
+ * The run ends at the first token after an `END_VAR` that is not a VAR-family keyword. A METHOD
+ * of a function block comes after the run and may hold its own VAR block; the last `END_VAR` of
+ * the whole file was taken before, so the method became part of the declarations and the POU
+ * failed to parse (upstream issue 1265). Comments and strings are blanked first, so an `END_VAR`
+ * inside them does not count. `stopAtIndex` bounds the scan, as on `findLastEndVarIndex`.
+ */
+const findEndOfLeadingVarBlocks = (content: string, varStartIndex: number, stopAtIndex?: number): number => {
+  const region = blankTrivia(stopAtIndex === undefined ? content : content.slice(0, stopAtIndex))
+  const endVar = /\bEND_VAR\b/gi
+  const varKeyword = new RegExp(`^${VAR_KEYWORD_PATTERN}`, 'i')
+  let blockEnd = -1
+  let searchFrom = varStartIndex
+  for (;;) {
+    endVar.lastIndex = searchFrom
+    const match = endVar.exec(region)
+    if (!match) return blockEnd
+    blockEnd = match.index + match[0].length
+    const nextToken = region.slice(blockEnd).search(/\S/)
+    if (nextToken === -1 || !varKeyword.test(region.slice(blockEnd + nextToken))) return blockEnd
+    searchFrom = blockEnd + nextToken
+  }
+}
+
 /** 1-based line of `index` in `content`. */
 const lineOfIndex = (content: string, index: number): number => {
   let line = 1
@@ -241,7 +268,8 @@ const lineOfIndex = (content: string, index: number): number => {
 /**
  * The POU's declaration section and where its body starts.
  *
- * A closed section runs from the line of the first VAR-family keyword to the last `END_VAR`, kept
+ * A closed section runs from the line of the first VAR-family keyword to the `END_VAR` of the last
+ * VAR block in the run of blocks after the header (see `findEndOfLeadingVarBlocks`), kept
  * verbatim because it is written back to the file. A block that never reaches `END_VAR`, whether it
  * opens right after the header or follows a closed block, is `unterminated`, ends at
  * `unterminatedSectionEnd` and carries the line of its keyword. `boundAtGraphicalBody` stops the
@@ -257,7 +285,7 @@ export const extractVariablesSection = (
   if (varStartIndex === -1) return { kind: 'none', text: '', bodyStartIndex }
 
   const graphicalBodyStart = options.boundAtGraphicalBody ? findGraphicalBodyStartIndex(content, varStartIndex) : -1
-  const lastEndVarIndex = findLastEndVarIndex(
+  const lastEndVarIndex = findEndOfLeadingVarBlocks(
     content,
     varStartIndex,
     graphicalBodyStart === -1 ? undefined : graphicalBodyStart,

@@ -1013,3 +1013,53 @@ describe('a VAR block without END_VAR is a parse error', () => {
     expect(pou.body.value).toBe('(* uses VAR x *)\nx := 1;')
   })
 })
+
+describe('parseTextualPouFromString — a METHOD with its own VAR block (upstream issue 1265)', () => {
+  const source = [
+    'FUNCTION_BLOCK FB_Base',
+    '  VAR',
+    '    n : INT;',
+    '  END_VAR',
+    '  METHOD PUBLIC Step : INT',
+    '    VAR',
+    '      k : INT;',
+    '    END_VAR',
+    '    k := n + 1;',
+    '    n := k;',
+    '    Step := n;',
+    '  END_METHOD',
+    'END_FUNCTION_BLOCK',
+  ].join('\n')
+
+  it('ends the declarations at the END_VAR of the function block, not of the method', () => {
+    const pou = parseTextualPouFromString(source, 'st', 'function-block')
+
+    expect(pou.interface?.variables.map((v) => v.name)).toEqual(['n'])
+    expect(pou.variablesText).toBe('  VAR\n    n : INT;\n  END_VAR')
+    expect(pou.body.value).toMatch(/^METHOD PUBLIC Step : INT/)
+    expect(pou.body.value).toContain('k : INT;')
+    expect(pou.body.value).toMatch(/END_METHOD$/)
+  })
+
+  it('still takes each VAR block of the run after the header', () => {
+    const pou = parseTextualPouFromString(
+      [
+        'FUNCTION_BLOCK FB',
+        '  VAR_INPUT',
+        '    a : BOOL;',
+        '  END_VAR',
+        '  (* outputs END_VAR *)',
+        '  VAR_OUTPUT',
+        '    q : BOOL;',
+        '  END_VAR',
+        '  q := a;',
+        'END_FUNCTION_BLOCK',
+      ].join('\n'),
+      'st',
+      'function-block',
+    )
+
+    expect(pou.interface?.variables.map((v) => v.name)).toEqual(['a', 'q'])
+    expect(pou.body.value).toBe('q := a;')
+  })
+})
