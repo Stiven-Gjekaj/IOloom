@@ -11,7 +11,12 @@ export const projectDefaultFilesMapSchema = {
 export type ProjectDefaultFilesMapKeys = keyof typeof projectDefaultFilesMapSchema
 export type ProjectDefaultFilesMapValues = (typeof projectDefaultFilesMapSchema)[ProjectDefaultFilesMapKeys]
 
-export const projectPouDirectories = ['pous/functions', 'pous/function-blocks', 'pous/interfaces', 'pous/programs'] as const
+export const projectPouDirectories = [
+  'pous/functions',
+  'pous/function-blocks',
+  'pous/interfaces',
+  'pous/programs',
+] as const
 // Kept out of projectPouDirectories: pou-path detection
 // (detectPouTypeFromPath) must never see datatypes/ entries.
 export const projectDataTypeDirectories = ['datatypes'] as const

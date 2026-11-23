@@ -34,9 +34,7 @@ describe('INTERFACE POU text', () => {
   })
 
   it('refuses a file with no END_INTERFACE', () => {
-    expect(() => parseTextualPouFromString(`INTERFACE I_Run\n${methods}\n`, 'st', 'interface')).toThrow(
-      /END_INTERFACE/,
-    )
+    expect(() => parseTextualPouFromString(`INTERFACE I_Run\n${methods}\n`, 'st', 'interface')).toThrow(/END_INTERFACE/)
   })
 
   it('writes the same interface back on save', () => {

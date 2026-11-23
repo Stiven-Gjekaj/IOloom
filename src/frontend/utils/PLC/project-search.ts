@@ -11,7 +11,13 @@ import type {
   PouType,
 } from '../../../middleware/shared/ports/types'
 
-export type SearchElementFilter = 'data-type' | 'function' | 'function-block' | 'interface' | 'program' | 'configuration'
+export type SearchElementFilter =
+  | 'data-type'
+  | 'function'
+  | 'function-block'
+  | 'interface'
+  | 'program'
+  | 'configuration'
 
 export type ProjectSearchOptions = {
   caseSensitive: boolean

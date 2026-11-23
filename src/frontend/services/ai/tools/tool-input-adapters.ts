@@ -52,7 +52,11 @@ export type CreatePouInput = {
 }
 
 export function adaptCreatePou(input: CreatePouInput): {
-  createProps: { name: string; type: 'program' | 'function' | 'function-block' | 'interface'; language: CreatePouLanguage }
+  createProps: {
+    name: string
+    type: 'program' | 'function' | 'function-block' | 'interface'
+    language: CreatePouLanguage
+  }
   body?: string
 } {
   return {
