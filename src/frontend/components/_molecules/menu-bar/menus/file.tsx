@@ -2,6 +2,7 @@ import * as MenuPrimitive from '@radix-ui/react-menubar'
 import { useEffect, useState } from 'react'
 
 import { useAppUpdate, useCapabilities, useProject } from '../../../../../middleware/shared/providers'
+import { useAutosaveSetting } from '../../../../hooks/use-autosave'
 import { useIsEditingLocked } from '../../../../hooks/use-editing-lock'
 import { useHandleRemoveTab } from '../../../../hooks/use-remove-tab'
 import { i18n } from '../../../../locales/i18n'
@@ -19,6 +20,7 @@ export const FileMenu = () => {
   const appUpdate = useAppUpdate()
   const isEditingLocked = useIsEditingLocked()
   const [autoCheck, setAutoCheck] = useState(false)
+  const autosave = useAutosaveSetting()
   const {
     project,
     editor: activeEditor,
@@ -175,6 +177,17 @@ export const FileMenu = () => {
             <span>{i18n.t('menu:file.submenu.print')}</span>
             <span className={ACCELERATOR}>{'Ctrl + P'}</span>
           </MenuPrimitive.Item>
+          {autosave.available && (
+            <MenuPrimitive.CheckboxItem
+              className={ITEM}
+              checked={autosave.enabled}
+              onCheckedChange={autosave.setEnabled}
+              onSelect={(event) => event.preventDefault()}
+            >
+              <span>Autosave Every 10 Minutes</span>
+              <MenuPrimitive.ItemIndicator className={ACCELERATOR}>✓</MenuPrimitive.ItemIndicator>
+            </MenuPrimitive.CheckboxItem>
+          )}
           <MenuPrimitive.Separator className={SEPARATOR} />
           <MenuPrimitive.Item className={ITEM} disabled={!appUpdate} onClick={() => appUpdate?.checkNow()}>
             <span>{i18n.t('menu:file.submenu.updates')}</span>

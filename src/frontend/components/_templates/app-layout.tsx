@@ -2,6 +2,7 @@ import { ComponentPropsWithoutRef, ReactNode, useCallback, useEffect, useState }
 
 import { useAppUpdate, useCapabilities, useProject, useSystem, useTheme } from '../../../middleware/shared/providers'
 import { useAppUpdateStatus } from '../../hooks/use-app-update-status'
+import { useAutosaveTimer } from '../../hooks/use-autosave'
 import { useOpenPLCStore } from '../../store'
 import type { RungLadderState } from '../../store/slices/ladder'
 import type { CreateGraphicalVariableModalData } from '../../store/slices/modal/types'
@@ -111,6 +112,7 @@ const AppLayout = ({ children, ...rest }: AppLayoutProps): ReactNode => {
   // A newer editor is out (desktop only: the web has no update port).
   const appUpdate = useAppUpdate()
   const update = useAppUpdateStatus()
+  useAutosaveTimer()
   const banner = appUpdate && update.state !== 'none' ? update : null
 
   return (
