@@ -50,6 +50,7 @@ import {
   renderPlaceholderElements,
   searchNearestPlaceholder,
 } from './ladder-utils/elements/placeholder'
+import { type ArrowDirection, nextNodeInDirection, nextVariant } from './ladder-utils/keyboard'
 import { findNode, getRungNodesBounds } from './ladder-utils/nodes'
 import { computeRungDebugStates, type RungDebugStates } from './rung-debug-states'
 import { isSameSelection } from './selection'
@@ -582,6 +583,74 @@ export const RungBody = ({ rung, className, nodeDivergences = [], isDebuggerActi
       }
     })
   })
+
+  /**
+   * Keyboard shortcuts for the selected element (upstream issue 496):
+   *   - Arrow keys select the neighbouring contact, coil or block.
+   *   - Enter puts the cursor in the variable field of the element.
+   *   - Ctrl+Enter (Cmd+Enter on macOS) gives a contact or coil its next kind.
+   * They act only when this rung has exactly one element selected, and never while
+   * a text field has the focus, so typing in a field keeps its own keys.
+   */
+  const handleRungKeyDown = useStableCallback((event: globalThis.KeyboardEvent) => {
+    if (event.defaultPrevented || event.altKey) return
+    const target = event.target instanceof HTMLElement ? event.target : null
+    if (target?.closest('input, textarea, select, [contenteditable="true"]')) return
+
+    const selected = rungLocal.nodes.filter(
+      (node) => node.selected && (node.type === 'contact' || node.type === 'coil' || node.type === 'block'),
+    )
+    if (selected.length !== 1) return
+    const node = selected[0]
+
+    const directions: Record<string, ArrowDirection> = {
+      ArrowLeft: 'left',
+      ArrowRight: 'right',
+      ArrowUp: 'up',
+      ArrowDown: 'down',
+    }
+    const direction = directions[event.key]
+    if (direction && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
+      const next = nextNodeInDirection(rungLocal.nodes, node.id, direction)
+      if (!next) return
+      event.preventDefault()
+      onNodesChange([
+        { type: 'select', id: node.id, selected: false },
+        { type: 'select', id: next.id, selected: true },
+      ])
+      return
+    }
+
+    if (event.key !== 'Enter' || event.shiftKey) return
+    const changeKind = event.ctrlKey || event.metaKey
+    if (!changeKind) {
+      const field = reactFlowViewportRef.current?.querySelector<HTMLTextAreaElement>(
+        `.react-flow__node[data-id="${CSS.escape(node.id)}"] textarea`,
+      )
+      if (!field) return
+      event.preventDefault()
+      field.focus()
+      field.select()
+      return
+    }
+
+    const variant = nextVariant(node)
+    if (!variant) return
+    event.preventDefault()
+    captureAndPush(pouName)
+    ladderFlowActions.updateNode({
+      editorName: pouName,
+      rungId: rungLocal.id,
+      nodeId: node.id,
+      node: { ...node, data: { ...node.data, variant } },
+    })
+  })
+
+  useEffect(() => {
+    if (isDebuggerActive) return
+    document.addEventListener('keydown', handleRungKeyDown)
+    return () => document.removeEventListener('keydown', handleRungKeyDown)
+  }, [isDebuggerActive, handleRungKeyDown])
 
   const onDragEnterViewport = useStableCallback((event: DragEvent) => {
     if (isDebuggerActive) return
