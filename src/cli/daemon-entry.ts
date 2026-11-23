@@ -1,16 +1,20 @@
 /**
- * Daemon bootstrap: read the config line from stdin, then serve.
+ * Daemon bootstrap: read the config line, then serve.
  *
- * Config arrives on stdin rather than argv because it carries the runtime
- * password, and argv is readable by any process on the machine via `ps`.
+ * Config arrives over the local socket that the parent names in the env, not
+ * argv, because it carries the runtime password, and argv is readable by any
+ * process on the machine via `ps`. See `config-channel.ts`.
  */
 
 import { app } from 'electron'
 
+import { CONFIG_CHANNEL_ENV, readConfigChannel } from './config-channel'
 import { type DaemonConfig, runDaemon } from './session/daemon-main'
 
 export async function runDaemonFromStdin(): Promise<void> {
-  const raw = await readFirstLine()
+  // A parent names a config channel. A parent from before the channel writes the line on stdin.
+  const channelPath = process.env[CONFIG_CHANNEL_ENV]
+  const raw = channelPath ? await readConfigChannel(channelPath) : await readFirstLine()
   const config = readConfig(raw)
   if (!config) {
     // Written and awaited before exiting: piped stdout is async, and `app.exit`

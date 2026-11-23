@@ -23,6 +23,7 @@ import {
   type SpawnSessionOptions,
   type SpawnSessionResult,
 } from './commands/debug'
+import { CONFIG_CHANNEL_ENV, type ConfigChannel, openConfigChannel } from './config-channel'
 import { loadDebugIndex } from './debug/variables'
 import { splitLines } from './session/protocol'
 
@@ -79,24 +80,31 @@ export function createSessionSpawner(deps: SpawnDependencies) {
       idleTimeoutMs: options.idleTimeoutMs,
     }
 
-    // Credentials go over stdin, not argv: argv is world-readable in `ps`.
-    // userData is only a directory path (not a secret), so the env is fine and
-    // avoids threading it through the stdin config schema; the daemon reads it
-    // in its boot branch to align onto the same installed-VPP directory.
+    // Credentials go over a one-use local socket, not argv (readable in `ps`) and
+    // not stdin (an Electron child on Windows gets EOF there). Only the socket
+    // path goes into the env. userData is only a directory path (not a secret),
+    // so the env is fine for it too; the daemon reads it in its boot branch to
+    // align onto the same installed-VPP directory.
+    let channel: ConfigChannel
+    try {
+      channel = await openConfigChannel(JSON.stringify(config))
+    } catch (error) {
+      return {
+        success: false,
+        code: 'internal',
+        error: `Could not open the config channel: ${error instanceof Error ? error.message : String(error)}`,
+      }
+    }
     const child = spawn(deps.execPath, [...deps.execArgs, '--cli-daemon'], {
       detached: true,
-      stdio: ['pipe', 'pipe', 'pipe'],
-      env: { ...process.env, OPENPLC_CLI_DAEMON: '1', OPENPLC_USER_DATA: deps.userData },
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: {
+        ...process.env,
+        OPENPLC_CLI_DAEMON: '1',
+        OPENPLC_USER_DATA: deps.userData,
+        [CONFIG_CHANNEL_ENV]: channel.path,
+      },
     })
-
-    // A daemon that exits before reading its config closes this pipe, and the
-    // write then raises EPIPE asynchronously. Unhandled, that is an uncaught
-    // exception that pre-empts the `exit` handler below — so the caller loses
-    // the real reason (a bad password, a busy port) and gets the plumbing
-    // instead. Swallowed here; the handshake's own failure path reports it.
-    child.stdin.on('error', () => undefined)
-    child.stdin.write(`${JSON.stringify(config)}\n`)
-    child.stdin.end()
 
     return await new Promise<SpawnSessionResult>((resolve) => {
       let buffered = ''
@@ -107,6 +115,8 @@ export function createSessionSpawner(deps: SpawnDependencies) {
         if (settled) return
         settled = true
         clearTimeout(timer)
+        // The daemon has the config, or never will: the socket must not wait for another client.
+        channel.close()
         // A child that never reported ready must not be left running. It can
         // still become ready afterwards, register a session and TAKE THE TARGET
         // — a serial port, or a single-client Modbus TCP socket — while the
