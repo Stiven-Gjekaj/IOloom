@@ -105,6 +105,14 @@ export interface PLCPou {
   }
   body: PLCBody
   documentation?: string
+  /** `ABSTRACT` or `FINAL` in the header of a FUNCTION_BLOCK, before its name. */
+  declarationQualifier?: 'ABSTRACT' | 'FINAL'
+  /**
+   * The `EXTENDS` and `IMPLEMENTS` clauses in the header of a FUNCTION_BLOCK, after its
+   * name, verbatim (`EXTENDS FB_Base IMPLEMENTS I_Run`). Kept so the save and the compile
+   * write them back (upstream issue 1264).
+   */
+  declarationClauses?: string
   /**
    * The POU's `VAR … END_VAR` declarations, verbatim, as the user wrote them.
    *

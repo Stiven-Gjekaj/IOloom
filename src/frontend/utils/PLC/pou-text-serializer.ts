@@ -17,7 +17,10 @@ const buildDeclaration = (pou: SerializablePou): string => {
   if (pou.pouType === 'function' && pou.interface?.returnType) {
     return `${startKeyword} ${pou.name} : ${pou.interface.returnType}\n`
   }
-  return `${startKeyword} ${pou.name}\n`
+  // A FUNCTION_BLOCK keeps its qualifier and its EXTENDS / IMPLEMENTS clauses (upstream issue 1264).
+  const qualifier = pou.pouType === 'function-block' && pou.declarationQualifier ? `${pou.declarationQualifier} ` : ''
+  const clauses = pou.pouType === 'function-block' && pou.declarationClauses ? ` ${pou.declarationClauses}` : ''
+  return `${startKeyword} ${qualifier}${pou.name}${clauses}\n`
 }
 
 const buildVariables = (pou: SerializablePou): string => {

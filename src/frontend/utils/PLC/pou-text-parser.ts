@@ -138,16 +138,46 @@ export interface PouHeaderMatch {
   name: string
   /** Present for a FUNCTION, which declares what it returns. */
   returnType?: string
+  /** `ABSTRACT` or `FINAL` before the name of a FUNCTION_BLOCK. */
+  qualifier?: 'ABSTRACT' | 'FINAL'
+  /** `EXTENDS FB_Base IMPLEMENTS I_Run` after the name of a FUNCTION_BLOCK, verbatim. */
+  clauses?: string
 }
 
-/** `PROGRAM Main` / `FUNCTION Add : INT` at the head of `content`. */
+/** `EXTENDS` and `IMPLEMENTS` after the FB name, up to the end of the line or a VAR keyword on that line. */
+const FB_CLAUSES_PATTERN = '([ \\t]+(?:EXTENDS|IMPLEMENTS)\\b(?:(?!\\bVAR)[^\\n])*)?'
+
+/**
+ * `PROGRAM Main` / `FUNCTION Add : INT` / `FUNCTION_BLOCK ABSTRACT B EXTENDS A` at the head of
+ * `content`. A FUNCTION_BLOCK keeps its qualifier and its EXTENDS and IMPLEMENTS clauses, so the
+ * save and the compile write them back (upstream issues 1264 and 1266).
+ */
 export const matchPouHeader = (content: string, pouType: string): PouHeaderMatch | undefined => {
   const keyword = POU_TYPE_KEYWORDS[pouType]
   if (!keyword) return undefined
+  if (pouType === 'function-block') {
+    const match = content.match(
+      new RegExp(`^\\s*(${keyword})\\s+(?:(ABSTRACT|FINAL)\\s+)?(\\w+)${FB_CLAUSES_PATTERN}`, 'i'),
+    )
+    if (!match) return undefined
+    const clauses = match[4]?.trim()
+    return {
+      text: match[0],
+      name: match[3],
+      ...(match[2] ? { qualifier: match[2].toUpperCase() as 'ABSTRACT' | 'FINAL' } : {}),
+      ...(clauses ? { clauses } : {}),
+    }
+  }
   const match = content.match(new RegExp(`^\\s*(${keyword})\\s+(\\w+)(?:\\s*:\\s*(\\w+))?`, 'i'))
   if (!match) return undefined
   return { text: match[0], name: match[1 + 1], ...(match[3] ? { returnType: match[3] } : {}) }
 }
+
+/** The PLCPou fields that keep a FUNCTION_BLOCK's qualifier and clauses. */
+const headerFields = (header: PouHeaderMatch): Pick<PLCPou, 'declarationQualifier' | 'declarationClauses'> => ({
+  ...(header.qualifier ? { declarationQualifier: header.qualifier } : {}),
+  ...(header.clauses ? { declarationClauses: header.clauses } : {}),
+})
 
 /** The declaration section of a POU: absent, closed by `END_VAR`, or opened and never closed. */
 export type VariablesSection =
@@ -343,23 +373,21 @@ export const parseTextualPouFromString = (content: string, language: string, typ
       throw new Error(formatParseError(`Unsupported POU type: ${type}`))
     }
 
-    const declarationMatch = remainingContent.match(
-      new RegExp(`^\\s*(${typeKeyword})\\s+(\\w+)(?:\\s*:\\s*(\\w+))?`, 'i'),
-    )
+    const header = matchPouHeader(remainingContent, type)
 
-    if (!declarationMatch) {
+    if (!header) {
       throw new Error(formatParseError(`Could not find ${typeKeyword} declaration`))
     }
 
-    const pouName = declarationMatch[2]
-    const returnType = declarationMatch[3] // Only present for functions
+    const pouName = header.name
+    const returnType = header.returnType // Only present for functions
 
     if (type === 'function' && !returnType) {
       throw new Error(formatParseError(`Function ${pouName} must have a return type`))
     }
 
     const endKeyword = POU_END_KEYWORDS[type]
-    const section = extractVariablesSection(remainingContent, declarationMatch[0].length, { endKeyword })
+    const section = extractVariablesSection(remainingContent, header.text.length, { endKeyword })
     assertSectionTerminated(section, documentationLineCount(content, remainingContent))
     const variablesString = section.text
     const bodyStartIndex = section.bodyStartIndex
@@ -383,6 +411,7 @@ export const parseTextualPouFromString = (content: string, language: string, typ
 
     return {
       name: pouName,
+      ...headerFields(header),
       pouType: type as PouType,
       interface: {
         ...(type === 'function' ? { returnType: resolvedReturnType } : {}),
@@ -425,23 +454,21 @@ export const parseHybridPouFromString = (content: string, language: string, type
       throw new Error(formatParseError(`Unsupported POU type: ${type}`))
     }
 
-    const declarationMatch = remainingContent.match(
-      new RegExp(`^\\s*(${typeKeyword})\\s+(\\w+)(?:\\s*:\\s*(\\w+))?`, 'i'),
-    )
+    const header = matchPouHeader(remainingContent, type)
 
-    if (!declarationMatch) {
+    if (!header) {
       throw new Error(formatParseError(`Could not find ${typeKeyword} declaration`))
     }
 
-    const pouName = declarationMatch[2]
-    const returnType = declarationMatch[3] // Only present for functions
+    const pouName = header.name
+    const returnType = header.returnType // Only present for functions
 
     if (type === 'function' && !returnType) {
       throw new Error(formatParseError(`Function ${pouName} must have a return type`))
     }
 
     const endKeyword = POU_END_KEYWORDS[type]
-    const section = extractVariablesSection(remainingContent, declarationMatch[0].length, { endKeyword })
+    const section = extractVariablesSection(remainingContent, header.text.length, { endKeyword })
     assertSectionTerminated(section, documentationLineCount(content, remainingContent))
     const variablesString = section.text
     const bodyStartIndex = section.bodyStartIndex
@@ -464,6 +491,7 @@ export const parseHybridPouFromString = (content: string, language: string, type
 
     return {
       name: pouName,
+      ...headerFields(header),
       pouType: type as PouType,
       interface: {
         ...(type === 'function' ? { returnType: resolvedReturnType } : {}),
@@ -507,22 +535,20 @@ export const parseGraphicalPouFromString = (content: string, language: string, t
       throw new Error(formatParseError(`Unsupported POU type: ${type}`))
     }
 
-    const declarationMatch = remainingContent.match(
-      new RegExp(`^\\s*(${typeKeyword})\\s+(\\w+)(?:\\s*:\\s*(\\w+))?`, 'i'),
-    )
+    const header = matchPouHeader(remainingContent, type)
 
-    if (!declarationMatch) {
+    if (!header) {
       throw new Error(formatParseError(`Could not find ${typeKeyword} declaration`))
     }
 
-    const pouName = declarationMatch[2]
-    const returnType = declarationMatch[3]
+    const pouName = header.name
+    const returnType = header.returnType
 
     if (type === 'function' && !returnType) {
       throw new Error(formatParseError(`Function ${pouName} must have a return type`))
     }
 
-    const section = extractVariablesSection(remainingContent, declarationMatch[0].length, {
+    const section = extractVariablesSection(remainingContent, header.text.length, {
       boundAtGraphicalBody: true,
     })
     assertSectionTerminated(section, documentationLineCount(content, remainingContent))
@@ -577,6 +603,7 @@ export const parseGraphicalPouFromString = (content: string, language: string, t
 
     return {
       name: pouName,
+      ...headerFields(header),
       pouType: type as PouType,
       interface: {
         ...(type === 'function' ? { returnType: resolvedReturnType } : {}),

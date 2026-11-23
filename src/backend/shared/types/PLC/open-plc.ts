@@ -259,6 +259,10 @@ const PLCFunctionBlockSchema = z.object({
   documentation: z.string(),
   /** Raw unparsed variables text - used to preserve user input even if it doesn't parse correctly */
   variablesText: z.string().optional(),
+  /** `ABSTRACT` or `FINAL` before the FB name. */
+  declarationQualifier: z.enum(['ABSTRACT', 'FINAL']).optional(),
+  /** `EXTENDS` and `IMPLEMENTS` after the FB name, verbatim (upstream issue 1264). */
+  declarationClauses: z.string().optional(),
 })
 
 type PLCFunctionBlock = z.infer<typeof PLCFunctionBlockSchema>
