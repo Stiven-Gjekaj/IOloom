@@ -12,7 +12,8 @@ export type PLCLanguage = 'IL' | 'ST' | 'LD' | 'FBD' | 'SFC'
 /** Extended languages supported by function blocks */
 export type PLCExtendedLanguage = PLCLanguage | 'python' | 'cpp'
 
-export type PouType = 'program' | 'function' | 'function-block'
+/** An `interface` holds METHOD prototypes only: no variables and no body code (upstream issue 1266). */
+export type PouType = 'program' | 'function' | 'function-block' | 'interface'
 
 export type VariableClass = 'input' | 'output' | 'inOut' | 'external' | 'local' | 'temp' | 'global'
 
@@ -109,8 +110,8 @@ export interface PLCPou {
   declarationQualifier?: 'ABSTRACT' | 'FINAL'
   /**
    * The `EXTENDS` and `IMPLEMENTS` clauses in the header of a FUNCTION_BLOCK, after its
-   * name, verbatim (`EXTENDS FB_Base IMPLEMENTS I_Run`). Kept so the save and the compile
-   * write them back (upstream issue 1264).
+   * name, verbatim (`EXTENDS FB_Base IMPLEMENTS I_Run`). For an INTERFACE, its `EXTENDS`
+   * clause. Kept so the save and the compile write them back (upstream issue 1264).
    */
   declarationClauses?: string
   /**
@@ -161,6 +162,18 @@ export interface PLCFunctionBlock {
   body: PLCBody
   documentation: string
   variablesText?: string
+}
+
+/** METHOD prototypes in ST. `variables` is always empty (upstream issue 1266). */
+export interface PLCInterface {
+  language: 'st'
+  name: string
+  variables: PLCVariable[]
+  body: PLCBody
+  documentation: string
+  variablesText?: string
+  /** `EXTENDS I_Base` after the interface name, verbatim. */
+  declarationClauses?: string
 }
 
 export interface PLCProgram {

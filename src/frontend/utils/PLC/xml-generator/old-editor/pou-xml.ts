@@ -99,8 +99,11 @@ export const oldEditorParseInterface = (pou: PLCPou) => {
   return xml
 }
 
+/** PLCopen XML has no INTERFACE element, so an interface POU is not exported. */
+const isPlcOpenPou = (pou: PLCPou): pou is Exclude<PLCPou, { type: 'interface' }> => pou.type !== 'interface'
+
 export const oldEditorParsePousToXML = (xml: BaseXml, pous: PLCPou[]) => {
-  pous.forEach((pou) => {
+  pous.filter(isPlcOpenPou).forEach((pou) => {
     const interfaceResult = oldEditorParseInterface(pou)
 
     switch (pou.data.body.language) {

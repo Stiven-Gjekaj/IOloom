@@ -11,6 +11,7 @@ import { EnumIcon } from '../../../../../assets/icons/project/Enum'
 import { FBDIcon } from '../../../../../assets/icons/project/FBD'
 import { FunctionIcon } from '../../../../../assets/icons/project/Function'
 import { FunctionBlockIcon } from '../../../../../assets/icons/project/FunctionBlock'
+import { InterfaceIcon } from '../../../../../assets/icons/project/Interface'
 import { ILIcon } from '../../../../../assets/icons/project/IL'
 import { LDIcon } from '../../../../../assets/icons/project/LD'
 import { PLCIcon } from '../../../../../assets/icons/project/PLC'
@@ -68,7 +69,7 @@ const ProjectSearchTreeRoot = ({ children, label, ...res }: IProjectSearchTreeRo
 }
 
 type IProjectSearchTreeBranchProps = ComponentPropsWithoutRef<'li'> & {
-  branchTarget: 'data-type' | 'function' | 'function-block' | 'program' | 'resource' | 'device'
+  branchTarget: 'data-type' | 'function' | 'function-block' | 'interface' | 'program' | 'resource' | 'device'
   children?: ReactNode
 }
 
@@ -76,6 +77,7 @@ const BranchSources = {
   'data-type': { BranchIcon: DataTypeIcon, label: 'Data Types' },
   function: { BranchIcon: FunctionIcon, label: 'Functions' },
   'function-block': { BranchIcon: FunctionBlockIcon, label: 'Function Blocks' },
+  interface: { BranchIcon: InterfaceIcon, label: 'Interfaces' },
   program: { BranchIcon: ProgramIcon, label: 'Programs' },
   resource: { BranchIcon: ResourceIcon, label: 'Resource' },
   device: { BranchIcon: DeviceIcon, label: 'Device' },

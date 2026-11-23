@@ -17,6 +17,7 @@ import { EnumIcon } from '../../../assets/icons/project/Enum'
 import { FBDIcon } from '../../../assets/icons/project/FBD'
 import { FunctionIcon } from '../../../assets/icons/project/Function'
 import { FunctionBlockIcon } from '../../../assets/icons/project/FunctionBlock'
+import { InterfaceIcon } from '../../../assets/icons/project/Interface'
 import { GlobalVariableListIcon } from '../../../assets/icons/project/GlobalVariableList'
 import { ILIcon } from '../../../assets/icons/project/IL'
 import { LDIcon } from '../../../assets/icons/project/LD'
@@ -93,6 +94,7 @@ type ProjectTreeBranchProps = ComponentPropsWithoutRef<'li'> & {
     | 'global-variable-list'
     | 'function'
     | 'function-block'
+    | 'interface'
     | 'program'
     | 'resource'
     | 'device'
@@ -109,6 +111,7 @@ const BranchSources = {
   'global-variable-list': { BranchIcon: GlobalVariableListIcon, label: 'Global Variables' },
   function: { BranchIcon: FunctionIcon, label: 'Functions' },
   'function-block': { BranchIcon: FunctionBlockIcon, label: 'Function Blocks' },
+  interface: { BranchIcon: InterfaceIcon, label: 'Interfaces' },
   program: { BranchIcon: ProgramIcon, label: 'Programs' },
   resource: { BranchIcon: ResourceIcon, label: 'Resource' },
   device: { BranchIcon: DeviceIcon, label: 'Device' },

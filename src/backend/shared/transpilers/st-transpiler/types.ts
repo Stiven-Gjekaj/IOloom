@@ -18,7 +18,7 @@ export interface TranspileProject {
 
 /* ─────────────────────────── pou ────────────────────────────────────────── */
 
-export type TranspilePouKind = 'program' | 'function' | 'function-block'
+export type TranspilePouKind = 'program' | 'function' | 'function-block' | 'interface'
 export type TranspileBodyLanguage = 'st' | 'il' | 'ld' | 'fbd' | 'sfc' | 'python' | 'cpp'
 
 export interface TranspilePou {
@@ -27,7 +27,7 @@ export interface TranspilePou {
   documentation?: string
   /** `ABSTRACT` or `FINAL` before a FUNCTION_BLOCK name. */
   declarationQualifier?: 'ABSTRACT' | 'FINAL'
-  /** `EXTENDS` / `IMPLEMENTS` after a FUNCTION_BLOCK name, verbatim. */
+  /** `EXTENDS` / `IMPLEMENTS` after a FUNCTION_BLOCK name, or `EXTENDS` after an INTERFACE name, verbatim. */
   declarationClauses?: string
   /** Empty for POUs with no parameters / locals. */
   interface: TranspilePouInterface

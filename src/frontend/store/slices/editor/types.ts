@@ -127,7 +127,7 @@ export type EditorModel = EditorModelBase &
           name: string
           path: string
           language: 'il' | 'st' | 'python' | 'cpp'
-          pouType: 'program' | 'function' | 'function-block'
+          pouType: 'program' | 'function' | 'function-block' | 'interface'
         }
         variable: VariablesTable
       }
@@ -137,7 +137,7 @@ export type EditorModel = EditorModelBase &
           name: string
           path: string
           language: 'ld' | 'sfc' | 'fbd'
-          pouType: 'program' | 'function' | 'function-block'
+          pouType: 'program' | 'function' | 'function-block' | 'interface'
         }
         variable: VariablesTable
         graphical: GraphicalType

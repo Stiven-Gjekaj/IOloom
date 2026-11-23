@@ -66,6 +66,18 @@ export interface PLCFunctionBlock {
   variablesText?: string
 }
 
+/** METHOD prototypes in ST. `variables` is always empty (upstream issue 1266). */
+export interface PLCInterface {
+  language: 'st'
+  name: string
+  variables: PLCVariable[]
+  body: PLCBody
+  documentation: string
+  variablesText?: string
+  /** `EXTENDS I_Base` after the interface name, verbatim. */
+  declarationClauses?: string
+}
+
 // ---------------------------------------------------------------------------
 // Discriminated-union POU
 // ---------------------------------------------------------------------------
@@ -74,6 +86,7 @@ export type PLCPou =
   | { type: 'program'; data: PLCProgram }
   | { type: 'function'; data: PLCFunction }
   | { type: 'function-block'; data: PLCFunctionBlock }
+  | { type: 'interface'; data: PLCInterface }
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -100,7 +113,7 @@ export interface PLCProjectData {
   debugVariables?: Record<string, unknown>
   deletedPous?: Array<{
     name: string
-    type: 'program' | 'function' | 'function-block'
+    type: 'program' | 'function' | 'function-block' | 'interface'
     language: 'il' | 'st' | 'ld' | 'sfc' | 'fbd' | 'python' | 'cpp'
   }>
   deletedServers?: Array<{ name: string; protocol: string }>

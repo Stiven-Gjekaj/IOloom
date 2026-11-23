@@ -240,7 +240,8 @@ const createSharedSlice: StateCreator<SharedRootState, [], [], SharedSlice> = (s
       state.editorActions.setEditor(editorModel)
 
       // Programs are instantiated by the Resource, never called from another POU, so they are not library blocks.
-      if (type !== 'program') {
+      // An interface is a type, not a block to place, so it is not a library block either.
+      if (type !== 'program' && type !== 'interface') {
         state.libraryActions.addLibrary(name, type)
       }
 
@@ -324,7 +325,7 @@ const createSharedSlice: StateCreator<SharedRootState, [], [], SharedSlice> = (s
       state.fileActions.addFile({ name: newName, type: sourcePou.pouType, filePath: newName, isNew: true })
 
       // Without the user-library entry the copy exists in the project but can't be placed or completed.
-      if (sourcePou.pouType !== 'program') {
+      if (sourcePou.pouType !== 'program' && sourcePou.pouType !== 'interface') {
         state.libraryActions.addLibrary(newName, sourcePou.pouType)
       }
 
@@ -1136,7 +1137,7 @@ const createSharedSlice: StateCreator<SharedRootState, [], [], SharedSlice> = (s
       }
 
       pous.forEach((pou) => {
-        if (pou.pouType !== 'program') {
+        if (pou.pouType !== 'program' && pou.pouType !== 'interface') {
           getState().libraryActions.addLibrary(pou.name, pou.pouType)
         }
       })

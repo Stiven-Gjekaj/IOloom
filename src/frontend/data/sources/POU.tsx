@@ -3,6 +3,7 @@ import { DataTypeIcon } from '../../assets/icons/project/DataType'
 import { FBDIcon } from '../../assets/icons/project/FBD'
 import { FunctionIcon } from '../../assets/icons/project/Function'
 import { FunctionBlockIcon } from '../../assets/icons/project/FunctionBlock'
+import { InterfaceIcon } from '../../assets/icons/project/Interface'
 import { GlobalVariableListIcon } from '../../assets/icons/project/GlobalVariableList'
 import { ILIcon } from '../../assets/icons/project/IL'
 import { LDIcon } from '../../assets/icons/project/LD'
@@ -47,6 +48,7 @@ const PouLanguageSources = [
 const CreatePouSources = {
   function: <FunctionIcon size='sm' />,
   'function-block': <FunctionBlockIcon size='sm' />,
+  interface: <InterfaceIcon size='sm' />,
   program: <ProgramIcon size='sm' />,
   'data-type': <DataTypeIcon size='sm' />,
   'global-variable-list': <GlobalVariableListIcon size='sm' />,

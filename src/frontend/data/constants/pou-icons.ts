@@ -2,6 +2,7 @@ import { DataTypeIcon } from '../../assets/icons/project/DataType'
 import { DeviceIcon } from '../../assets/icons/project/Device'
 import { FunctionIcon } from '../../assets/icons/project/Function'
 import { FunctionBlockIcon } from '../../assets/icons/project/FunctionBlock'
+import { InterfaceIcon } from '../../assets/icons/project/Interface'
 import { GlobalVariableListIcon } from '../../assets/icons/project/GlobalVariableList'
 import { ProgramIcon } from '../../assets/icons/project/Program'
 import { ResourceIcon } from '../../assets/icons/project/Resource'
@@ -9,6 +10,7 @@ import { ResourceIcon } from '../../assets/icons/project/Resource'
 export const PouIcon = {
   function: FunctionIcon,
   'function-block': FunctionBlockIcon,
+  interface: InterfaceIcon,
   program: ProgramIcon,
   resource: ResourceIcon,
   'data-type': DataTypeIcon,

@@ -3,7 +3,7 @@ import type { EditorModel } from '../editor'
 import type { PouDTO } from '../project'
 
 type PouProps = {
-  type: 'program' | 'function' | 'function-block'
+  type: 'program' | 'function' | 'function-block' | 'interface'
   name: string
   language: 'il' | 'st' | 'ld' | 'sfc' | 'fbd' | 'python' | 'cpp'
 }
@@ -36,6 +36,18 @@ export function createPouObject({ type, name, language }: PouProps): PouDTO {
           name,
           language,
           body: bodyValue,
+          variables: [],
+          documentation: '',
+        },
+      }
+    case 'interface':
+      // An interface is ST only and holds METHOD prototypes, so it starts empty.
+      return {
+        type: 'interface',
+        data: {
+          name,
+          language: 'st',
+          body: { language: 'st', value: '' },
           variables: [],
           documentation: '',
         },
@@ -93,7 +105,7 @@ export function createDatatypeObject(data: DatatypeProps): PLCDataType {
 
 export function createEditorObjectForPou(
   name: string,
-  pouType: 'program' | 'function' | 'function-block',
+  pouType: 'program' | 'function' | 'function-block' | 'interface',
   language: string,
 ): EditorModel {
   const pouLanguage = language.toLowerCase()
@@ -181,8 +193,8 @@ export function createEditorObjectForEtherCATDevice(name: string, busName: strin
 
 export function createTabObject(
   name: string,
-  pouType: 'program' | 'function' | 'function-block',
+  pouType: 'program' | 'function' | 'function-block' | 'interface',
   language: string,
-): { type: 'program' | 'function' | 'function-block'; name: string; language: string } {
+): { type: 'program' | 'function' | 'function-block' | 'interface'; name: string; language: string } {
   return { type: pouType, name, language }
 }

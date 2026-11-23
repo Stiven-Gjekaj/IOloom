@@ -13,6 +13,7 @@ import type {
   PLCDataType,
   PLCFunction,
   PLCFunctionBlock,
+  PLCInterface,
   PLCInstance,
   PLCProgram,
   PLCProjectData,
@@ -60,6 +61,7 @@ export type PouDTO =
   | { type: 'program'; data: PLCProgram }
   | { type: 'function'; data: PLCFunction }
   | { type: 'function-block'; data: PLCFunctionBlock }
+  | { type: 'interface'; data: PLCInterface }
 
 export type DataTypeDTO = {
   data: PLCDataType

@@ -46,13 +46,13 @@ function resolveVariableType(typeStr: string): PLCVariableType {
 
 export type CreatePouInput = {
   name: string
-  type: 'program' | 'function' | 'function-block'
+  type: 'program' | 'function' | 'function-block' | 'interface'
   language: 'st' | 'il' | 'python' | 'cpp' | 'ld'
   body?: string
 }
 
 export function adaptCreatePou(input: CreatePouInput): {
-  createProps: { name: string; type: 'program' | 'function' | 'function-block'; language: CreatePouLanguage }
+  createProps: { name: string; type: 'program' | 'function' | 'function-block' | 'interface'; language: CreatePouLanguage }
   body?: string
 } {
   return {

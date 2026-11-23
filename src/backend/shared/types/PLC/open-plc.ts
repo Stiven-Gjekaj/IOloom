@@ -267,6 +267,24 @@ const PLCFunctionBlockSchema = z.object({
 
 type PLCFunctionBlock = z.infer<typeof PLCFunctionBlockSchema>
 
+/**
+ * An INTERFACE: METHOD prototypes in ST, with no variables of its own (upstream issue 1266).
+ * `variables` is always empty. It stays in the shape so the code that reads each POU's
+ * variables does not need a special case.
+ */
+const PLCInterfaceSchema = z.object({
+  language: z.literal('st'),
+  name: z.string(),
+  variables: z.array(PLCVariableSchema),
+  body: bodySchema,
+  documentation: z.string(),
+  variablesText: z.string().optional(),
+  /** `EXTENDS I_Base, I_Other` after the interface name, verbatim. */
+  declarationClauses: z.string().optional(),
+})
+
+type PLCInterface = z.infer<typeof PLCInterfaceSchema>
+
 const PLCPouSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('program'),
@@ -279,6 +297,10 @@ const PLCPouSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('function-block'),
     data: PLCFunctionBlockSchema,
+  }),
+  z.object({
+    type: z.literal('interface'),
+    data: PLCInterfaceSchema,
   }),
 ])
 type PLCPou = z.infer<typeof PLCPouSchema>
@@ -1022,7 +1044,7 @@ const PLCProjectDataSchema = z.object({
     .array(
       z.object({
         name: z.string(),
-        type: z.enum(['program', 'function', 'function-block']),
+        type: z.enum(['program', 'function', 'function-block', 'interface']),
         language: z.enum(['il', 'st', 'ld', 'sfc', 'fbd', 'python', 'cpp']),
       }),
     )
@@ -1097,6 +1119,7 @@ export {
   PLCDebugVariablesSchema,
   PLCEnumeratedDatatypeSchema,
   PLCFunctionBlockSchema,
+  PLCInterfaceSchema,
   PLCFunctionSchema,
   PLCGlobalVariableListSchema,
   PLCGlobalVariableSchema,
@@ -1162,6 +1185,7 @@ export type {
   PLCEnumeratedDatatype,
   PLCFunction,
   PLCFunctionBlock,
+  PLCInterface,
   PLCGlobalVariable,
   PLCInstance,
   PLCPou,

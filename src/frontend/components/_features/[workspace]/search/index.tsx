@@ -14,7 +14,7 @@ import {
   ProjectSearchTreeVariableLeaf,
 } from './display/tree-view'
 
-type BranchTarget = 'data-type' | 'function' | 'function-block' | 'program' | 'resource' | 'device'
+type BranchTarget = 'data-type' | 'function' | 'function-block' | 'interface' | 'program' | 'resource' | 'device'
 type LeafLang = 'il' | 'st' | 'python' | 'cpp' | 'fbd' | 'sfc' | 'ld' | 'arr' | 'enum' | 'str' | 'res'
 
 type MatchGroup = {
