@@ -16,15 +16,22 @@ import { store } from '../store'
 export interface AutosaveSetting {
   isEnabled(): boolean
   setEnabled(enabled: boolean): void
+  /** Each change, from either menu. The native menu rebuilds itself on it. */
+  onChange(listener: (enabled: boolean) => void): void
 }
 
 export function createAutosaveSetting(getWindow: () => BrowserWindow | null): AutosaveSetting {
+  const listeners: Array<(enabled: boolean) => void> = []
   const setting: AutosaveSetting = {
     isEnabled: () => store.get('autosave') !== false,
     setEnabled: (enabled) => {
       store.set('autosave', enabled)
       const window = getWindow()
       if (window && !window.isDestroyed()) window.webContents.send('autosave:changed', enabled)
+      for (const listener of listeners) listener(enabled)
+    },
+    onChange: (listener) => {
+      listeners.push(listener)
     },
   }
   ipcMain.handle('autosave:get-enabled', () => setting.isEnabled())

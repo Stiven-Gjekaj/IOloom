@@ -291,14 +291,14 @@ describe.each(['darwin', 'win32', 'linux'] as const)('%s updates', (platform) =>
 describe.each(['darwin', 'win32', 'linux'] as const)('%s autosave', (platform) => {
   beforeEach(() => setPlatform(platform))
 
-  function builderWith(autosave: { isEnabled: jest.Mock; setEnabled: jest.Mock }): MenuBuilder {
+  function builderWith(autosave: { isEnabled: jest.Mock; setEnabled: jest.Mock; onChange: jest.Mock }): MenuBuilder {
     // @ts-expect-error: a BrowserWindow stand-in with only what MenuBuilder touches
     const window: BrowserWindow = mainWindow
     return new MenuBuilder(window, undefined, autosave)
   }
 
   it('the File menu toggle shows and stores the setting', async () => {
-    const autosave = { isEnabled: jest.fn(() => true), setEnabled: jest.fn() }
+    const autosave = { isEnabled: jest.fn(() => true), setEnabled: jest.fn(), onChange: jest.fn() }
     await builderWith(autosave).buildMenu()
 
     const toggle = lastMenu().get('Autosave Every 10 Minutes')

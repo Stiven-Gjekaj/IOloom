@@ -67,6 +67,10 @@ const updateService = createElectronUpdateService({
 })
 // One per process too: it registers its IPC handlers once.
 const autosaveSetting = createAutosaveSetting(() => mainWindow)
+// The menu of the current window. macOS can create the window again, so the listener below reads this.
+let activeMenuBuilder: MenuBuilder | undefined
+// The native checkbox must show a change made from the in-app menu.
+autosaveSetting.onChange(() => void activeMenuBuilder?.buildMenu())
 const quitCoordinator = createQuitCoordinator({
   platform: process.platform,
   getWindow: () => mainWindow,
@@ -418,6 +422,7 @@ const createMainWindow = async () => {
   // Handles the creation of the menu
   const menuBuilder = new MenuBuilder(mainWindow, updateService, autosaveSetting)
   void menuBuilder.buildMenu()
+  activeMenuBuilder = menuBuilder
 
   /**
    * Creates a singleton instance for project service, which will be used across the entire application
