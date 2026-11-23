@@ -49,9 +49,12 @@ The milestone M0 decides between the two.
 ### 4.1 Files
 
 IOloom adds one folder to the OpenPLC project folder. The upstream files do
-not change format.
+not change format. IOloom also adds `pous/interfaces/`: one `.st` file for each
+INTERFACE POU (upstream issue 1266). The upstream editor does not read that
+folder.
 
     project.json, devices/, pous/, datatypes/     upstream, unchanged
+    pous/interfaces/                              INTERFACE POUs, IOloom only
     ioloom/
       ioloom.json        format version, settings
       signals.json         the shared signal list

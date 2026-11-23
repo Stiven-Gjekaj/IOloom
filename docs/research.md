@@ -29,6 +29,7 @@ Project storage. A project is a folder:
     devices/pin-mapping.json      pins to IEC addresses
     pous/programs/                programs
     pous/function-blocks/         function blocks
+    pous/interfaces/              interfaces (IOloom only, not upstream)
     pous/functions/               functions
     datatypes/                    user data types
     build/                        build output
