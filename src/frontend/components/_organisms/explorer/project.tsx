@@ -283,6 +283,32 @@ const Project = () => {
               ))}
           </ProjectTreeBranch>
 
+          {/* Project Interfaces tree branch. Only a PLC project can create one, but a branch that
+              already holds interfaces stays visible. */}
+          {(projectType === 'plc-project' || pous?.some((pou) => pou.pouType === 'interface')) && (
+            <ProjectTreeBranch branchTarget='interface'>
+              {pous
+                ?.filter((pou) => pou.pouType === 'interface')
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((pou) => (
+                  <ProjectTreeLeaf
+                    key={pou.name}
+                    leafLang='st'
+                    leafType='interface'
+                    label={pou.name}
+                    highlightQuery={searchQuery}
+                    onClick={() =>
+                      handleCreateTab({
+                        name: pou.name,
+                        path: `/data/pous/interface/${pou.name}`,
+                        elementType: { type: 'interface', language: 'st' },
+                      })
+                    }
+                  />
+                ))}
+            </ProjectTreeBranch>
+          )}
+
           {/* Project Programs tree branch — hidden in library projects
               (libraries have no programs). */}
           {projectCaps.hasPrograms && (

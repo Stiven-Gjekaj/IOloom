@@ -23,12 +23,20 @@ import { useToast } from '../../../[app]/toast/use-toast'
 import { validatePouOrDataTypeName } from '../hooks/use-name-validation'
 
 type ElementCardProps = {
-  target: 'function' | 'function-block' | 'program' | 'data-type' | 'global-variable-list' | 'server' | 'remote-device'
+  target:
+    | 'function'
+    | 'function-block'
+    | 'interface'
+    | 'program'
+    | 'data-type'
+    | 'global-variable-list'
+    | 'server'
+    | 'remote-device'
   closeContainer: Dispatch<SetStateAction<boolean>>
 }
 
 type CreatePouFormProps = {
-  type: 'function' | 'function-block' | 'program'
+  type: 'function' | 'function-block' | 'interface' | 'program'
   name: string
   language: 'il' | 'st' | 'ld' | 'sfc' | 'fbd' | 'python' | 'cpp'
 }
@@ -820,67 +828,77 @@ const ElementCard = (props: ElementCardProps): ReactNode => {
                         </span>
                       )}
                     </div>
-                    <div id='pou-language-form-container' className='flex w-full flex-col gap-[6px] '>
-                      <label
-                        id='pou-language-label'
-                        htmlFor='pou-language'
-                        className='my-[2px] flex-1 text-start font-caption text-xs font-normal text-neutral-1000 dark:text-neutral-300'
-                      >
-                        Language:
-                        {pouErrors.language && <span className='text-red-500'>*</span>}
-                      </label>
-                      <Controller
-                        name='language'
-                        control={pouControl}
-                        rules={{ required: true }}
-                        render={({ field: { value, onChange } }) => {
-                          return (
-                            <Select value={value} onValueChange={onChange}>
-                              <SelectTrigger
-                                withIndicator
-                                aria-label='pou-language'
-                                placeholder='Select a language'
-                                className='flex h-[30px] w-full items-center justify-between gap-1 rounded-md border border-neutral-100 bg-white px-2 py-1 font-caption text-cp-sm font-medium text-neutral-850 outline-none dark:border-brand-medium-dark dark:bg-neutral-950 dark:text-neutral-300'
-                              />
-                              <SelectContent
-                                className='box h-fit w-[--radix-select-trigger-width] overflow-hidden rounded-lg bg-white outline-none dark:bg-neutral-950'
-                                sideOffset={5}
-                                alignOffset={5}
-                                position='popper'
-                                align='center'
-                                side='bottom'
-                              >
-                                {PouLanguageSources.filter((lang) => {
-                                  if (target === 'function-block') return true
-                                  return lang.value !== 'Python' && lang.value !== 'C/C++'
-                                }).map((lang) => {
-                                  const isPythonBlockedForArduino =
-                                    lang.value === 'Python' && isArduinoTarget && !isSimulator
-                                  const isDisabled = !!BlockedLanguagesStyles[lang.value] || isPythonBlockedForArduino
+                    {target === 'interface' ? (
+                      <div id='pou-language-form-container' className='flex w-full flex-col gap-[6px] '>
+                        {/* An interface holds METHOD prototypes in ST, so the language is not a choice. */}
+                        <input type='hidden' {...pouRegister('language')} value='st' />
+                        <p className='my-[2px] flex-1 text-start font-caption text-xs font-normal text-neutral-1000 dark:text-neutral-300'>
+                          Language: Structured Text
+                        </p>
+                      </div>
+                    ) : (
+                      <div id='pou-language-form-container' className='flex w-full flex-col gap-[6px] '>
+                        <label
+                          id='pou-language-label'
+                          htmlFor='pou-language'
+                          className='my-[2px] flex-1 text-start font-caption text-xs font-normal text-neutral-1000 dark:text-neutral-300'
+                        >
+                          Language:
+                          {pouErrors.language && <span className='text-red-500'>*</span>}
+                        </label>
+                        <Controller
+                          name='language'
+                          control={pouControl}
+                          rules={{ required: true }}
+                          render={({ field: { value, onChange } }) => {
+                            return (
+                              <Select value={value} onValueChange={onChange}>
+                                <SelectTrigger
+                                  withIndicator
+                                  aria-label='pou-language'
+                                  placeholder='Select a language'
+                                  className='flex h-[30px] w-full items-center justify-between gap-1 rounded-md border border-neutral-100 bg-white px-2 py-1 font-caption text-cp-sm font-medium text-neutral-850 outline-none dark:border-brand-medium-dark dark:bg-neutral-950 dark:text-neutral-300'
+                                />
+                                <SelectContent
+                                  className='box h-fit w-[--radix-select-trigger-width] overflow-hidden rounded-lg bg-white outline-none dark:bg-neutral-950'
+                                  sideOffset={5}
+                                  alignOffset={5}
+                                  position='popper'
+                                  align='center'
+                                  side='bottom'
+                                >
+                                  {PouLanguageSources.filter((lang) => {
+                                    if (target === 'function-block') return true
+                                    return lang.value !== 'Python' && lang.value !== 'C/C++'
+                                  }).map((lang) => {
+                                    const isPythonBlockedForArduino =
+                                      lang.value === 'Python' && isArduinoTarget && !isSimulator
+                                    const isDisabled = !!BlockedLanguagesStyles[lang.value] || isPythonBlockedForArduino
 
-                                  return (
-                                    <SelectItem
-                                      key={lang.value}
-                                      disabled={isDisabled}
-                                      className={cn(
-                                        BlockedLanguagesStyles[lang.value],
-                                        getBlockedLanguageStyle(isPythonBlockedForArduino),
-                                        'flex w-full cursor-pointer items-center px-2 py-[9px] outline-none hover:bg-neutral-100 focus:bg-neutral-100 dark:hover:bg-neutral-900 dark:focus:bg-neutral-900',
-                                      )}
-                                      value={ConvertToLangShortenedFormat(lang.value)}
-                                    >
-                                      <span className='flex items-center gap-2 font-caption text-cp-sm font-medium text-neutral-850 dark:text-neutral-300'>
-                                        {lang.icon} <span>{lang.value}</span>
-                                      </span>
-                                    </SelectItem>
-                                  )
-                                })}
-                              </SelectContent>
-                            </Select>
-                          )
-                        }}
-                      />
-                    </div>
+                                    return (
+                                      <SelectItem
+                                        key={lang.value}
+                                        disabled={isDisabled}
+                                        className={cn(
+                                          BlockedLanguagesStyles[lang.value],
+                                          getBlockedLanguageStyle(isPythonBlockedForArduino),
+                                          'flex w-full cursor-pointer items-center px-2 py-[9px] outline-none hover:bg-neutral-100 focus:bg-neutral-100 dark:hover:bg-neutral-900 dark:focus:bg-neutral-900',
+                                        )}
+                                        value={ConvertToLangShortenedFormat(lang.value)}
+                                      >
+                                        <span className='flex items-center gap-2 font-caption text-cp-sm font-medium text-neutral-850 dark:text-neutral-300'>
+                                          {lang.icon} <span>{lang.value}</span>
+                                        </span>
+                                      </SelectItem>
+                                    )
+                                  })}
+                                </SelectContent>
+                              </Select>
+                            )
+                          }}
+                        />
+                      </div>
+                    )}
                     <div id='form-button-container' className='flex w-full justify-between'>
                       <Popover.Close asChild>
                         <button

@@ -48,6 +48,7 @@ import { Console as ConsoleComponent } from '../components/_organisms/console'
 import { ConsoleFilters } from '../components/_organisms/console/filters'
 import { Debugger } from '../components/_organisms/debugger'
 import { Explorer } from '../components/_organisms/explorer'
+import { InterfaceNote } from '../components/_organisms/interface-note'
 import { Navigation } from '../components/_organisms/navigation'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../components/_organisms/panel'
 import { PlcLogs } from '../components/_organisms/plc-logs'
@@ -759,7 +760,11 @@ const WorkspaceScreen = () => {
                                     const isActive = editor.meta.name === model.meta.name
                                     return (
                                       <div key={model.meta.name} className={cn('h-full w-full', !isActive && 'hidden')}>
-                                        <VariablesEditor name={model.meta.name} isActive={isActive} />
+                                        {model.meta.pouType === 'interface' ? (
+                                          <InterfaceNote />
+                                        ) : (
+                                          <VariablesEditor name={model.meta.name} isActive={isActive} />
+                                        )}
                                       </div>
                                     )
                                   })}

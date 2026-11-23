@@ -11,6 +11,7 @@ import { ElementCard } from './element-card'
 type CreatePLCElementType =
   | 'function'
   | 'function-block'
+  | 'interface'
   | 'program'
   | 'data-type'
   | 'global-variable-list'
@@ -40,9 +41,21 @@ const CreatePLCElement = () => {
   // keeps already-configured devices visible, creation is refused outright.
   const targetCaps = useTargetCapabilities()
   const CreatePLCElementTypes: CreatePLCElementType[] = (
-    ['function', 'function-block', 'program', 'data-type', 'global-variable-list', 'server', 'remote-device'] as const
+    [
+      'function',
+      'function-block',
+      'interface',
+      'program',
+      'data-type',
+      'global-variable-list',
+      'server',
+      'remote-device',
+    ] as const
   ).filter((target) => {
     switch (target) {
+      case 'interface':
+        // The library build is not tested with interfaces, so only a PLC project offers them.
+        return projectType === 'plc-project'
       case 'program':
         return projectCaps.hasPrograms
       case 'server':

@@ -46,6 +46,7 @@ const LEGACY_LEAF_LANG: Record<string, DeleteElementType> = {
   datatype: 'datatype',
   function: 'pou',
   'function-block': 'pou',
+  interface: 'pou',
   program: 'pou',
 }
 
