@@ -1,0 +1,23 @@
+name: CI - Audit
+
+on:
+  workflow_call:
+
+jobs:
+  audit:
+    name: Runtime Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # The audit reads package-lock.json. It installs nothing.
+      # --omit=dev checks only the packages that ship in the app. Build and test tools stay out.
+      # --audit-level=moderate fails the job on a moderate, high, or critical fault.
+      - name: Audit the runtime dependencies
+        run: npm audit --omit=dev --audit-level=moderate

@@ -18,6 +18,9 @@ jobs:
   lint:
     uses: ./.github/workflows/ci-lint.yml
 
+  audit:
+    uses: ./.github/workflows/ci-audit.yml
+
   unit-tests:
     uses: ./.github/workflows/ci-unit-tests.yml
 
