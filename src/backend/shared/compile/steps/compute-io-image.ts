@@ -323,7 +323,7 @@ export function vppEntries(vendorScreenData: Record<string, unknown> | undefined
   const entries = (mapping as { entries?: unknown }).entries
   if (!Array.isArray(entries)) return { entries: [] }
 
-  return { entries } as PoolVppIoInput
+  return { entries }
 }
 
 function producerClaims(input: ComputeIoImageInput, backed: Map<string, Set<number>>): Record<string, number> {

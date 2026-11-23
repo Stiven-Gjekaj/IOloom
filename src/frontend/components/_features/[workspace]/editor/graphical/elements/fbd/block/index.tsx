@@ -195,7 +195,7 @@ const BlockElement = <T extends object>({ isOpen, onClose, selectedNode }: Block
         },
       })
 
-      const newNodeDataVariant = newNode.data.variant as BlockVariant
+      const newNodeDataVariant = newNode.data.variant
       const formName: string = newNodeDataVariant.name
       const formInputs: string = newNodeDataVariant.variables
         .filter((variable) => (variable.class === 'input' || variable.class === 'inOut') && variable.name !== 'EN')
@@ -239,10 +239,13 @@ const BlockElement = <T extends object>({ isOpen, onClose, selectedNode }: Block
     classified.extensibleInputs.push(newInput)
     const blockVariables = assembleVariables(classified) as BlockVariant['variables']
 
-    const { height } = getBlockSize({ ...blockVariant, variables: blockVariables } as BlockVariant, {
-      x: (node.data as BasicNodeData).inputConnector?.glbPosition.x || 0,
-      y: (node.data as BasicNodeData).inputConnector?.glbPosition.y || 0,
-    })
+    const { height } = getBlockSize(
+      { ...blockVariant, variables: blockVariables },
+      {
+        x: (node.data as BasicNodeData).inputConnector?.glbPosition.x || 0,
+        y: (node.data as BasicNodeData).inputConnector?.glbPosition.y || 0,
+      },
+    )
 
     setNode((node) => ({
       ...node,

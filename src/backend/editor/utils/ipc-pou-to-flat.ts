@@ -9,12 +9,12 @@ export function ipcPouToFlat(pou: IpcPou): FlatPou & { variablesText?: string } 
   const data = pou.data as Record<string, unknown>
   return {
     name: pou.data.name,
-    pouType: pou.type as FlatPou['pouType'],
+    pouType: pou.type,
     interface: {
       returnType: (data.returnType as string | undefined) ?? undefined,
       variables: (data.variables ?? []) as NonNullable<FlatPou['interface']>['variables'],
     },
-    body: pou.data.body as FlatPou['body'],
+    body: pou.data.body,
     documentation: pou.data.documentation,
     variablesText: (data.variablesText as string | undefined) ?? undefined,
   }

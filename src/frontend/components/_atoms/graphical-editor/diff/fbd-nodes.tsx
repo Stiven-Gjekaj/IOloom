@@ -83,7 +83,7 @@ export function ReadOnlyComment({ data, width, height }: NodeProps) {
 
   return (
     <DiffWrapper status={status}>
-      <CommentVisual content={content} width={width as number} height={height as number} />
+      <CommentVisual content={content} width={width} height={height} />
       {renderFBDHandles(data.handles)}
     </DiffWrapper>
   )

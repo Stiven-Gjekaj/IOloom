@@ -21,13 +21,13 @@ type RemoteDeviceIOPoint = {
 // screen). The slice's merge function is the primary defence (it always
 // populates the field on load), but this fallback covers async edge cases
 // where the field could transiently be undefined.
-const EMPTY_SELECTED_PLATFORM_OPTIONS: Record<string, string> = Object.freeze({}) as Record<string, string>
+const EMPTY_SELECTED_PLATFORM_OPTIONS: Record<string, string> = Object.freeze({})
 
 // Same Zustand-stability rationale as EMPTY_SELECTED_PLATFORM_OPTIONS:
 // `pinSelectors.usePins` falls back to this when the active board has
 // no entry yet in the per-board pin-mapping dict. A fresh `[]` literal
 // per render would churn every component subscribed to the pins.
-const EMPTY_PINS: readonly DevicePin[] = Object.freeze([]) as readonly DevicePin[]
+const EMPTY_PINS: readonly DevicePin[] = Object.freeze([])
 
 const boardSelectors = {
   useAvailableBoards: () => useOpenPLCStore((state) => state.deviceAvailableOptions.availableBoards),

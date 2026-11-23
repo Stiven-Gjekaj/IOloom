@@ -212,5 +212,5 @@ export function scopeCompletionToVariable(candidate: ScopeCompletion): PLCVariab
     location: '',
     documentation: '',
     debug: false,
-  } as PLCVariable
+  }
 }

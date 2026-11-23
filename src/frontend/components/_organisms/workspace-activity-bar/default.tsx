@@ -989,11 +989,7 @@ export const DefaultWorkspaceActivityBar = ({ zoom }: DefaultWorkspaceActivityBa
       if (result.state !== undefined) {
         store
           .getState()
-          .deviceActions.setPlcRuntimeStatus(
-            (result.state === 1 ? 'RUNNING' : result.state === 2 ? 'ERROR' : 'STOPPED') as NonNullable<
-              RuntimeConnection['plcStatus']
-            >,
-          )
+          .deviceActions.setPlcRuntimeStatus(result.state === 1 ? 'RUNNING' : result.state === 2 ? 'ERROR' : 'STOPPED')
       }
     } catch (error: unknown) {
       addLog({ level: 'error', message: `PLC control error: ${getErrorMessage(error)}` })

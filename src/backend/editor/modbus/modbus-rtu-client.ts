@@ -340,7 +340,7 @@ export class ModbusRtuClient implements DeviceModbusTransport {
 
       this.serialPort!.on('data', onData)
       this.serialPort!.once('error', onError)
-      this.serialPort!.write(request as unknown as Uint8Array, (error: unknown) => {
+      this.serialPort!.write(request, (error: unknown) => {
         if (error) {
           clearTimeout(timeoutHandle)
           cleanup()

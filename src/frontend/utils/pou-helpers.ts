@@ -181,7 +181,7 @@ export const isFunctionBlockType = (
 export const findStructureVariables = (typeName: string, dataTypes: PLCDataType[]): PouVariable[] | null => {
   const dataType = dataTypes.find((dt) => dt.name.toLowerCase() === typeName.toLowerCase())
   if (dataType?.derivation === 'structure') {
-    return dataType.variable as PouVariable[]
+    return dataType.variable
   }
   return null
 }
@@ -306,7 +306,7 @@ export const findLeafVariables = (
  */
 export const getPouVariables = (pou: PLCPou): PouVariable[] => {
   if (pou.pouType === 'program' || pou.pouType === 'function-block') {
-    return (pou.interface?.variables ?? []) as PouVariable[]
+    return pou.interface?.variables ?? []
   }
   return []
 }

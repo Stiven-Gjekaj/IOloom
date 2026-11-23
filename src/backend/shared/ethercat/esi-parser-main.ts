@@ -72,9 +72,9 @@ function getTextValue(value: unknown): string {
     return getTextValue(english ?? value[0])
   }
   if (typeof value === 'object' && value !== null && '#text' in value) {
-    return getTextValue((value as { '#text': unknown })['#text'])
+    return getTextValue(value['#text'])
   }
-  return typeof value === 'object' ? JSON.stringify(value) : String(value as string)
+  return typeof value === 'object' ? JSON.stringify(value) : String(value)
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -815,7 +815,7 @@ function parseInitCmd(cmd: Record<string, unknown>): ESIInitCmd | null {
     subIndex,
     data,
     dataAscii,
-    value: Number.isFinite(value) ? (value as number) : undefined,
+    value: Number.isFinite(value) ? value : undefined,
     dataType,
     completeAccess,
     comment,

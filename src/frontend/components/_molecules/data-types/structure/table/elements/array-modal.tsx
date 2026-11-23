@@ -1,5 +1,5 @@
 import { baseTypeEnum } from '@root/middleware/shared/ports/plc-schemas'
-import type { PLCDataType, PLCStructureVariable } from '@root/middleware/shared/ports/types'
+import type { PLCStructureVariable } from '@root/middleware/shared/ports/types'
 import { useEffect, useState } from 'react'
 
 import { useOpenPLCStore } from '../../../../../../store'
@@ -189,7 +189,7 @@ export const ArrayModal = ({
     updateDatatype(dataTypeName, {
       ...structure,
       variable: updatedVariables,
-    } as unknown as PLCDataType)
+    })
 
     setArrayModalIsOpen(false)
     closeContainer()

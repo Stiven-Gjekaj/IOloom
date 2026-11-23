@@ -105,7 +105,7 @@ function preprocessPous(
       `they require the OpenPLC Linux runtime. Remove or change ${names}, or select a Runtime target.`
     log('error', message)
     return {
-      projectData: processedProjectData as ProjectDataWithCpp,
+      projectData: processedProjectData,
       validationFailed: true,
       validationError: message,
     }
@@ -133,7 +133,7 @@ function preprocessPous(
       const message = refusedClasses.join(' ')
       log('error', message)
       return {
-        projectData: processedProjectData as ProjectDataWithCpp,
+        projectData: processedProjectData,
         validationFailed: true,
         validationError: message,
       }
@@ -167,7 +167,7 @@ function preprocessPous(
       const message = `Python function blocks cannot exchange these variables: ${unsupported.join('; ')}.`
       log('error', message)
       return {
-        projectData: processedProjectData as ProjectDataWithCpp,
+        projectData: processedProjectData,
         validationFailed: true,
         validationError: message,
       }
@@ -271,7 +271,7 @@ function preprocessPous(
 
     if (validationFailed) {
       return {
-        projectData: processedProjectData as ProjectDataWithCpp,
+        projectData: processedProjectData,
         validationFailed: true,
         validationError: 'POU validation failed. Check C/C++ code for missing setup()/loop() functions.',
       }
@@ -323,7 +323,7 @@ function preprocessPous(
     log('info', 'Generated SoftMotion axis bindings for CiA 402 drive(s)')
   }
 
-  return { projectData: processedProjectData as ProjectDataWithCpp, validationFailed: false }
+  return { projectData: processedProjectData, validationFailed: false }
 }
 
 export { preprocessPous, type ProjectDataWithCpp, type PythonTargetSupport }

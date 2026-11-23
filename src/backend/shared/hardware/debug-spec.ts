@@ -161,7 +161,7 @@ export type DeviceLinkCandidatesOutcome =
  */
 function lookupRef(path: string, state: DebugResolverState): unknown {
   const parts = path.split('.')
-  let cursor: unknown = state as unknown
+  let cursor: unknown = state
   for (const part of parts) {
     if (cursor === null || cursor === undefined || typeof cursor !== 'object') return undefined
     cursor = (cursor as Record<string, unknown>)[part]
@@ -327,7 +327,7 @@ export function resolveDebugConnection(
     channelLabel: channel.label,
     config: {
       connectionType: channel.channel,
-      connectionParams: connectionParams as DebugConnectionConfig['connectionParams'],
+      connectionParams: connectionParams,
     },
   }
 }

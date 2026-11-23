@@ -190,7 +190,7 @@ export const useFBDClipboard = ({
             })
           : { x: reactFlowInstance.getViewport().x, y: reactFlowInstance.getViewport().y }
         : { x: 0, y: 0 }
-      const data = pasteNodesAtFBD(parsedData.content.nodes as Node[], parsedData.content.edges as Edge[], nodePosition)
+      const data = pasteNodesAtFBD(parsedData.content.nodes as Node[], parsedData.content.edges, nodePosition)
 
       // De-Select all selected nodes
       const newNodes: Node[] = rung.nodes.map((node) => {

@@ -194,7 +194,7 @@ const Project = () => {
                 id='project-name'
                 className={`box-border h-full w-full cursor-text bg-transparent px-2 py-0 text-xs font-medium text-neutral-1000 outline-none dark:text-neutral-50`}
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value as unknown as string)}
+                onChange={(e) => setInputValue(e.target.value)}
                 onBlur={() => void handleBlur()}
                 autoFocus
               />

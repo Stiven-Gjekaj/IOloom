@@ -33,7 +33,7 @@ const createVariableType = (
     case 'base-type':
       return {
         definition: 'base-type',
-        value: value as Extract<PLCVariable['type'], { definition: 'base-type' }>['value'],
+        value: value,
       }
     case 'user-data-type':
       return { definition: 'user-data-type', value }
@@ -276,7 +276,7 @@ const SelectableTypeCell = ({
                 ? ''
                 : definition === 'array' || definition === 'derived'
                   ? cellValue
-                  : _.upperCase(cellValue as unknown as string)}
+                  : _.upperCase(cellValue)}
             </span>
           </div>
         </PrimitiveDropdown.Trigger>

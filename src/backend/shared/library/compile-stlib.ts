@@ -58,5 +58,5 @@ export interface CompileStlibResult {
  */
 export function compileStlib(sources: CompileStlibSource[], options: CompileStlibOptions): CompileStlibResult {
   const strucpp = loadStrucpp()
-  return strucpp.compileStlib(sources, options) as CompileStlibResult
+  return strucpp.compileStlib(sources, options)
 }

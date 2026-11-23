@@ -1,6 +1,6 @@
 import { CellContext } from '@tanstack/react-table'
 
-import type { DevicePin, PinPullMode, PinPullSpec } from '../../../../middleware/shared/ports/types'
+import type { DevicePin, PinPullSpec } from '../../../../middleware/shared/ports/types'
 import {
   PIN_PULL_LABELS,
   resolveEffectivePinPull,
@@ -38,7 +38,7 @@ export const PinPullInputCell = ({ row, column: { id }, table, pullSpec, selecte
 
   const onValueChange = (next: string) => {
     if (next === value) return
-    const res = table.options.meta?.updateData(row.index, id, next as PinPullMode)
+    const res = table.options.meta?.updateData(row.index, id, next)
     if (res === undefined || res?.ok) return
     toast({ title: res?.title, description: res?.message, variant: 'fail' })
   }

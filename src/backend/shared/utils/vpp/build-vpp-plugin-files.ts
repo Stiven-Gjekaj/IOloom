@@ -178,8 +178,8 @@ export async function buildVppPluginFiles(args: BuildVppPluginFilesArgs): Promis
     } else {
       finalConfig = generateVendorPluginConfig(
         configTemplate,
-        vendorScreenData as Parameters<typeof generateVendorPluginConfig>[1],
-        (args.modules ?? []) as Parameters<typeof generateVendorPluginConfig>[2],
+        vendorScreenData,
+        args.modules ?? [],
         (args.devicePins ?? []) as Parameters<typeof generateVendorPluginConfig>[3],
       )
     }

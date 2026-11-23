@@ -723,14 +723,14 @@ export function insertIntoBranch(
   // Step 1: Build or use existing element node
   const newElement: Node =
     typeof nodeOrType === 'string'
-      ? (buildGenericNode({
+      ? buildGenericNode({
           nodeType: nodeOrType,
           id: `${nodeOrType.toUpperCase()}_${uuidv4()}`,
           posX: 0,
           posY: 0,
           handleX: 0,
           handleY: 0,
-        }) as Node)
+        })
       : { ...nodeOrType, data: { ...nodeOrType.data } }
 
   // Set branch context marker
@@ -897,14 +897,14 @@ export function replaceVariableWithBranch(
   // Step 1: Build or use existing element node
   const newElement: Node =
     typeof nodeOrType === 'string'
-      ? (buildGenericNode({
+      ? buildGenericNode({
           nodeType: nodeOrType,
           id: `${nodeOrType.toUpperCase()}_${uuidv4()}`,
           posX: 0,
           posY: 0,
           handleX: 0,
           handleY: 0,
-        }) as Node)
+        })
       : { ...nodeOrType, data: { ...nodeOrType.data } }
 
   // Set branch context marker
@@ -1038,7 +1038,7 @@ export function startParallelInBranch(
       posY: 0,
       handleX: 0,
       handleY: 0,
-    }) as Node
+    })
   } else {
     newElement = newNode
   }

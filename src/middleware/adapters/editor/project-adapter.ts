@@ -128,9 +128,9 @@ function mapPortPouToIpcPou(portPou: PLCPou): IpcPou {
     data: {
       name: portPou.name,
       language: portPou.body.language,
-      variables: (portPou.interface?.variables ?? []) as unknown[],
+      variables: portPou.interface?.variables ?? [],
       ...(portPou.interface?.returnType ? { returnType: portPou.interface.returnType } : {}),
-      body: portPou.body as { language: string; value: unknown },
+      body: portPou.body,
       documentation: portPou.documentation ?? '',
     },
   }
@@ -402,7 +402,7 @@ export function createEditorProjectAdapter(
         return classifyCloudWrite(await window.bridge.edgeProjectsSaveProject(files).catch(cloudWriteFailure), account)
       }
 
-      const response = (await window.bridge.writeProjectFiles(files)) as { success: boolean; error?: string }
+      const response = await window.bridge.writeProjectFiles(files)
       if (!response.success) {
         return { success: false, error: response.error ?? 'Save failed' }
       }

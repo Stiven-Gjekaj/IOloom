@@ -154,7 +154,7 @@ export function lspCompletionToMonaco(
 
   return {
     label: item.label,
-    kind: (item.kind ?? 1) as monaco.languages.CompletionItemKind,
+    kind: item.kind ?? 1,
     insertText,
     insertTextRules,
     range,
@@ -238,7 +238,7 @@ export function lspLocationsToMonaco(
 export function lspSymbolKindToMonaco(kind: number): monaco.languages.SymbolKind {
   // LSP and Monaco both use numeric SymbolKind enums that line up
   // for the subset language services typically surface.
-  return (kind - 1) as monaco.languages.SymbolKind
+  return kind - 1
 }
 
 /**

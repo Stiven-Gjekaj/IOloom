@@ -50,7 +50,7 @@ export function createEditorLibraryAdapter(): LibraryPort {
 
     async uninstall(name: string): Promise<Result> {
       const result = await window.bridge.uninstallLibrary(name)
-      if (result.success) return { success: true } as Result
+      if (result.success) return { success: true }
       return { success: false, error: result.error ?? 'Uninstall failed' }
     },
 

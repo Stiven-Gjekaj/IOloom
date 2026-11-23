@@ -23,7 +23,7 @@ export type MigrationReport = {
  */
 function removeVariableIds(variable: PLCVariable): PLCVariable {
   const { id, ...variableWithoutId } = variable as PLCVariable & { id?: string }
-  return variableWithoutId as PLCVariable
+  return variableWithoutId
 }
 
 /**

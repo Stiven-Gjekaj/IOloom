@@ -32,11 +32,7 @@ import { type NativePouRef, parseNativePouRefs } from '@root/backend/shared/libr
 import { buildKnownPous, emitCompileErrorEvents } from '@root/backend/shared/library/program-build-helpers'
 import { runProgramBuildPipeline } from '@root/backend/shared/library/program-build-pipeline'
 import { loadStrucpp } from '@root/backend/shared/library/strucpp-runtime'
-import {
-  fromSchemaShape,
-  type SchemaProjectData,
-  transpileToSt as runJsonTranspiler,
-} from '@root/backend/shared/transpilers/st-transpiler'
+import { fromSchemaShape, transpileToSt as runJsonTranspiler } from '@root/backend/shared/transpilers/st-transpiler'
 import type { KnownPou } from '@root/backend/shared/utils/PLC/split-program-st'
 
 /**
@@ -1681,7 +1677,7 @@ class CompilerModule {
         packageFiles,
         packageSignature,
         vendorScreenData,
-        devicePins: devicePins as unknown as Array<Record<string, unknown>>,
+        devicePins: devicePins,
         modules,
         trustedKeysC,
         // The pin comparison is advisory: it produces a warning, never a
@@ -1777,10 +1773,7 @@ class CompilerModule {
         }),
       )
 
-      return buildModuleConfigEntries(
-        vendorScreenData as Parameters<typeof buildModuleConfigEntries>[0],
-        modules as Parameters<typeof buildModuleConfigEntries>[1],
-      )
+      return buildModuleConfigEntries(vendorScreenData, modules)
     } catch {
       return []
     }
@@ -2728,7 +2721,7 @@ class CompilerModule {
 
     const runDebugInProcess = (): DebugStResult => {
       try {
-        const ir = fromSchemaShape(projectData as unknown as SchemaProjectData)
+        const ir = fromSchemaShape(projectData)
         const result = runJsonTranspiler(ir)
         if (result.programSt === null || result.errors.length > 0) {
           return { ok: false, error: result.errors.join('\n') || 'Failed to generate Structured Text' }

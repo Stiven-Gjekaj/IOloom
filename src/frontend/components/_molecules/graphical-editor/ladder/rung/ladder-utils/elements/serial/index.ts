@@ -25,10 +25,7 @@ export const appendSerialConnection = <T>(
    */
   let newElement: Node = {} as Node
   if (!checkIfElementIsNode(node)) {
-    const newElementPosition = getElementPositionBasedOnPlaceholderElement(
-      placeholder.selected as Node,
-      node.elementType,
-    )
+    const newElementPosition = getElementPositionBasedOnPlaceholderElement(placeholder.selected, node.elementType)
     newElement = buildGenericNode({
       nodeType: node.elementType,
       blockType: node.blockVariant,

@@ -64,10 +64,10 @@ export const resolveArrayElement = (baseVariable: PLCVariable, access: ParsedArr
     ...baseVariable,
     name: `${access.baseName}[${indexStr}]`,
     type: {
-      definition: data.baseType.definition as PLCVariable['type']['definition'],
+      definition: data.baseType.definition,
       value: data.baseType.value,
     },
-  } as PLCVariable
+  }
 }
 
 /**

@@ -74,10 +74,7 @@ export const startParallelConnection = <T>(
    */
   let newElement: Node = {} as Node
   if (!checkIfElementIsNode(node)) {
-    const newElementPosition = getElementPositionBasedOnPlaceholderElement(
-      placeholder.selected as Node,
-      node.elementType,
-    )
+    const newElementPosition = getElementPositionBasedOnPlaceholderElement(placeholder.selected, node.elementType)
     newElement = buildGenericNode({
       nodeType: node.elementType,
       blockType: node.blockVariant,
@@ -151,8 +148,8 @@ export const startParallelConnection = <T>(
   const { edgesToRemove, edgesToAdd } = wireParallelAroundElement({
     incomingEdge,
     outgoingEdge,
-    openParallel: openParallelElement as Node,
-    closeParallel: closeParallelElement as Node,
+    openParallel: openParallelElement,
+    closeParallel: closeParallelElement,
     aboveElement,
     newElement,
     openTargetHandle,

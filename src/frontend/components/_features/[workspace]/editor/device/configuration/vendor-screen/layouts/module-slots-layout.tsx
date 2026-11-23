@@ -991,7 +991,7 @@ function ModuleSlotsLayout({ section, moduleSystem }: ModuleSlotsLayoutProps) {
                                     <Checkbox
                                       id={`slot${selectedSlot + 1}-${field.id}`}
                                       checked={current === true}
-                                      onCheckedChange={(c) => setValue(c as boolean)}
+                                      onCheckedChange={(c) => setValue(c)}
                                       className={
                                         current === true
                                           ? 'h-[14px] w-[14px] border-brand'

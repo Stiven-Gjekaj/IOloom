@@ -28,7 +28,7 @@ export const DISALLOWED_LOCATION_CLASSES: ReadonlyArray<PLCVariable['class']> = 
  * Type guard to check if a library object has a 'pous' property
  */
 const hasLibraryPous = (lib: unknown): lib is { pous: Array<{ name: string; type: string }> } => {
-  return typeof lib === 'object' && lib !== null && 'pous' in lib && Array.isArray((lib as { pous: unknown }).pous)
+  return typeof lib === 'object' && lib !== null && 'pous' in lib && Array.isArray(lib.pous)
 }
 
 /**

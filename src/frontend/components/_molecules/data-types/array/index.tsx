@@ -111,7 +111,7 @@ const ArrayDataType = ({ data, ...rest }: ArrayDatatypeProps) => {
     }
     const updatedData = { ...data }
     updatedData.initialValue = e.target.value
-    updateDatatype(data.name, updatedData as PLCArrayDatatype)
+    updateDatatype(data.name, updatedData)
     handleFileAndWorkspaceSavedState(editor.meta.name)
   }
 

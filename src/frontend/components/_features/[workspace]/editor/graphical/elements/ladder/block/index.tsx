@@ -186,7 +186,7 @@ const BlockElement = <T extends object>({ isOpen, onClose, selectedNode }: Block
         },
       })
 
-      const newNodeDataVariant = newNode.data.variant as LadderBlockVariant
+      const newNodeDataVariant = newNode.data.variant
       const formName: string = newNodeDataVariant.name
       const formInputs: string = newNodeDataVariant.variables
         .filter((variable) => (variable.class === 'input' || variable.class === 'inOut') && variable.name !== 'EN')

@@ -42,7 +42,7 @@ export function buildKnownPous(pous: PLCPou[]): KnownPou[] {
         : p.type === 'function'
           ? ('FUNCTION' as const)
           : ('FUNCTION_BLOCK' as const),
-    language: p.data.language as KnownPou['language'],
+    language: p.data.language,
   }))
 }
 

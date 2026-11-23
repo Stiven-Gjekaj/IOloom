@@ -93,7 +93,7 @@ export function useNavigateToCompileError(): (err: StructuredCompileError) => vo
       // Graphical languages: opening the tab is the whole story.  The
       // user will land on the diagram view — synthesized ST line
       // numbers don't map to anything they can act on.
-      if (GRAPHICAL_LANGUAGES.has(language as string)) return
+      if (GRAPHICAL_LANGUAGES.has(language)) return
 
       // Textual body errors: place the cursor at bodyLine if we have
       // it, otherwise fall back to error.line as a best effort.

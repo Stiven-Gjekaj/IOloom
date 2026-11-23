@@ -28,7 +28,7 @@
  * consume this same orchestration.
  */
 
-import type { PLCProject, PLCProjectData } from '@root/backend/shared/types/PLC/open-plc'
+import type { PLCProject } from '@root/backend/shared/types/PLC/open-plc'
 import { checkPathId } from '@root/backend/shared/utils/path-safety'
 import { type KnownPou, splitProgramSt } from '@root/backend/shared/utils/PLC/split-program-st'
 
@@ -189,7 +189,7 @@ function stubProgramFor(project: PLCProject): PLCProject {
           ],
         },
       },
-    } as PLCProjectData,
+    },
   }
 }
 

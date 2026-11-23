@@ -1,6 +1,5 @@
 import { zodLadderFlowSchema } from '../../../../middleware/shared/ports/flow-schemas'
 import type { SystemLibrary, UserLibrary } from '../../../../middleware/shared/ports/library-types'
-import type { PLCBody } from '../../../../middleware/shared/ports/open-plc-types'
 import type { PLCDataType, PLCPou, PLCStructureVariable, PLCVariable } from '../../../../middleware/shared/ports/types'
 import type { OpenPLCStore } from '../../../store'
 import type { RungLadderState } from '../../../store/slices/ladder/types'
@@ -235,7 +234,7 @@ function executeCreatePou(store: OpenPLCStore, input: CreatePouInput): ToolResul
     if (pou) {
       freshState.projectActions.updatePou({
         name: createProps.name,
-        content: { language: createProps.language, value: body } as PLCBody,
+        content: { language: createProps.language, value: body },
       })
       freshState.sharedWorkspaceActions.handleFileAndWorkspaceSavedState(createProps.name)
 

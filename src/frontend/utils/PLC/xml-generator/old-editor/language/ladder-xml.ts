@@ -321,7 +321,7 @@ const rightRailToXML = (
   rung: RungLadderState,
   offsetY: number = 0,
 ): RightPowerRailLadderXML => {
-  const connections = findConnections(rightRail as Node<BasicNodeData>, rung, offsetY)
+  const connections = findConnections(rightRail, rung, offsetY)
 
   return {
     '@localId': rightRail.data.numericId,

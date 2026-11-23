@@ -462,7 +462,7 @@ export const useProjectVariables = (): VariableTreeNode[] => {
     if (globalVars && globalVars.length > 0) {
       nodes.push(
         buildGlobalVariablesNode(
-          globalVars.map((v) => ({ ...v, class: 'global' })) as PLCVariable[],
+          globalVars.map((v) => ({ ...v, class: 'global' })),
           projectData.dataTypes,
           projectData.pous,
           systemLibraries,

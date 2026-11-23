@@ -576,7 +576,7 @@ async function runCompilePipelineInner(
   // refusal lands here rather than at creation — and it names them, because
   // "only one server is allowed" leaves the user to guess which to turn off.
   // ---------------------------------------------------------------------
-  const modbusSelection = selectModbusServer(processedData.servers as never)
+  const modbusSelection = selectModbusServer(processedData.servers)
   // Whether this build COMPILES the server into firmware macros. The simulator
   // and the openplc-compiler runtimes do not, so narrowing their transports
   // would warn about a macro nothing reads.
@@ -683,7 +683,7 @@ async function runCompilePipelineInner(
   const hasCBlocks = originalCppPous.length > 0
   // `buildKnownPous` is typed against the port-shape `PLCPou`; cast
   // through `never` for the same reason described in Step 0.
-  const knownPous = buildKnownPous(processedData.pous as never)
+  const knownPous = buildKnownPous(processedData.pous)
   // MD5 of program.st — the runtime embeds this into defines.h via
   // `generateDefinesContent` for stale-program detection.  Each
   // platform's adapter implements `computeMd5` (editor: Node crypto;
@@ -765,7 +765,7 @@ async function runCompilePipelineInner(
         // cross-module difference, not the credentials type which is now
         // concrete.
         servers: opcuaCredentialServers as never,
-        remoteDevices: processedData.remoteDevices as never,
+        remoteDevices: processedData.remoteDevices,
         instances: processedData.configuration.resource.instances.map(
           (inst: { name: string; task: string; program: string }) => ({
             name: inst.name,

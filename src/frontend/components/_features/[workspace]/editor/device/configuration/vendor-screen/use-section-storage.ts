@@ -85,7 +85,7 @@ export function useSectionStorage(section: PersistableSection): SectionStorage {
         state.deviceActions.setVendorScreenData(vendorKey, {
           ...current,
           ...patch,
-        } as Record<string, string | number | boolean>)
+        })
       }
     },
     [storeApi, isVpp, packageId, vppScreenId, vendorKey, readonly],

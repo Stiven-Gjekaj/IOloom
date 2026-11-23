@@ -77,7 +77,7 @@ function userPouPinTypes(pou: PLCPou): PinTypes {
   const returnType = pou.interface?.returnType
   // A function's return pin is synthesised as OUT when the block is dropped.
   if (pou.pouType === 'function' && returnType) {
-    types.set('OUT', { definition: 'base-type', value: returnType.toUpperCase() } as VariantVariableType)
+    types.set('OUT', { definition: 'base-type', value: returnType.toUpperCase() })
   }
   return types
 }

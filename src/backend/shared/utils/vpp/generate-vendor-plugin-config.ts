@@ -517,7 +517,7 @@ function sanitizeConfigValue(value: unknown, depth: number): unknown {
     return value.map((item) => sanitizeConfigValue(item, depth + 1)).filter((item) => item !== undefined)
   }
   const out: Record<string, unknown> = {}
-  for (const key of Object.keys(value as Record<string, unknown>)) {
+  for (const key of Object.keys(value)) {
     if (FORBIDDEN_CONFIG_KEYS.has(key)) continue
     const sanitized = sanitizeConfigValue((value as Record<string, unknown>)[key], depth + 1)
     if (sanitized !== undefined) out[key] = sanitized

@@ -232,7 +232,7 @@ function stripGraphicalSelections(pou: PLCPou): PLCPou {
           })),
         },
       },
-    } as PLCPou
+    }
   }
 
   if (lang === 'fbd' && body.rung) {
@@ -252,7 +252,7 @@ function stripGraphicalSelections(pou: PLCPou): PLCPou {
           },
         },
       },
-    } as PLCPou
+    }
   }
 
   return pou

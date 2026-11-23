@@ -82,7 +82,7 @@ function classifyDrop(
 
   const sourceIsBranch = !!(draggedNode.data as BasicNodeData).branchContext
 
-  if (isNodeOfType(selectedPlaceholder as Node, 'parallelPlaceholder')) {
+  if (isNodeOfType(selectedPlaceholder, 'parallelPlaceholder')) {
     const relatedNode = selectedPlaceholder.data.relatedNode
     const branchCtx = relatedNode && (relatedNode.data as BasicNodeData).branchContext
 

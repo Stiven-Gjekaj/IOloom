@@ -607,11 +607,9 @@ export async function readProjectFiles(basePath: string): Promise<IProjectServic
   }
 
   // Check if project needs migration from ID-based to name+type-based system
-  if (needsMigration(returnData.project.data as Parameters<typeof needsMigration>[0])) {
+  if (needsMigration(returnData.project.data)) {
     console.log('Project needs migration from ID-based to name+type-based system')
-    const { migratedProject, report } = migrateProjectToNameTypeSystem(
-      returnData.project.data as Parameters<typeof migrateProjectToNameTypeSystem>[0],
-    )
+    const { migratedProject, report } = migrateProjectToNameTypeSystem(returnData.project.data)
 
     if (report.success) {
       console.log(`Migration successful: ${report.variablesMigrated} variables migrated`)

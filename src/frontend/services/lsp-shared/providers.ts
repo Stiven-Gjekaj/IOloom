@@ -36,7 +36,6 @@ import {
   DocumentSymbolRequest,
   HoverRequest,
   type Location as LspLocation,
-  type LocationLink,
   type MessageConnection,
   ReferencesRequest,
   SignatureHelpRequest,
@@ -263,7 +262,7 @@ export function registerLspProviders(opts: RegisterLspProvidersOptions): monaco.
         // DefinitionRequest may resolve to Location, Location[], or
         // LocationLink[].  Normalise to Location[] first so the mapper
         // sees a uniform shape.
-        const normalised = normaliseLocationResponse(result as LspLocation | LspLocation[] | LocationLink[] | null)
+        const normalised = normaliseLocationResponse(result)
         if (!normalised) return null
 
         const locations = Array.isArray(normalised) ? normalised : [normalised]

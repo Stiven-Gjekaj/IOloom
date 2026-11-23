@@ -486,8 +486,7 @@ const S7CommServerEditor = () => {
   const handleSaveDataBlock = useCallback(
     (dataBlock: S7CommUIDataBlock) => {
       // Cast UI data block to middleware type — the extra UI fields (startBuffer, bitAddressing) are ignored by the store
-      const middlewareBlock =
-        dataBlock as unknown as import('../../../../../../../middleware/shared/ports/types').S7CommDataBlock
+      const middlewareBlock = dataBlock
       if (editingBlock) {
         projectActions.updateS7CommDataBlock(serverName, editingBlock.dbNumber, middlewareBlock)
       } else {
@@ -718,7 +717,7 @@ const S7CommServerEditor = () => {
                               <td className='px-3 py-2 text-right'>
                                 <div className='flex justify-end gap-2'>
                                   <button
-                                    onClick={() => handleEditDataBlock(db as unknown as S7CommUIDataBlock)}
+                                    onClick={() => handleEditDataBlock(db)}
                                     className='rounded p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200'
                                     title='Edit'
                                   >

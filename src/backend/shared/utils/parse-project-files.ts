@@ -271,7 +271,7 @@ function foldLegacyVariableAliases(value: unknown): unknown {
     for (const [key, child] of Object.entries(obj)) {
       if (isLegacyAliasBound && key === 'alias') continue
       if (isLegacyAliasBound && key === 'location') {
-        out.location = obj.alias as string
+        out.location = obj.alias
         continue
       }
       out[key] = foldLegacyVariableAliases(child)
@@ -427,7 +427,7 @@ export function parseProjectFiles(
     if (raw) {
       const result = PLCProjectSchema.safeParse(raw)
       if (result.success) {
-        project = result.data as typeof project
+        project = result.data
       } else {
         console.error('[parseProjectFiles] project.json Zod errors:', result.error.issues)
         warnings.push('project.json has invalid structure and was loaded with defaults.')

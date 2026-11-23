@@ -12,7 +12,6 @@ import type {
   CoilNode,
   ContactNode,
   ParallelNode,
-  PowerRailNode,
   VariableNode,
 } from '../../../../components/_atoms/graphical-editor/ladder/utils/types'
 import { updateDiagramElementsPosition } from '../../../../components/_molecules/graphical-editor/ladder/rung/ladder-utils/elements/diagram'
@@ -80,7 +79,7 @@ export const duplicateLadderRung = (editorName: string, rung: RungLadderState): 
                 : node.data.variable,
             connectedVariables: normalizeConnectedVariables((node as BlockNode<BlockVariant>).data.connectedVariables),
           },
-        } as BlockNode<BlockVariant>
+        }
       }
       case 'coil': {
         const newCoil = nodesBuilder.coil({
@@ -104,7 +103,7 @@ export const duplicateLadderRung = (editorName: string, rung: RungLadderState): 
               },
             }),
           },
-        } as CoilNode
+        }
       }
       case 'contact': {
         const newContact = nodesBuilder.contact({
@@ -128,7 +127,7 @@ export const duplicateLadderRung = (editorName: string, rung: RungLadderState): 
               },
             }),
           },
-        } as ContactNode
+        }
       }
       case 'parallel': {
         const parallelData = node.data as BasicNodeData
@@ -155,7 +154,7 @@ export const duplicateLadderRung = (editorName: string, rung: RungLadderState): 
               },
             }),
           },
-        } as ParallelNode
+        }
       }
       case 'powerRail': {
         const railData = node.data as BasicNodeData
@@ -173,7 +172,7 @@ export const duplicateLadderRung = (editorName: string, rung: RungLadderState): 
             inputHandles: remappedHandles.filter((h) => h.type === 'target'),
             outputHandles: remappedHandles.filter((h) => h.type === 'source'),
           },
-        } as PowerRailNode
+        }
       }
       case 'variable': {
         return {
@@ -187,7 +186,7 @@ export const duplicateLadderRung = (editorName: string, rung: RungLadderState): 
               id: nodeMaps[(node as VariableNode).data.block.id]?.id ?? (node as VariableNode).data.block.id,
             },
           },
-        } as VariableNode
+        }
       }
       default: {
         return node
