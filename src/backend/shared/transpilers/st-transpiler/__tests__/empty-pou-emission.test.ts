@@ -160,3 +160,17 @@ describe('empty POUs are emitted, not refused', () => {
     expect(out).toContain('a := 1;')
   })
 })
+
+describe('a FUNCTION_BLOCK keeps its header clauses (upstream issue 1264)', () => {
+  it('emits the qualifier before the name and EXTENDS after it', () => {
+    const out = st({
+      name: 'FB_Derived',
+      pouType: 'function-block',
+      declarationQualifier: 'FINAL',
+      declarationClauses: 'EXTENDS FB_Base',
+      interface: { variables: [local('m')] },
+      body: { language: 'st', value: 'm := n + 10;' },
+    })
+    expect(out).toContain('FUNCTION_BLOCK FINAL FB_Derived EXTENDS FB_Base\n')
+  })
+})

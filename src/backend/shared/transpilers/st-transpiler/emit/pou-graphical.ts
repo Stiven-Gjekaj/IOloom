@@ -58,7 +58,10 @@ export function generateGraphicalPou(pou: TranspilePou, project: TranspileProjec
   // emitted the body bytes + any synthetic vars.
   const program: ProgramChunk[] = []
   program.push([`${kindKeyword} `, []])
+  // A FUNCTION_BLOCK keeps its qualifier and its EXTENDS / IMPLEMENTS clauses (upstream issue 1264).
+  if (pou.declarationQualifier) program.push([`${pou.declarationQualifier} `, []])
   program.push([pou.name, [tagName, 'name']])
+  if (pou.declarationClauses) program.push([` ${pou.declarationClauses}`, []])
   if (pou.pouType === 'function') {
     const returnType = (pou.interface.returnType ?? 'BOOL').toUpperCase()
     program.push([' : ', []])

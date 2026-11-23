@@ -96,6 +96,12 @@ function projectPou(pou: PLCPou): TranspilePou {
     name: pou.name,
     pouType: pou.pouType,
     documentation: pou.documentation ?? '',
+    ...(pou.pouType === 'function-block' && pou.declarationQualifier
+      ? { declarationQualifier: pou.declarationQualifier }
+      : {}),
+    ...(pou.pouType === 'function-block' && pou.declarationClauses
+      ? { declarationClauses: pou.declarationClauses }
+      : {}),
     interface: {
       variables,
       ...(pou.pouType === 'function' && pou.interface?.returnType ? { returnType: pou.interface.returnType } : {}),

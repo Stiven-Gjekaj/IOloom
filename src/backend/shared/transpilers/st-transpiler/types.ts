@@ -25,6 +25,10 @@ export interface TranspilePou {
   name: string
   pouType: TranspilePouKind
   documentation?: string
+  /** `ABSTRACT` or `FINAL` before a FUNCTION_BLOCK name. */
+  declarationQualifier?: 'ABSTRACT' | 'FINAL'
+  /** `EXTENDS` / `IMPLEMENTS` after a FUNCTION_BLOCK name, verbatim. */
+  declarationClauses?: string
   /** Empty for POUs with no parameters / locals. */
   interface: TranspilePouInterface
   body: TranspileBody

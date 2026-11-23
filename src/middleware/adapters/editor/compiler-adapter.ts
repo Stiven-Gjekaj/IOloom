@@ -76,6 +76,9 @@ function portPouToIpcPou(pou: PLCPou) {
       ...(pou.interface?.returnType ? { returnType: pou.interface.returnType } : {}),
       body: pou.body as { language: string; value: unknown },
       documentation: pou.documentation ?? '',
+      // The header of a FUNCTION_BLOCK: ABSTRACT / FINAL and EXTENDS / IMPLEMENTS (upstream issue 1264).
+      ...(pou.declarationQualifier ? { declarationQualifier: pou.declarationQualifier } : {}),
+      ...(pou.declarationClauses ? { declarationClauses: pou.declarationClauses } : {}),
     },
   }
 }
