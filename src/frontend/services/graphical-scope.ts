@@ -27,9 +27,15 @@ import {
   resolveNewVariableType,
   validateVariableType,
 } from '../utils/PLC/validate-variable-type'
-import { collectDeclaredRoots, rootIdentifierOf } from './project-scope-roots'
+import { collectDeclaredConstantTypes, collectDeclaredRoots, rootIdentifierOf } from './project-scope-roots'
 // The leaf, not the `st-lsp` barrel: the barrel pulls ESM-only LSP packages that Jest cannot transform.
-import { getScopedQueryApi, isValueCompletionKind, splitExpression } from './st-lsp/scoped-query'
+import {
+  getScopedQueryApi,
+  isConstantCompletionKind,
+  isValueCompletionKind,
+  type ScopedCompletionItem,
+  splitExpression,
+} from './st-lsp/scoped-query'
 
 /** Max instance/struct variables to drill into when a type-filtered search has no direct hits. */
 const SCOPE_EXPAND_LIMIT = 8
@@ -37,6 +43,20 @@ const SCOPE_EXPAND_LIMIT = 8
 /** True for an instance/struct/enum (non-base) type — i.e. one that may expose dotted members. */
 function isDerivedType(type: string): boolean {
   return getVariableRestrictionType(type).definition === 'derived'
+}
+
+/**
+ * The items a variable box can bind: variables, members and fields, plus the
+ * declared constants. strucpp gives a constant no type, so each one takes its
+ * type from `constantTypes`, and a constant with no known type is dropped.
+ */
+function bindableItems(items: ScopedCompletionItem[], constantTypes: Map<string, string>): ScopedCompletionItem[] {
+  return items.flatMap((item) => {
+    if (isValueCompletionKind(item.kind)) return [item]
+    if (!isConstantCompletionKind(item.kind)) return []
+    const type = constantTypes.get(item.label.toUpperCase())
+    return type ? [{ ...item, type }] : []
+  })
 }
 
 /** A single autocomplete candidate for a graphical variable box. */
@@ -80,11 +100,13 @@ export async function getScopeCompletions(
   const roots = collectDeclaredRoots(store.getState().project.data, pouName)
   if (anchor && !roots.has(rootIdentifierOf(anchor))) return []
 
-  const items = await api.completeInScope(pouName, anchor)
+  const project = store.getState().project.data
+  // A constant is a root name, so only an unanchored box can name one.
+  const constantTypes = anchor ? new Map<string, string>() : collectDeclaredConstantTypes(project, pouName)
+  const items = bindableItems(await api.completeInScope(pouName, anchor), constantTypes)
   const needle = segment.toLowerCase()
   const matching = items.filter(
     (item) =>
-      isValueCompletionKind(item.kind) &&
       item.label.toLowerCase().includes(needle) &&
       // Under an anchor the root was checked above; bare labels are the root.
       (anchor !== '' || roots.has(rootIdentifierOf(item.label))),
@@ -135,7 +157,11 @@ export async function getScopeCompletions(
  * isn't a symbol, so it resolves `unknown` and the box is flagged, which a
  * client-side subscript-stripping heuristic could never detect.
  */
-export async function resolveScopeExpressionType(pouName: string, expression: string): Promise<ScopeTypeResult> {
+export async function resolveScopeExpressionType(
+  pouName: string,
+  expression: string,
+  constantTypes: Map<string, string> = new Map(),
+): Promise<ScopeTypeResult> {
   const api = getScopedQueryApi()
   if (!api) return { status: 'unavailable' }
 
@@ -148,8 +174,8 @@ export async function resolveScopeExpressionType(pouName: string, expression: st
   // context yet — treat as unavailable rather than flag a false invalid.
   if (items.length === 0) return { status: 'unavailable' }
 
-  const match = items.find(
-    (item) => isValueCompletionKind(item.kind) && item.label.toLowerCase() === segment.toLowerCase(),
+  const match = bindableItems(items, anchor ? new Map() : constantTypes).find(
+    (item) => item.label.toLowerCase() === segment.toLowerCase(),
   )
   if (!match || !match.type) return { status: 'unknown' }
 

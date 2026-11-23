@@ -7,13 +7,15 @@ import type { ConfiguredEtherCATDevice } from '../../../middleware/shared/ports/
 import type { PLCProjectData, PLCVariable } from '../../../middleware/shared/ports/types'
 import type { OpenPLCStore } from '../../store'
 import { createTestStore } from '../../store/testing'
-import { getScopeCompletions } from '../graphical-scope'
-import { collectDeclaredRoots, rootIdentifierOf } from '../project-scope-roots'
+import { getScopeCompletions, resolveScopeExpressionType } from '../graphical-scope'
+import { collectDeclaredConstantTypes, collectDeclaredRoots, rootIdentifierOf } from '../project-scope-roots'
 import { registerScopedQueryApi, type ScopedCompletionItem } from '../st-lsp/scoped-query'
 
 /** strucpp emits Variable(6) for instance members, Field(5) for STRUCT members. */
 const VARIABLE = 6
 const FIELD = 5
+/** strucpp emits Constant(21), with no type, for a name in a VAR CONSTANT block. */
+const CONSTANT = 21
 
 /** Records the prefixes asked of the LSP, so a test can prove a round-trip never happened. */
 function withScopedQuery(items: Record<string, ScopedCompletionItem[]>) {
@@ -37,6 +39,10 @@ function variable(name: string, value: string): PLCVariable {
     documentation: '',
     debug: false,
   } as PLCVariable
+}
+
+function constant(name: string, value: string, variableClass: PLCVariable['class'] = 'local'): PLCVariable {
+  return { ...variable(name, value), class: variableClass, flag: 'constant' }
 }
 
 /** A drive with both mandatory CiA 402 objects mapped, which is what makes it an axis. */
@@ -286,5 +292,61 @@ describe('getScopeCompletions', () => {
     const items = await getScopeCompletions(store, 'main', 'GVL.', 'BOOL')
 
     expect(items.map((i) => i.insertText)).toEqual(['GVL.Output1'])
+  })
+})
+
+describe('declared constants (upstream issue 1232)', () => {
+  it('maps each constant of the POU and of the resource to its type, and leaves out plain variables', () => {
+    const types = collectDeclaredConstantTypes(
+      projectData([constant('aConst', 'INT'), variable('n1', 'INT')], {
+        configurations: {
+          resource: { tasks: [], instances: [], globalVariables: [constant('gConst', 'REAL', 'global')] },
+        },
+      }),
+      'main',
+    )
+
+    expect(types).toEqual(
+      new Map([
+        ['GCONST', 'REAL'],
+        ['ACONST', 'INT'],
+      ]),
+    )
+  })
+
+  it('offers a local constant of a compatible type on a typed pin', async () => {
+    setProject([constant('aConst', 'INT'), variable('n1', 'INT')])
+    withScopedQuery({
+      '': [
+        { label: 'aConst', insertText: 'aConst', kind: CONSTANT },
+        { label: 'n1', insertText: 'n1', type: 'INT', kind: VARIABLE },
+      ],
+    })
+
+    const items = await getScopeCompletions(store, 'main', 'a', 'INT')
+
+    expect(items).toEqual([{ label: 'aConst', insertText: 'aConst', type: 'INT' }])
+  })
+
+  it('does not offer a constant of an incompatible type', async () => {
+    setProject([constant('aConst', 'INT')])
+    withScopedQuery({ '': [{ label: 'aConst', insertText: 'aConst', kind: CONSTANT }] })
+
+    expect(await getScopeCompletions(store, 'main', '', 'BOOL')).toEqual([])
+  })
+
+  it('does not offer a constant that the project does not declare', async () => {
+    setProject([])
+    withScopedQuery({ '': [{ label: 'LIB_CONST', insertText: 'LIB_CONST', kind: CONSTANT }] })
+
+    expect(await getScopeCompletions(store, 'main', '', undefined)).toEqual([])
+  })
+
+  it('resolves the type of a typed-in constant, so the box is not flagged', async () => {
+    withScopedQuery({ '': [{ label: 'aConst', insertText: 'aConst', kind: CONSTANT }] })
+
+    const types = new Map([['ACONST', 'INT']])
+    expect(await resolveScopeExpressionType('main', 'aConst', types)).toEqual({ status: 'resolved', type: 'INT' })
+    expect(await resolveScopeExpressionType('main', 'aConst')).toEqual({ status: 'unknown' })
   })
 })

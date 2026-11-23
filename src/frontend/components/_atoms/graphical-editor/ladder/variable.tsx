@@ -7,6 +7,7 @@ import { useDebugCompositeKey } from '../../../../hooks/use-debug-composite-key'
 import { useDebugValue, useIsDebuggerVisible } from '../../../../hooks/use-debug-value'
 import { forceDebugVariable, releaseDebugVariable } from '../../../../services/debug-force-variable'
 import { resolveScopeExpressionType } from '../../../../services/graphical-scope'
+import { collectDeclaredConstantTypes } from '../../../../services/project-scope-roots'
 import { useOpenPLCStore, useOpenPLCStoreApi } from '../../../../store'
 import { RungLadderState } from '../../../../store/slices/ladder'
 import { cn } from '../../../../utils/cn'
@@ -130,7 +131,8 @@ const VariableElement = (block: VariableProps) => {
       return
     }
     let cancelled = false
-    void resolveScopeExpressionType(pouName, name).then((res) => {
+    const constantTypes = collectDeclaredConstantTypes(store.getState().project.data, pouName)
+    void resolveScopeExpressionType(pouName, name, constantTypes).then((res) => {
       if (cancelled) return
       // Leave the current state untouched while the LSP is still warming so
       // we never flash a false error/warning during boot.

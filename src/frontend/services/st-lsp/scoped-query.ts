@@ -80,6 +80,18 @@ export function isValueCompletionKind(kind: number | undefined): boolean {
 }
 
 /**
+ * strucpp emits `Constant` (21) for a name declared in a `VAR CONSTANT` or
+ * `VAR_GLOBAL CONSTANT` block. The item has no type detail, so a caller that
+ * binds it must find the type in the declaration.
+ */
+const LSP_KIND_CONSTANT = 21
+
+/** True for a completion item that names a declared constant. */
+export function isConstantCompletionKind(kind: number | undefined): boolean {
+  return kind === LSP_KIND_CONSTANT
+}
+
+/**
  * Split an expression into the completion anchor — everything up to and
  * including the last `.` — and the trailing partial segment.
  *

@@ -28,3 +28,25 @@ export function collectDeclaredRoots(project: PLCProjectData, pouName: string): 
   ]
   return new Set(names.map((name) => name.toUpperCase()))
 }
+
+/**
+ * Types of the constants declared in `pouName`'s scope, by uppercased name: the
+ * POU's own `VAR CONSTANT` and the resource's `VAR_GLOBAL CONSTANT`. strucpp
+ * completes a constant with no type, so the graphical editors read it here.
+ * An array constant has no single type name, so it is left out.
+ */
+export function collectDeclaredConstantTypes(project: PLCProjectData, pouName: string): Map<string, string> {
+  const pou = project.pous.find((p) => p.name === pouName)
+  const constants = [
+    // Globals first, so a local constant of the same name replaces the global one, as the scope does.
+    ...project.configurations.resource.globalVariables,
+    ...(pou?.interface?.variables ?? []),
+  ].filter((variable) => variable.flag === 'constant')
+
+  const types = new Map<string, string>()
+  for (const variable of constants) {
+    if (variable.type.definition === 'array') continue
+    types.set(variable.name.toUpperCase(), variable.type.value)
+  }
+  return types
+}
