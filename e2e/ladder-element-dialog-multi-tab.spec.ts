@@ -9,7 +9,8 @@ import { z } from 'zod'
 const nodeSchema = z.object({
   type: z.string(),
   data: z.object({
-    variant: z.unknown(),
+    // Optional: a parallel node has no variant, and zod 4 requires a key typed unknown.
+    variant: z.unknown().optional(),
     executionControl: z.boolean().optional(),
     variable: z.object({ name: z.string() }).partial().optional(),
   }),
