@@ -13,6 +13,9 @@ import type { ElectronApplication, Page } from '@playwright/test'
 import { _electron as electron, expect, test } from '@playwright/test'
 
 test.skip(process.platform !== 'darwin', 'macOS quit flow')
+// Each test checks that the window is on screen, and hidden mode never shows a window. Run
+// this spec with IOLOOM_E2E_HIDDEN=0 to check the quit flow.
+test.skip(process.env.IOLOOM_E2E_HIDDEN === '1', 'needs windows on screen; hidden mode keeps them off it')
 
 const ROOT = join(tmpdir(), 'openplc-e2e-macos-quit-flow')
 const QUIT_PROMPT = 'Are you sure you want to quit the application?'
