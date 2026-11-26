@@ -15,6 +15,7 @@ import { ProjectResponse } from '../../../store/slices/project'
 import { cn } from '../../../utils/cn'
 import { isLegalIdentifier, sanitizeVariableInput } from '../../../utils/keywords'
 import { buildLocationDropdownOptions } from '../../../utils/location-dropdown-options'
+import { initializerMembers } from '../../../utils/PLC/structured-initial-value'
 import {
   findAllReferencesToVariable,
   propagateVariableRename,
@@ -26,6 +27,7 @@ import { InputWithRef } from '../../_atoms/input'
 import { LocationWarningGlyph } from '../../_atoms/location-warning-glyph'
 import { useToast } from '../../_features/[app]/toast/use-toast'
 import { RenameImpactModal } from '../rename-impact-modal'
+import { InitialValueDialog } from './initial-value-dialog'
 
 declare module '@tanstack/react-table' {
   // This is a helper interface that adds the `updateData` property to the table meta.
@@ -403,7 +405,43 @@ const EditableInitialValueCell = ({
     )
   }, [editor.meta.name, index, table.options.data, scope, getVariable])
 
-  return isEditing ? (
+  // A structure or function block variable gets the Initial Value dialog (upstream issue 1184).
+  const pous = useOpenPLCStore((state) => state.project.data.pous)
+  const dataTypes = useOpenPLCStore((state) => state.project.data.dataTypes)
+  const systemLibraries = useOpenPLCStore((state) => state.libraries.system)
+  const members = useMemo(
+    () =>
+      id === 'initialValue' && variable
+        ? initializerMembers(variable.type, {
+            pous,
+            dataTypes,
+            libraries: systemLibraries.flatMap((library) => library.pous),
+          })
+        : null,
+    [id, variable, pous, dataTypes, systemLibraries],
+  )
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const hasMembers = members !== null && members.length > 0 && variable !== undefined
+
+  // The dialog is a sibling of the clickable cell, not a child: React sends a click inside a
+  // portal up to the portal's React parents, so a click on Apply started the text editing.
+  const dialog = hasMembers && (
+    <InitialValueDialog
+      open={isDialogOpen}
+      onOpenChange={setIsDialogOpen}
+      variableName={variable.name}
+      typeName={variable.type.value}
+      members={members}
+      initialValue={cellValue ?? ''}
+      onApply={(value) => {
+        if (value === (initialValue ?? '')) return
+        setCellValue(value)
+        table.options.meta?.updateData(index, id, value)
+      }}
+    />
+  )
+
+  const cell = isEditing ? (
     <InputWithRef
       value={cellValue}
       onChange={(e) => setCellValue(e.target.value)}
@@ -413,7 +451,7 @@ const EditableInitialValueCell = ({
   ) : (
     <div
       onClick={handleStartEditing}
-      className={cn('flex w-full flex-1 bg-transparent p-2 text-center outline-none', {
+      className={cn('flex w-full flex-1 items-center bg-transparent p-2 text-center outline-none', {
         'pointer-events-none': !selected,
         'cursor-not-allowed': !isEditable(),
       })}
@@ -421,9 +459,30 @@ const EditableInitialValueCell = ({
       <HighlightedText
         text={cellValue}
         searchQuery={searchQuery}
-        className={cn('h-4 w-full max-w-[400px] overflow-hidden text-ellipsis break-all', {})}
+        className={cn('h-4 w-full min-w-0 max-w-[400px] flex-1 overflow-hidden text-ellipsis break-all', {})}
       />
+      {hasMembers && isEditable() && (
+        <button
+          type='button'
+          aria-label='Edit the member initial values'
+          title='Edit the member initial values'
+          onClick={(event) => {
+            event.stopPropagation()
+            setIsDialogOpen(true)
+          }}
+          className='ml-1 shrink-0 rounded px-1 text-xs font-bold text-brand hover:bg-neutral-100 dark:hover:bg-neutral-850'
+        >
+          …
+        </button>
+      )}
     </div>
+  )
+
+  return (
+    <>
+      {cell}
+      {dialog}
+    </>
   )
 }
 
