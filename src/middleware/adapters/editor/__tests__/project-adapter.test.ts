@@ -816,7 +816,7 @@ describe('createEditorProjectAdapter', () => {
           },
         ])
       await expect(adapter.listExampleProjects?.()).resolves.toEqual([
-        { folder: 'blink', name: 'Blink', description: 'a lamp.' },
+        { folder: 'blink', name: 'Blink', description: 'A lamp.' },
       ])
     })
 

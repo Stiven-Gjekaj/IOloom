@@ -11,6 +11,7 @@ import { CloudProjectsNotice } from '../components/_features/[start]/cloud-proje
 import { useRecentCloudProjects } from '../components/_features/[start]/cloud-projects/use-recent-cloud-projects'
 import { MenuDivider, MenuItem, MenuRoot, MenuSection } from '../components/_features/[start]/menu'
 import { OpenCloudProjectModal } from '../components/_features/[start]/open-cloud-project'
+import { DisplayExampleProjects } from '../components/_organisms/display-example-projects'
 import DisplayRecentProjects from '../components/_organisms/display-recent-projects'
 import { ProjectFilterBar, type ProjectOrder } from '../components/_organisms/project-filter-bar'
 import { StartMainContent } from '../components/_templates/[start]/main-content'
@@ -179,6 +180,7 @@ const StartScreen = () => {
           cloud={cloud}
           onProjectUploaded={reloadCloud}
         />
+        <DisplayExampleProjects />
       </StartMainContent>
       <OpenCloudProjectModal open={openCloudOpen} onOpenChange={setOpenCloudOpen} />
     </>

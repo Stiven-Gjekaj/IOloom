@@ -30,15 +30,16 @@ const projectName = (projectJson: string): string | null => {
 }
 
 /**
- * The first comment of the main program, without a leading `<name>:`. The examples start
- * with one that says what they do.
+ * The first comment of the main program, without a leading `<name>:` and with a capital
+ * first letter. The examples start with one that says what they do.
  */
 const leadingComment = (source: string, name: string): string => {
   const match = /^\s*\(\*([\s\S]*?)\*\)/.exec(source)
   if (!match) return ''
   const text = match[1].replace(/\s+/g, ' ').trim()
   const prefix = `${name}:`
-  return text.toLowerCase().startsWith(prefix.toLowerCase()) ? text.slice(prefix.length).trim() : text
+  const description = text.toLowerCase().startsWith(prefix.toLowerCase()) ? text.slice(prefix.length).trim() : text
+  return description.charAt(0).toUpperCase() + description.slice(1)
 }
 
 /** The examples to show, sorted by name. A folder without a readable project.json is left out. */

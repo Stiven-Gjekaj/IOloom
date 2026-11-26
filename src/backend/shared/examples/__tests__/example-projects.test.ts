@@ -10,7 +10,7 @@ const entry = (folder: string, name: string | null, mainSource = ''): ExamplePro
 describe('describeExampleProjects', () => {
   it('takes the name from project.json and the description from the first comment, without the name', () => {
     expect(describeExampleProjects([entry('blink', 'Blink', '(* Blink: a lamp\n   blinks. *)\nPROGRAM main')])).toEqual(
-      [{ folder: 'blink', name: 'Blink', description: 'a lamp blinks.' }],
+      [{ folder: 'blink', name: 'Blink', description: 'A lamp blinks.' }],
     )
   })
 
