@@ -16,6 +16,7 @@ import {
   getFieldIndexFromMapWithFallback,
   getIndexFromMapWithFallback,
   type PLCInstanceMapping,
+  resolveDebugKey,
 } from '../debug-variable-finder'
 
 // ---------------------------------------------------------------------------
@@ -312,5 +313,42 @@ describe('appendToDebugPath', () => {
 
   it('handles already uppercased child name', () => {
     expect(appendToDebugPath('INSTANCE0', 'VAR')).toBe('INSTANCE0.VAR')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// resolveDebugKey (upstream issue 585, IOloom #9)
+// ---------------------------------------------------------------------------
+
+describe('resolveDebugKey', () => {
+  const variables = [
+    { name: 'sensor', class: 'local' as const },
+    { name: 'gSensor', class: 'external' as const },
+    { name: 'gx', class: 'external' as const },
+  ]
+  const local = (name: string) => `main:${name}`
+
+  it('keeps a local name that matches its declaration', () => {
+    expect(resolveDebugKey(variables, 'sensor[0]', local)).toBe('main:sensor[0]')
+  })
+
+  it('uses the declared spelling of a local, because the debug tree keys by it', () => {
+    expect(resolveDebugKey(variables, 'SENSOR[1]', local)).toBe('main:sensor[1]')
+  })
+
+  it('removes the spaces in an array index', () => {
+    expect(resolveDebugKey(variables, 'sensor[ 1 ]', local)).toBe('main:sensor[1]')
+  })
+
+  it('gives an element of a VAR_EXTERNAL array the global key', () => {
+    expect(resolveDebugKey(variables, 'gsensor[0]', local)).toBe('Config0:gSensor[0]')
+  })
+
+  it('gives a VAR_EXTERNAL scalar the global key', () => {
+    expect(resolveDebugKey(variables, 'gx', local)).toBe('Config0:gx')
+  })
+
+  it('leaves a name with no declaration in the POU as it is', () => {
+    expect(resolveDebugKey(variables, 'R_TRIG0.Q', local)).toBe('main:R_TRIG0.Q')
   })
 })

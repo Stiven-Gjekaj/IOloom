@@ -114,6 +114,34 @@ export function buildGlobalCompositeKey(variableName: string): string {
 }
 
 /**
+ * The debug key of a variable that a diagram node or a source line names, as the debug tree
+ * keys it (upstream issue 585).
+ *
+ * A node holds the name as the user typed it. The tree keys a variable by its declared
+ * spelling, and a VAR_EXTERNAL global by `Config0:<name>` for each POU that uses it. So a
+ * contact on `gSensor[0]`, a VAR_EXTERNAL array, looked up `main:gSensor[0]`, found no
+ * value, and stayed red; a force from the rung failed the same way. This finds the
+ * declaration of the base name (IEC names are not case sensitive), takes its spelling,
+ * removes the spaces in an array index, and gives a VAR_EXTERNAL the global key.
+ * A name with no declaration in the POU, such as an edge trigger output, goes to
+ * `localKey` as it is.
+ */
+export function resolveDebugKey(
+  variables: ReadonlyArray<{ name: string; class?: string }>,
+  typedName: string,
+  localKey: (variableName: string) => string,
+): string {
+  const match = /^\s*([A-Za-z_]\w*)(.*?)\s*$/s.exec(typedName)
+  if (!match) return localKey(typedName)
+  const [, base, rest] = match
+  const suffix = rest.replace(/\[([^\]]*)\]/g, (_, index: string) => `[${index.replace(/\s+/g, '')}]`)
+  const declared = variables.find((variable) => variable.name.toUpperCase() === base.toUpperCase())
+  if (!declared) return localKey(`${base}${suffix}`)
+  const name = `${declared.name}${suffix}`
+  return declared.class === 'external' ? buildGlobalCompositeKey(name) : localKey(name)
+}
+
+/**
  * The single path rule for a program variable: a shared global (VAR_EXTERNAL →
  * CONFIGURATION VAR_GLOBAL) addresses by its bare name; everything else is
  * instance-prefixed. Both the tree traversal and the base-path shim resolve

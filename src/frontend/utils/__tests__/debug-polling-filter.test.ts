@@ -780,6 +780,43 @@ describe('buildActiveIndexSet', () => {
       expect(activeIndexes).toContain(2)
     })
 
+    it('polls an array element by the key the debug tree uses, for a local and a VAR_EXTERNAL array', () => {
+      const pou = makePou(
+        'Main',
+        'program',
+        [
+          makeArrayVariable('sensor', 'BOOL', '0..1'),
+          { ...makeArrayVariable('gSensor', 'BOOL', '0..1'), class: 'external' },
+        ],
+        'ld',
+      )
+      const indexMap = new Map([
+        ['Main:sensor[1]', 1],
+        ['Config0:gSensor[0]', 2],
+      ])
+      const ldFlow = {
+        name: 'Main',
+        rungs: [
+          {
+            nodes: [
+              { type: 'contact', data: { variable: { name: 'SENSOR[ 1 ]' } } },
+              { type: 'coil', data: { variable: { name: 'gsensor[0]' } } },
+            ],
+          },
+        ],
+      }
+      const state = makeState({
+        pous: [pou],
+        editorName: 'Main',
+        editorLanguage: 'ld',
+        debugVariableIndexes: indexMap,
+        ladderFlows: [ldFlow],
+      })
+
+      const { activeIndexes } = buildActiveIndexSet(state, new Map(), null)
+      expect(activeIndexes).toEqual([1, 2])
+    })
+
     it('polls the edge trigger output of rising and falling contacts, not only their variable', () => {
       const pou = makePou('Main', 'program', [], 'ld')
       const indexMap = new Map([
