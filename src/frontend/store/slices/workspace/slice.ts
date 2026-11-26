@@ -61,6 +61,7 @@ const createWorkspaceSlice: StateCreator<WorkspaceSlice, [], [], WorkspaceSlice>
     canEdit: true,
     autoSaveOnBuild: true,
     isEphemeralProject: false,
+    isExampleProject: false,
   },
 
   workspaceActions: {
@@ -153,6 +154,7 @@ const createWorkspaceSlice: StateCreator<WorkspaceSlice, [], [], WorkspaceSlice>
           // to the session. Leaving it set would make the NEXT project opened
           // refuse to save for a reason that no longer applies.
           workspace.isEphemeralProject = false
+          workspace.isExampleProject = false
           workspace.editingState = 'initial-state'
           workspace.selectedProjectTreeLeaf = { label: '', type: null }
           workspace.isCollapsed = false
@@ -458,6 +460,13 @@ const createWorkspaceSlice: StateCreator<WorkspaceSlice, [], [], WorkspaceSlice>
       setState(
         produce(({ workspace }: WorkspaceSlice) => {
           workspace.isEphemeralProject = value
+        }),
+      )
+    },
+    setIsExampleProject: (value: boolean) => {
+      setState(
+        produce(({ workspace }: WorkspaceSlice) => {
+          workspace.isExampleProject = value
         }),
       )
     },

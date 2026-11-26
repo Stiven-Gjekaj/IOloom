@@ -50,6 +50,12 @@ describe('shouldAutosave', () => {
     expect(shouldAutosave(store.getState())).toBe(false)
   })
 
+  it('is false for a copy of an example, which has no location the user chose', () => {
+    dirtyProject()
+    store.setState((s) => ({ ...s, workspace: { ...s.workspace, isExampleProject: true } }))
+    expect(shouldAutosave(store.getState())).toBe(false)
+  })
+
   it('is false when the user cannot edit the project', () => {
     dirtyProject()
     store.setState((s) => ({ ...s, workspace: { ...s.workspace, canEdit: false } }))

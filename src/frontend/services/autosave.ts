@@ -18,7 +18,7 @@ export const AUTOSAVE_INTERVAL_MS = 10 * 60 * 1000
 export function shouldAutosave(state: ReturnType<OpenPLCStore['getState']>): boolean {
   const { workspace, project } = state
   if (!project.meta.path) return false
-  if (workspace.isEphemeralProject || !workspace.canEdit) return false
+  if (workspace.isEphemeralProject || workspace.isExampleProject || !workspace.canEdit) return false
   if (workspace.editingState === 'save-request') return false
   return state.sharedWorkspaceActions.hasUnsavedChanges()
 }

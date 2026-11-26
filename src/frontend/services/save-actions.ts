@@ -350,6 +350,13 @@ export async function executeSaveProject(
 
   if (refusedForHavingNoLocation(store, reason)) return { success: false }
 
+  // A copy of an example sits in the temporary folder (upstream issue 245): a user save
+  // asks where to keep the project. A build still flushes the copy, which it compiles.
+  if (reason === 'user' && state.workspace.isExampleProject) {
+    const saved = await executeSaveProjectAs(store, projectPort, capabilities)
+    return { success: saved.success }
+  }
+
   // A partner session can turn the pre-build save off: there every write reaches the partner's save callback. The
   // flushes above still ran, so the compile sees every edit; only the write (and marking files saved) is skipped.
   if (reason === 'pre-build' && !state.workspace.autoSaveOnBuild) {

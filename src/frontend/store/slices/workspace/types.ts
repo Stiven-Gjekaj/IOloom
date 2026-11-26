@@ -164,6 +164,11 @@ export type WorkspaceState = {
      * Reset to `false` on project close and on any normally opened project.
      */
     isEphemeralProject: boolean
+    /**
+     * True for a copy of an example project (upstream issue 245). The copy sits in the
+     * temporary folder, so a user save runs Save As. Reset like `isEphemeralProject`.
+     */
+    isExampleProject: boolean
   }
 }
 
@@ -233,6 +238,7 @@ export type WorkspaceActions = {
   setCanEdit: (value: boolean) => void
   setAutoSaveOnBuild: (value: boolean) => void
   setIsEphemeralProject: (value: boolean) => void
+  setIsExampleProject: (value: boolean) => void
 }
 
 export type WorkspaceSlice = WorkspaceState & {

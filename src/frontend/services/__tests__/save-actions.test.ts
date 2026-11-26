@@ -123,6 +123,35 @@ describe('save-actions', () => {
   })
 
   describe('executeSaveProject', () => {
+    // An example opens as a copy in the temporary folder (upstream issue 245): a save asks for a real place.
+    describe('an example project', () => {
+      it('runs Save As for a user save', async () => {
+        store.getState().workspaceActions.setIsExampleProject(true)
+        const projectPort = makeProjectPort()
+
+        await executeSaveProject(store, projectPort, capabilities)
+
+        expect(projectPort.pickPath).toHaveBeenCalled()
+      })
+
+      it('still lets the build flush the copy to disk', async () => {
+        store.getState().workspaceActions.setIsExampleProject(true)
+        const projectPort = makeProjectPort()
+
+        const result = await executeSaveProject(store, projectPort, capabilities, 'pre-build')
+
+        expect(result.success).toBe(true)
+        expect(projectPort.pickPath).not.toHaveBeenCalled()
+        expect(projectPort.saveProject).toHaveBeenCalled()
+      })
+
+      it('is no longer an example after the workspace clears', () => {
+        store.getState().workspaceActions.setIsExampleProject(true)
+        store.getState().workspaceActions.clearWorkspace()
+        expect(store.getState().workspace.isExampleProject).toBe(false)
+      })
+    })
+
     // A retrieved project's scratch location isn't real; reporting success there would be a lie.
     describe('a project retrieved from a device', () => {
       it('refuses a user save and says what to do instead', async () => {
