@@ -531,6 +531,13 @@ const VariablesEditor = ({ name: propName, isActive: _isActive = true }: Variabl
     })
   }
 
+  /** Sets or clears one column filter; an empty value clears it. */
+  const setColumnFilter = (id: string, value: unknown) =>
+    setColumnFilters((prev) => {
+      const others = prev.filter((filter) => filter.id !== id)
+      return value === '' || value === false ? others : others.concat({ id, value })
+    })
+
   const handleRowClick = (row: HTMLTableRowElement) => {
     updateModelVariables({
       display: 'table',
@@ -1215,6 +1222,30 @@ const VariablesEditor = ({ name: propName, isActive: _isActive = true }: Variabl
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Search and "basic types only" (upstream issue 620): instances crowd the table. */}
+              <div
+                aria-label='Variables editor table search container'
+                className='flex h-full max-w-xs flex-1 items-center gap-2'
+              >
+                <input
+                  type='search'
+                  aria-label='Search variables'
+                  placeholder='Search name or type'
+                  autoComplete='off'
+                  spellCheck={false}
+                  onChange={(event) => setColumnFilter('name', event.target.value)}
+                  className='h-full w-full rounded-lg border border-neutral-500 bg-inherit px-2 font-caption text-cp-sm font-normal text-neutral-850 outline-none dark:border-neutral-850 dark:text-neutral-300'
+                />
+                <label className='flex w-fit items-center gap-1 text-nowrap text-xs font-medium text-neutral-1000 dark:text-neutral-300'>
+                  <input
+                    type='checkbox'
+                    aria-label='Basic types only'
+                    onChange={(event) => setColumnFilter('type', event.target.checked)}
+                  />
+                  Basic types only
+                </label>
               </div>
             </div>
           )}

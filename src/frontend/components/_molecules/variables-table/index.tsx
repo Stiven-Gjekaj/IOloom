@@ -1,4 +1,4 @@
-import { ColumnFiltersState, createColumnHelper, OnChangeFn } from '@tanstack/react-table'
+import { ColumnFiltersState, createColumnHelper, FilterFn, OnChangeFn } from '@tanstack/react-table'
 
 import type { PLCVariable } from '../../../../middleware/shared/ports/types'
 import { usePouSnapshot } from '../../../hooks/use-pou-snapshot'
@@ -14,6 +14,21 @@ import { SelectableClassCell, SelectableDebugCell, SelectableFlagCell, Selectabl
 
 const columnHelper = createColumnHelper<PLCVariable>()
 
+/**
+ * The search field of the variables editor (upstream issue 620): a variable shows when its
+ * name or its type holds the text, in any letter case. Set on the name column.
+ */
+const nameOrTypeFilter: FilterFn<PLCVariable> = (row, _columnId, query: string) => {
+  const text = query.trim().toLowerCase()
+  if (text === '') return true
+  const { name, type } = row.original
+  return name.toLowerCase().includes(text) || type.value.toLowerCase().includes(text)
+}
+
+/** "Basic types only": hides function block instances, structures, enumerations and arrays. */
+const basicTypeFilter: FilterFn<PLCVariable> = (row, _columnId, onlyBasic: boolean) =>
+  !onlyBasic || row.original.type.definition === 'base-type'
+
 const columnsPrograms = [
   columnHelper.display({
     id: 'rowNumber',
@@ -26,6 +41,7 @@ const columnsPrograms = [
   }),
   columnHelper.accessor('name', {
     header: 'Name',
+    filterFn: nameOrTypeFilter,
     enableResizing: true,
     size: 300,
     minSize: 150,
@@ -47,6 +63,7 @@ const columnsPrograms = [
   }),
   columnHelper.accessor('type', {
     header: 'Type',
+    filterFn: basicTypeFilter,
     enableResizing: true,
     size: 300,
     minSize: 80,
@@ -86,6 +103,7 @@ const columns = [
   }),
   columnHelper.accessor('name', {
     header: 'Name',
+    filterFn: nameOrTypeFilter,
     enableResizing: true,
     size: 300,
     minSize: 150,
@@ -107,6 +125,7 @@ const columns = [
   }),
   columnHelper.accessor('type', {
     header: 'Type',
+    filterFn: basicTypeFilter,
     enableResizing: true,
     size: 300,
     minSize: 80,
