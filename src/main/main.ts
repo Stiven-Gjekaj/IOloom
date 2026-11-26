@@ -92,6 +92,9 @@ if (process.env.NODE_ENV === 'production') {
 
 // Create the user service instance to initialize the user settings and history files.
 const userService = new UserService()
+// One for the process, like the user service: it holds no window and no state, so a
+// window that macOS opens again uses the same one (upstream issue 326).
+const pouService = new PouService()
 
 // Retrieves the system information
 const systemInfo = platform()
@@ -430,11 +433,6 @@ const createMainWindow = async () => {
    * Creates a singleton instance for project service, which will be used across the entire application
    */
   const projectService = new ProjectService(mainWindow)
-
-  /**
-   * Creates a singleton instance for POU service, which will be used across the entire application
-   */
-  const pouService = new PouService()
 
   /**
    * Creates a singleton instance for compiler service, which will be used across the entire application
