@@ -5,7 +5,7 @@ import type { PLCStructureVariable } from '../../../../../../middleware/shared/p
 import { usePouSnapshot } from '../../../../../hooks/use-pou-snapshot'
 import { useOpenPLCStore } from '../../../../../store'
 import { GenericTable } from '../../../../_atoms/generic-table'
-import { EditableInitialValueCell, EditableNameCell } from './editable-cell'
+import { EditableDocumentationCell, EditableInitialValueCell, EditableNameCell } from './editable-cell'
 import { SelectableTypeCell } from './selectable-cell'
 
 const columnHelper = createColumnHelper<PLCStructureVariable>()
@@ -56,6 +56,12 @@ const StructureTable = ({ dataTypeName, tableData, selectedRow, handleRowClick }
 
         cell: EditableInitialValueCell,
       }),
+      columnHelper.accessor('documentation', {
+        header: 'Documentation',
+        size: 200,
+
+        cell: EditableDocumentationCell,
+      }),
     ],
     [dataTypeName],
   )
@@ -81,13 +87,13 @@ const StructureTable = ({ dataTypeName, tableData, selectedRow, handleRowClick }
           updateDatatype(dataTypeName, {
             ...current,
             variable: tableData.map((variable, index) => {
-              if (index === rowIndex) {
-                return {
-                  ...variable,
-                  [columnId]: value,
-                }
+              if (index !== rowIndex) return variable
+              // An undefined value removes the field, so an emptied documentation leaves no key behind.
+              if (value === undefined) {
+                const { [columnId as keyof PLCStructureVariable]: _removed, ...rest } = variable
+                return rest as PLCStructureVariable
               }
-              return variable
+              return { ...variable, [columnId]: value }
             }),
           })
           handleFileAndWorkspaceSavedState(dataTypeName)

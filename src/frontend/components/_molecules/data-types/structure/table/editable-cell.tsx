@@ -115,4 +115,33 @@ const EditableInitialValueCell = ({
   )
 }
 
-export { EditableInitialValueCell, EditableNameCell }
+/**
+ * The documentation of a member: the `(* ... *)` comment after it in the .dt file (upstream
+ * issue 450). An empty cell removes the documentation, so the file gets no empty comment.
+ */
+const EditableDocumentationCell = ({ getValue, row: { index }, column: { id }, table }: IEditableCellProps) => {
+  const documentation = getValue<string | undefined>() ?? ''
+  const [cellValue, setCellValue] = useState(documentation)
+
+  const onBlur = () => {
+    const next = cellValue.trim()
+    if (next === documentation) return
+    table.options.meta?.updateData(index, id, next === '' ? undefined : next)
+  }
+
+  useEffect(() => {
+    setCellValue(documentation)
+  }, [documentation])
+
+  return (
+    <InputWithRef
+      aria-label='Member documentation'
+      value={cellValue}
+      onChange={(e) => setCellValue(e.target.value)}
+      onBlur={onBlur}
+      className={cn('flex w-full flex-1 bg-transparent p-2 text-left outline-none')}
+    />
+  )
+}
+
+export { EditableDocumentationCell, EditableInitialValueCell, EditableNameCell }
