@@ -16,6 +16,11 @@ import { pouUri, splitExpression } from '../../../../../services/st-lsp'
 import { useOpenPLCStore, useOpenPLCStoreApi } from '../../../../../store'
 import { applyAcceptedHunks, computeHunks } from '../../../../../utils/ai-diff-review'
 import { memberChainBefore } from '../../../../../utils/cpp/member-chain'
+import {
+  callParametersSnippet,
+  findFunctionBlockOfInstance,
+  instanceBeforeOpenParenthesis,
+} from '../../../../../utils/PLC/fb-call-parameters'
 import { getExtensionFromLanguage, getFolderFromPouType } from '../../../../../utils/PLC/pou-file-extensions'
 import { Modal, ModalContent, ModalTitle } from '../../../../_molecules/modal'
 import { toast } from '../../../[app]/toast/use-toast'
@@ -178,7 +183,9 @@ const MonacoEditor = (props: monacoEditorProps): ReturnType<typeof PrimitiveEdit
   const [templatesInjected, setTemplatesInjected] = useState<Set<string>>(new Set())
 
   const pou = pous.find((p) => p.name === name)
-  const pouVariables = pou?.interface?.variables ?? []
+  // One array while the variables do not change, so the hooks that depend on it do not run on each render.
+  const declaredVariables = pou?.interface?.variables
+  const pouVariables = useMemo(() => declaredVariables ?? [], [declaredVariables])
 
   // Sync local text when POU identity changes
   useEffect(() => {
@@ -597,6 +604,57 @@ const MonacoEditor = (props: monacoEditorProps): ReturnType<typeof PrimitiveEdit
     })
     return () => disposable.dispose()
   }, [pouVariables, globalVariables, sliceLibraries, language])
+
+  // The parameters of a function block call (upstream issue 576): `TON0(` offers every input,
+  // IN_OUT and output of the instance's block. The language server gives the other items.
+  useEffect(() => {
+    if (language !== 'st' && language !== 'il') return
+
+    const disposable = monaco.languages.registerCompletionItemProvider(language, {
+      triggerCharacters: ['('],
+      provideCompletionItems: (model, position) => {
+        // Every open editor registers this provider; only the one that owns the model answers.
+        if (model !== editorRef.current?.getModel()) return { suggestions: [] }
+        const textBefore = model.getValueInRange({
+          startLineNumber: position.lineNumber,
+          startColumn: 1,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        })
+        const instanceName = instanceBeforeOpenParenthesis(textBefore)
+        if (!instanceName) return { suggestions: [] }
+        const blocks = [
+          ...pous.map((pou) => ({ name: pou.name, type: pou.pouType, variables: pou.interface?.variables ?? [] })),
+          ...sliceLibraries.system.flatMap((library) => library.pous),
+        ]
+        const block = findFunctionBlockOfInstance(instanceName, pouVariables, blocks)
+        if (!block) return { suggestions: [] }
+        const snippet = callParametersSnippet(block.variables)
+        if (snippet === '') return { suggestions: [] }
+        return {
+          suggestions: [
+            {
+              label: `${instanceName}( all parameters )`,
+              detail: `${block.name} call`,
+              insertText: snippet,
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              kind: monaco.languages.CompletionItemKind.Snippet,
+              // First in the list, and selected: the language server's keywords sort before '0'.
+              sortText: '!',
+              preselect: true,
+              range: {
+                startLineNumber: position.lineNumber,
+                startColumn: position.column,
+                endLineNumber: position.lineNumber,
+                endColumn: position.column,
+              },
+            },
+          ],
+        }
+      },
+    })
+    return () => disposable.dispose()
+  }, [language, pous, pouVariables, sliceLibraries])
 
   const parseCppVariables = (code: string, range: monaco.IRange): monaco.languages.CompletionItem[] => {
     const variables = new Set<string>()
