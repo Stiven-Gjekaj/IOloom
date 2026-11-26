@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 import { useOpenPLCStore } from '../../../../../store'
+import { findUnusedElements } from '../../../../../utils/PLC/find-unused'
 import type { SearchElementFilter } from '../../../../../utils/PLC/project-search'
 import { searchProject } from '../../../../../utils/PLC/project-search'
 import { InputWithRef } from '../../../../_atoms/input'
@@ -212,6 +213,27 @@ export default function SearchInProject({ onClose }: SearchInProjectModalProps) 
     onClose()
   }
 
+  /** Lists the variables, functions and function blocks nothing uses (upstream issue 552). */
+  const handleFindUnused = () => {
+    const matches = findUnusedElements(data)
+    if (matches.length === 0) {
+      toast({
+        title: 'Nothing unused',
+        description: 'Every variable, function and function block is used.',
+        variant: 'default',
+      })
+      return
+    }
+    setSearchResults({
+      searchID: uuidv4(),
+      searchQuery: 'Unused elements',
+      projectName: meta.name,
+      matches,
+      searchCounts: matches.length,
+    })
+    onClose()
+  }
+
   const noElementSelected = selectedScope === 'only elements' && !Object.values(checkedOptions).some(Boolean)
 
   const handleSearchQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -301,6 +323,12 @@ export default function SearchInProject({ onClose }: SearchInProjectModalProps) 
           onClick={handleClose}
         >
           Close
+        </button>
+        <button
+          className='h-full w-full items-center rounded-lg bg-neutral-100 text-center font-medium text-neutral-1000 dark:bg-neutral-850 dark:text-neutral-100'
+          onClick={handleFindUnused}
+        >
+          Find Unused
         </button>
         <button
           className='h-full w-full items-center rounded-lg bg-brand text-center font-medium text-white disabled:cursor-not-allowed disabled:opacity-50'
