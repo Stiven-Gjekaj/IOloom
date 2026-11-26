@@ -10,6 +10,31 @@ function fontFor(bold: boolean | undefined): PrintFontKey {
   return bold ? 'monoBold' : 'mono'
 }
 
+/**
+ * Cells that `text` takes in a monospaced line. An East Asian wide or fullwidth character
+ * takes two, as in a terminal: its glyph, drawn with a fallback face, is about twice as
+ * wide as a monospaced Latin cell (upstream issue 1171). Each UTF-16 unit of another
+ * character takes one, as before.
+ */
+export function textCells(text: string): number {
+  let cells = 0
+  for (const character of text) cells += isWide(character.codePointAt(0)!) ? 2 : character.length
+  return cells
+}
+
+function isWide(codePoint: number): boolean {
+  return (
+    (codePoint >= 0x1100 && codePoint <= 0x115f) ||
+    (codePoint >= 0x2e80 && codePoint <= 0xa4cf && codePoint !== 0x303f) ||
+    (codePoint >= 0xac00 && codePoint <= 0xd7a3) ||
+    (codePoint >= 0xf900 && codePoint <= 0xfaff) ||
+    (codePoint >= 0xfe30 && codePoint <= 0xfe4f) ||
+    (codePoint >= 0xff00 && codePoint <= 0xff60) ||
+    (codePoint >= 0xffe0 && codePoint <= 0xffe6) ||
+    (codePoint >= 0x20000 && codePoint <= 0x3fffd)
+  )
+}
+
 /** Splits one source line's runs into as many `cols`-wide wrapped rows as needed, preserving run boundaries mid-wrap. */
 export function wrapColoredLine(line: ColoredLine, cols: number): TextRun[][] {
   const width = Math.max(1, cols)
@@ -18,20 +43,22 @@ export function wrapColoredLine(line: ColoredLine, cols: number): TextRun[][] {
   let currentLen = 0
 
   for (const run of line.runs) {
-    let remaining = run.text
-    while (remaining.length > 0) {
-      const space = width - currentLen
-      if (space <= 0) {
+    let chunk = ''
+    for (const character of run.text) {
+      const cells = textCells(character)
+      // A wide character that does not fit starts the next row. A row always takes one
+      // character, so a width of one cell cannot loop.
+      if (currentLen + cells > width && currentLen > 0) {
+        if (chunk) current.push({ ...run, text: chunk })
         wrapped.push(current)
         current = []
         currentLen = 0
-        continue
+        chunk = ''
       }
-      const chunk = remaining.slice(0, space)
-      current.push({ ...run, text: chunk })
-      currentLen += chunk.length
-      remaining = remaining.slice(chunk.length)
+      chunk += character
+      currentLen += cells
     }
+    if (chunk) current.push({ ...run, text: chunk })
   }
   wrapped.push(current)
   return wrapped
@@ -99,7 +126,7 @@ function linesToOps(wrappedLines: TextRun[][], fontSizePt: number): DrawOp[] {
           font: fontFor(run.bold),
         })
       }
-      col += run.text.length
+      col += textCells(run.text)
     }
   })
   return ops

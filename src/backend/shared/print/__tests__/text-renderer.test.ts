@@ -34,6 +34,14 @@ describe('wrapColoredLine', () => {
     ])
   })
 
+  it('counts a wide CJK character as two cells (upstream issue 1171)', () => {
+    const line: ColoredLine = { runs: [{ text: 'ab温度x', color: '#111111' }] }
+    expect(wrapColoredLine(line, 4)).toEqual([
+      [{ text: 'ab温', color: '#111111' }],
+      [{ text: '度x', color: '#111111' }],
+    ])
+  })
+
   it('skips an empty run without looping (while-condition false immediately)', () => {
     const line: ColoredLine = { runs: [{ text: '', color: '#000000' }] }
     expect(wrapColoredLine(line, 5)).toEqual([[]])
@@ -41,6 +49,23 @@ describe('wrapColoredLine', () => {
 })
 
 describe('renderTextPou', () => {
+  it('places the run after a wide CJK name two cells for each wide character (upstream issue 1171)', () => {
+    const lines: ColoredLine[] = [
+      {
+        runs: [
+          { text: '温度', color: '#111111' },
+          { text: ' := 1;', color: '#222222' },
+        ],
+      },
+    ]
+    const ops = renderTextPou(lines, 'normal', 500, 500)[0].ops
+    const name = ops.find((op) => op.kind === 'text' && op.text === '温度')
+    const rest = ops.find((op) => op.kind === 'text' && op.text === ' := 1;')
+    if (name?.kind !== 'text' || rest?.kind !== 'text') throw new Error('runs not drawn')
+    const cell = 0.6 * name.sizePt
+    expect(rest.x - name.x).toBeCloseTo(4 * cell)
+  })
+
   it('returns [] for no lines', () => {
     expect(renderTextPou([], 'normal', 200, 200)).toEqual([])
   })
