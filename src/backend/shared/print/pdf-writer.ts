@@ -59,19 +59,42 @@ export interface PdfBackend {
  * Every DrawOp coordinate is top-down (y grows downward), page-relative.
  * pdf-lib's page space is bottom-up — this is the one place that flips.
  */
-export async function createPdfLibBackend(fonts: EmbeddedFontSet): Promise<PdfBackend> {
+/**
+ * `usedText` is all text the document will draw. A fallback face is embedded only when this
+ * text needs it, so a document in Latin text stays as it was. Without `usedText`, each
+ * fallback face is embedded.
+ */
+export async function createPdfLibBackend(fonts: EmbeddedFontSet, usedText?: string): Promise<PdfBackend> {
   const doc = await PDFDocument.create()
   doc.registerFontkit(fontkit)
 
-  // Known limitation: Noto Sans's embedded coverage is Latin — a POU or
-  // variable name using CJK, emoji, or other glyphs outside it renders those
-  // characters blank rather than throwing (verified in index.test.ts). No
-  // fallback font is bundled; widening coverage is a real feature, not a bug.
+  // Noto Sans as embedded covers Latin only. A character outside it goes to the first
+  // fallback face that has it (upstream issue 1171); with no such face it renders blank.
   const embedded: Record<PrintFontKey, PDFFont> = {
     sans: await doc.embedFont(fonts.sans, { subset: true }),
     sansBold: await doc.embedFont(fonts.sansBold, { subset: true }),
     mono: await doc.embedFont(fonts.mono, { subset: true }),
     monoBold: await doc.embedFont(fonts.monoBold, { subset: true }),
+  }
+  const coverage = new Map<PrintFontKey, Set<number>>(
+    (Object.keys(embedded) as PrintFontKey[]).map((key) => [key, new Set(embedded[key].getCharacterSet())]),
+  )
+  const parsedFallbacks = (fonts.fallbacks ?? []).map((bytes) => ({ bytes, parsed: fontkit.create(bytes) }))
+  const primaryCoverage = [...coverage.values()]
+  const needed = new Set<number>()
+  for (const character of usedText ?? '') {
+    const codePoint = character.codePointAt(0)!
+    if (primaryCoverage.every((set) => set.has(codePoint))) continue
+    const index = parsedFallbacks.findIndex(({ parsed }) => parsed.hasGlyphForCodePoint(codePoint))
+    if (index !== -1) needed.add(index)
+  }
+  const fallbacks: Array<{ covers: (codePoint: number) => boolean; font: PDFFont }> = []
+  for (const [index, { bytes, parsed }] of parsedFallbacks.entries()) {
+    if (usedText !== undefined && !needed.has(index)) continue
+    fallbacks.push({
+      covers: (codePoint) => parsed.hasGlyphForCodePoint(codePoint),
+      font: await doc.embedFont(bytes, { subset: true }),
+    })
   }
 
   let page: PDFPage | undefined
@@ -123,15 +146,24 @@ export async function createPdfLibBackend(fonts: EmbeddedFontSet): Promise<PdfBa
     },
 
     drawText(text, x, y, sizePt, color, font, align) {
-      const pdfFont = embedded[font]
-      const width = align === 'left' ? 0 : pdfFont.widthOfTextAtSize(text, sizePt)
-      const dx = align === 'center' ? -width / 2 : align === 'right' ? -width : 0
-      currentPage().drawText(text, {
-        x: x + dx,
-        y: pageHeightPt - y,
-        size: sizePt,
-        font: pdfFont,
-        color: rgb(color.r, color.g, color.b),
+      const primary = coverage.get(font)!
+      const faces = [embedded[font], ...fallbacks.map((fallback) => fallback.font)]
+      const runs = splitTextByFont(text, [
+        (codePoint) => primary.has(codePoint),
+        ...fallbacks.map((fallback) => fallback.covers),
+      ])
+      const widths = runs.map((run) => faces[run.face].widthOfTextAtSize(run.text, sizePt))
+      const total = widths.reduce((sum, width) => sum + width, 0)
+      let runX = x + (align === 'center' ? -total / 2 : align === 'right' ? -total : 0)
+      runs.forEach((run, index) => {
+        currentPage().drawText(run.text, {
+          x: runX,
+          y: pageHeightPt - y,
+          size: sizePt,
+          font: faces[run.face],
+          color: rgb(color.r, color.g, color.b),
+        })
+        runX += widths[index]
       })
     },
 
@@ -152,6 +184,27 @@ export async function createPdfLibBackend(fonts: EmbeddedFontSet): Promise<PdfBa
       return doc.save()
     },
   }
+}
+
+/**
+ * Splits `text` into runs by font: each character goes to the first face whose `covers`
+ * test accepts it, and a character that no face covers goes to face 0. Adjacent
+ * characters of one face stay in one run.
+ */
+export function splitTextByFont(
+  text: string,
+  covers: ReadonlyArray<(codePoint: number) => boolean>,
+): Array<{ text: string; face: number }> {
+  const runs: Array<{ text: string; face: number }> = []
+  for (const character of text) {
+    const codePoint = character.codePointAt(0)!
+    const found = covers.findIndex((test) => test(codePoint))
+    const face = found === -1 ? 0 : found
+    const last = runs[runs.length - 1]
+    if (last && last.face === face) last.text += character
+    else runs.push({ text: character, face })
+  }
+  return runs
 }
 
 function drawOp(backend: PdfBackend, op: DrawOp): void {

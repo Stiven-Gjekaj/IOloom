@@ -93,4 +93,9 @@ export type EmbeddedFontSet = {
   sansBold: Uint8Array
   mono: Uint8Array
   monoBold: Uint8Array
+  /**
+   * Faces for the characters that the four Latin faces lack: CJK, Cyrillic, Greek, `℃`
+   * (upstream issue 1171). Tried in order. Each one is embedded only when a page uses it.
+   */
+  fallbacks?: Uint8Array[]
 }

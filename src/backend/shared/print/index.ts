@@ -30,7 +30,8 @@ export type {
  */
 export async function renderProjectToPdf(req: PrintRequest, fonts: EmbeddedFontSet): Promise<Uint8Array> {
   const pages = paginate(req)
-  const backend = await createPdfLibBackend(fonts)
+  const usedText = pages.flatMap((page) => page.ops.map((op) => (op.kind === 'text' ? op.text : ''))).join('')
+  const backend = await createPdfLibBackend(fonts, usedText)
   drawPages(backend, pages)
   return backend.finish()
 }
