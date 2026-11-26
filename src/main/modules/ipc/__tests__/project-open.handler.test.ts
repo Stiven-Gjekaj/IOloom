@@ -42,6 +42,7 @@ function createBridge(): MainProcessBridge {
       on: jest.fn((channel: string, handler: (...args: unknown[]) => unknown) => listeners.set(channel, handler)),
       handle: jest.fn(),
       removeHandler: jest.fn(),
+      removeListener: jest.fn(),
       removeAllListeners: jest.fn(),
     },
     mainWindow: {
@@ -110,6 +111,7 @@ describe('file-access root', () => {
         on: jest.fn((channel: string, handler: (...args: unknown[]) => unknown) => listeners.set(channel, handler)),
         handle: jest.fn(),
         removeHandler: jest.fn(),
+        removeListener: jest.fn(),
         removeAllListeners: jest.fn(),
       },
       mainWindow: {

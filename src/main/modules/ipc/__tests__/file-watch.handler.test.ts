@@ -55,6 +55,7 @@ function createBridge(): MainProcessBridge {
       on: jest.fn(),
       handle: jest.fn((channel: string, handler: Handler) => handles.set(channel, handler)),
       removeHandler: jest.fn(),
+      removeListener: jest.fn(),
       removeAllListeners: jest.fn(),
     },
     mainWindow: {

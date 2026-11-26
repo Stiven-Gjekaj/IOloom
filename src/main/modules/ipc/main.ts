@@ -283,6 +283,23 @@ const isRetrievedProjectPath = (projectPath: string): boolean => {
   return rel === '' || (!rel.startsWith('..') && !isAbsolute(rel))
 }
 
+/**
+ * What the last bridge registered on ipcMain. One record for the process, not one for each
+ * bridge: a bridge could remove only its own registrations, so the bridge of a reopened window
+ * met the old handlers, and Electron refused a second handler on each channel (upstream issue
+ * 326).
+ */
+const lastRegistrations: {
+  ipcMain: {
+    removeHandler(channel: string): void
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    removeListener(channel: string, listener: (...args: any[]) => void): unknown
+  } | null
+  handles: string[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  listeners: Array<{ channel: string; listener: (event: IpcMainEvent, ...args: any[]) => void }>
+} = { ipcMain: null, handles: [], listeners: [] }
+
 class MainProcessBridge implements MainIpcModule {
   ipcMain
   mainWindow
@@ -295,7 +312,6 @@ class MainProcessBridge implements MainIpcModule {
   quitCoordinator
   private quitPromptReady = false
   private reloadConfirmed = false
-  private registeredHandleChannels: string[] = []
   // ONE session for a baremetal device, whatever media it runs over; nothing else here opens a
   // Modbus client. The runtime-v4 WebSocket is a different protocol and keeps its own session.
   private readonly deviceSession = new DeviceSessionManager({
@@ -886,19 +902,34 @@ class MainProcessBridge implements MainIpcModule {
 
   // ===================== IPC HANDLER REGISTRATION =====================
 
-  /** Registers an invoke handler and tracks the channel for cleanup. */
+  /** Registers an invoke handler and records it, so the next bridge can remove it. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private registerHandle(channel: string, handler: (event: IpcMainInvokeEvent, ...args: any[]) => any) {
-    this.registeredHandleChannels.push(channel)
+    lastRegistrations.handles.push(channel)
     this.ipcMain.handle(channel, handler)
   }
 
-  /** Removes previously registered invoke handlers so they can be re-registered with fresh references on macOS window reopen. */
+  /** Registers a listener and records it, so the next bridge can remove it. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private registerOn(channel: string, listener: (event: IpcMainEvent, ...args: any[]) => void) {
+    lastRegistrations.listeners.push({ channel, listener })
+    this.ipcMain.on(channel, listener)
+  }
+
+  /**
+   * Removes what the previous bridge registered. macOS builds a new bridge each time it opens
+   * the window again, and the handlers of the old bridge hold the closed window (upstream
+   * issue 326).
+   */
   private cleanupHandlers() {
-    for (const channel of this.registeredHandleChannels) {
-      this.ipcMain.removeHandler(channel)
+    const previous = lastRegistrations.ipcMain
+    if (previous) {
+      for (const channel of lastRegistrations.handles) previous.removeHandler(channel)
+      for (const { channel, listener } of lastRegistrations.listeners) previous.removeListener(channel, listener)
     }
-    this.registeredHandleChannels = []
+    lastRegistrations.ipcMain = this.ipcMain
+    lastRegistrations.handles = []
+    lastRegistrations.listeners = []
   }
 
   setupMainIpcListener() {
@@ -983,32 +1014,32 @@ class MainProcessBridge implements MainIpcModule {
     this.registerHandle('project:remove-from-recent', this.handleRemoveProjectFromRecent)
     this.registerHandle('project:track-recent', this.handleTrackRecentProject)
     this.registerHandle('project:delete', this.handleDeleteProject)
-    this.ipcMain.on('app:request-quit', this.handleAppRequestQuit)
-    this.ipcMain.on('app:quit-ready', this.handleAppQuitReady)
-    this.ipcMain.on('app:quit-unready', this.handleAppQuitUnready)
-    this.ipcMain.on('app:quit', this.handleAppQuit)
+    this.registerOn('app:request-quit', this.handleAppRequestQuit)
+    this.registerOn('app:quit-ready', this.handleAppQuitReady)
+    this.registerOn('app:quit-unready', this.handleAppQuitUnready)
+    this.registerOn('app:quit', this.handleAppQuit)
     // this.ipcMain.on('app:reply-if-app-is-closing', (_, shouldQuit) => { ... })
 
     // Theme and store handlers
-    this.ipcMain.on('system:update-theme', this.mainIpcEventHandlers.handleUpdateTheme)
-    this.ipcMain.handle('system:get-theme', this.mainIpcEventHandlers.handleGetTheme)
+    this.registerOn('system:update-theme', this.mainIpcEventHandlers.handleUpdateTheme)
+    this.registerHandle('system:get-theme', this.mainIpcEventHandlers.handleGetTheme)
     // this.ipcMain.handle('app:store-get', this.mainIpcEventHandlers.getStoreValue)
 
     // ===================== COMPILER SERVICE =====================
-    this.ipcMain.on('compiler:run-compile-program', this.handleRunCompileProgram)
-    this.ipcMain.on('compiler:run-debug-compilation', this.handleRunDebugCompilation)
-    this.ipcMain.on('compiler:run-compile-library', this.handleRunCompileLibrary)
+    this.registerOn('compiler:run-compile-program', this.handleRunCompileProgram)
+    this.registerOn('compiler:run-debug-compilation', this.handleRunDebugCompilation)
+    this.registerOn('compiler:run-compile-library', this.handleRunCompileLibrary)
 
     // ===================== WINDOW CONTROLS =====================
-    this.ipcMain.on('window-controls:close', this.handleWindowControlsClose)
-    this.ipcMain.on('window-controls:closed', this.handleWindowControlsClosed)
-    this.ipcMain.on('window-controls:hide', this.handleWindowControlsHide)
-    this.ipcMain.on('window-controls:minimize', this.handleWindowControlsMinimize)
-    this.ipcMain.on('window-controls:maximize', this.handleWindowControlsMaximize)
-    this.ipcMain.on('window:reload', this.handleWindowReload)
-    this.ipcMain.on('window:rebuild-menu', this.handleWindowRebuildMenu)
-    this.ipcMain.on('window:project-open', this.handleWindowProjectOpen)
-    this.ipcMain.on('window:debugger-active', this.handleWindowDebuggerActive)
+    this.registerOn('window-controls:close', this.handleWindowControlsClose)
+    this.registerOn('window-controls:closed', this.handleWindowControlsClosed)
+    this.registerOn('window-controls:hide', this.handleWindowControlsHide)
+    this.registerOn('window-controls:minimize', this.handleWindowControlsMinimize)
+    this.registerOn('window-controls:maximize', this.handleWindowControlsMaximize)
+    this.registerOn('window:reload', this.handleWindowReload)
+    this.registerOn('window:rebuild-menu', this.handleWindowRebuildMenu)
+    this.registerOn('window:project-open', this.handleWindowProjectOpen)
+    this.registerOn('window:debugger-active', this.handleWindowDebuggerActive)
 
     // ===================== HARDWARE =====================
     this.registerHandle('hardware:get-available-communication-ports', this.handleHardwareGetAvailableCommunicationPorts)
@@ -1023,14 +1054,14 @@ class MainProcessBridge implements MainIpcModule {
     this.registerHandle('packages:uninstall', this.handlePackagesUninstall)
     this.registerHandle('packages:reinstall', this.handlePackagesReinstall)
     this.registerHandle('packages:take-startup-notices', this.handlePackagesTakeStartupNotices)
-    this.ipcMain.on('packages:cancel-install', this.handlePackagesCancelInstall)
+    this.registerOn('packages:cancel-install', this.handlePackagesCancelInstall)
     this.registerHandle('packages:get-manifest', this.handlePackagesGetManifest)
     this.registerHandle('packages:get-pin', this.handlePackagesGetPin)
     this.registerHandle('packages:verify-signatures', this.handlePackagesVerifySignatures)
 
     // ===================== UTILITIES =====================
     this.registerHandle('util:get-preview-image', this.handleUtilGetPreviewImage)
-    this.ipcMain.on('util:log', this.handleUtilLog)
+    this.registerOn('util:log', this.handleUtilLog)
     this.registerHandle('util:read-debug-file', this.handleReadDebugFile)
 
     this.registerHandle('wasm-toolchain:compile', this.handleWasmToolchainCompile)
