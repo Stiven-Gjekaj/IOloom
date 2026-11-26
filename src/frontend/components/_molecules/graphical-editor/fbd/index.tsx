@@ -45,6 +45,7 @@ import { findOccupiedInOutPin } from '../../../../utils/graphical/in-out-pin-rul
 import { isFbdPlacementElement, PLACEMENT_TARGET_ATTRIBUTE } from '../../../../utils/graphical/placement-elements'
 import { newGraphicalEditorNodeID } from '../../../../utils/new-graphical-editor-node-id'
 import { CustomFbdNodeTypes, customNodeTypes } from '../../../_atoms/graphical-editor/fbd'
+import { autoConnections } from '../../../_atoms/graphical-editor/fbd/utils/auto-connect'
 import { BlockNode } from '../../../_atoms/graphical-editor/fbd/utils/types'
 import { getVariableRestrictionType } from '../../../_atoms/graphical-editor/utils'
 import { ReactFlowPanel } from '../../../_atoms/react-flow'
@@ -634,12 +635,20 @@ export const FBDBody = ({ rung, nodeDivergences = [], isDebuggerActive = false }
   const onNodeDragStop = useStableCallback(
     (_e: globalThis.MouseEvent | globalThis.TouchEvent, _node: FlowNode, nodes: FlowNode[]) => {
       setDragging(false)
+      const movedNodes = rungLocal.nodes.map((node) => nodes.find((n) => n.id === node.id) ?? node)
+      // Auto-connect (upstream issue 539): an output dropped on a free input connects to it.
+      // The drag start took the undo snapshot, so one undo removes the move and the edges.
+      const connections = autoConnections(movedNodes, rungLocal.edges, new Set(nodes.map((node) => node.id))).filter(
+        (connection) => findOccupiedInOutPin(connection, rungLocal) === undefined,
+      )
+      const edges = connections.reduce((current, connection) => addEdge(connection, current), rungLocal.edges)
+      if (connections.length > 0) setRungLocal((rung) => ({ ...rung, nodes: movedNodes, edges }))
       fbdFlowActions.setRung({
         editorName: pouName,
         rung: {
           ...rungLocal,
-          nodes: rungLocal.nodes.map((node) => nodes.find((n) => n.id === node.id) ?? node),
-          edges: rungLocal.edges,
+          nodes: movedNodes,
+          edges,
         },
       })
     },
