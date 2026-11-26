@@ -1,7 +1,10 @@
+import { homedir } from 'node:os'
+import { join } from 'node:path'
+
 import { parse } from 'yaml'
 
 import { reconcileArduinoCliConfig } from '../arduino-cli-config'
-import { ARDUINO_DATA, buildArduinoCliConfig } from '../types'
+import { ARDUINO_DATA, buildArduinoCliConfig, defaultSketchbookLibrariesPath } from '../types'
 
 /**
  * The config every install created before this change: two board-manager URLs
@@ -280,5 +283,27 @@ describe('user libraries stay reachable', () => {
     const updated = requireUpdated(reconcileArduinoCliConfig(odd, SHIPPED))
     expect(parse(updated)).toMatchObject({ directories: { data: '/opt/openplc/arduino/data' } })
     expect(updated).toContain('builtin: 7')
+  })
+})
+
+/**
+ * A C++ block reaches a library that the Arduino IDE installed only when arduino-cli looks in
+ * the IDE's sketchbook (upstream issue 1107, IOloom #16). The IDE keeps it in the home folder
+ * on Linux and under Documents elsewhere; a Linux user saw `OneWire.h: No such file or directory`.
+ */
+describe('defaultSketchbookLibrariesPath', () => {
+  const original = process.platform
+  afterEach(() => Object.defineProperty(process, 'platform', { value: original }))
+
+  it('is ~/Arduino/libraries on Linux', () => {
+    Object.defineProperty(process, 'platform', { value: 'linux' })
+    expect(defaultSketchbookLibrariesPath('/home/user/Documents')).toBe(join(homedir(), 'Arduino', 'libraries'))
+  })
+
+  it('is under Documents on macOS and Windows', () => {
+    for (const platform of ['darwin', 'win32']) {
+      Object.defineProperty(process, 'platform', { value: platform })
+      expect(defaultSketchbookLibrariesPath('/docs')).toBe(join('/docs', 'Arduino', 'libraries'))
+    }
   })
 })
