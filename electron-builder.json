@@ -16,6 +16,10 @@
   "extraResources": [
     "./assets/**",
     {
+      "from": "./resources/examples",
+      "to": "./examples"
+    },
+    {
       "from": "./node_modules/strucpp/src/runtime/include",
       "to": "./strucpp/runtime/include"
     },
