@@ -414,6 +414,8 @@ const rendererProcessBridge = {
     subscribe('app-update:status', (_event, status) => callback(status)),
   autosaveGetEnabled: (): Promise<unknown> => ipcRenderer.invoke('autosave:get-enabled'),
   printGetFallbackFonts: (): Promise<unknown> => ipcRenderer.invoke('print:get-fallback-fonts'),
+  examplesList: (): Promise<unknown> => ipcRenderer.invoke('examples:list'),
+  examplesOpenCopy: (folder: string): Promise<unknown> => ipcRenderer.invoke('examples:open-copy', folder),
   autosaveSetEnabled: (enabled: boolean) => ipcRenderer.send('autosave:set-enabled', enabled),
   onAutosaveChanged: (callback: (enabled: unknown) => void) =>
     subscribe('autosave:changed', (_event, enabled) => callback(enabled)),

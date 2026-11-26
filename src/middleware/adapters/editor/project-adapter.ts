@@ -13,6 +13,7 @@
 import type * as PdfJsLib from 'pdfjs-dist'
 import { z } from 'zod'
 
+import { describeExampleProjects, type ExampleProjectEntry } from '../../../backend/shared/examples/example-projects'
 import { renderProjectToPdf } from '../../../backend/shared/print'
 import { parseProjectFiles } from '../../../backend/shared/utils/parse-project-files'
 import type { OpenPLCStore } from '../../../frontend/store'
@@ -334,6 +335,19 @@ export function createEditorProjectAdapter(
         raw.data.dataTypeFiles,
       )
       return { success: true, data: parsed }
+    },
+
+    async listExampleProjects() {
+      const entries = await window.bridge.examplesList().catch(() => [])
+      return describeExampleProjects(Array.isArray(entries) ? (entries as ExampleProjectEntry[]) : [])
+    },
+
+    async copyExampleProject(folder: string) {
+      const result = (await window.bridge.examplesOpenCopy(folder).catch((error: unknown) => ({
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      }))) as { success: boolean; path?: string; error?: string }
+      return result
     },
 
     async openProjectByPath(projectPath: string): Promise<ProjectResponse> {

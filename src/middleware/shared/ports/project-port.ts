@@ -1,6 +1,7 @@
 import type * as PdfJsLib from 'pdfjs-dist'
 import { z } from 'zod'
 
+import type { ExampleProject } from '../../../backend/shared/examples/example-projects'
 import type { PrintRequest } from './print-types'
 import type { DeviceConfiguration, DevicePin, PLCProjectData, ProjectMeta, RecentProject, Unsubscribe } from './types'
 
@@ -300,6 +301,15 @@ export interface ProjectPort {
 
   /** Get list of recently opened projects. */
   getRecentProjects(): Promise<RecentProject[]>
+
+  /** The example projects that come with the editor (upstream issue 245). Desktop only. */
+  listExampleProjects?(): Promise<ExampleProject[]>
+
+  /**
+   * Copies one example to a new folder and returns its path. An example opens as a copy,
+   * because the app's own copy is read-only. Desktop only.
+   */
+  copyExampleProject?(folder: string): Promise<{ success: boolean; path?: string; error?: string }>
 
   /** Server-ordered. Discriminated so signed-out, empty and offline read differently to the user. */
   listRecentCloudProjects?(limit: number): Promise<CloudProjectsResult>

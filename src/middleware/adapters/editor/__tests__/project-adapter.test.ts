@@ -804,6 +804,38 @@ describe('createEditorProjectAdapter', () => {
     })
   })
 
+  describe('example projects (upstream issue 245)', () => {
+    it('describes the example folders that the main process read', async () => {
+      ;(window.bridge as unknown as Record<string, unknown>).examplesList = jest
+        .fn()
+        .mockResolvedValue([
+          {
+            folder: 'blink',
+            projectJson: JSON.stringify({ meta: { name: 'Blink' } }),
+            mainSource: '(* Blink: a lamp. *)',
+          },
+        ])
+      await expect(adapter.listExampleProjects?.()).resolves.toEqual([
+        { folder: 'blink', name: 'Blink', description: 'a lamp.' },
+      ])
+    })
+
+    it('gives no examples when the main process fails', async () => {
+      ;(window.bridge as unknown as Record<string, unknown>).examplesList = jest.fn().mockRejectedValue(new Error('x'))
+      await expect(adapter.listExampleProjects?.()).resolves.toEqual([])
+    })
+
+    it('returns the path of the copy', async () => {
+      const examplesOpenCopy = jest.fn().mockResolvedValue({ success: true, path: '/tmp/ioloom-examples/blink-1' })
+      ;(window.bridge as unknown as Record<string, unknown>).examplesOpenCopy = examplesOpenCopy
+      await expect(adapter.copyExampleProject?.('blink')).resolves.toEqual({
+        success: true,
+        path: '/tmp/ioloom-examples/blink-1',
+      })
+      expect(examplesOpenCopy).toHaveBeenCalledWith('blink')
+    })
+  })
+
   describe('renderPdf', () => {
     it('renders on the renderer main thread via the shared engine, using the embedded font set', async () => {
       const bytes = new Uint8Array([0x25, 0x50, 0x44, 0x46])

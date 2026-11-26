@@ -39,6 +39,7 @@ import { VENDOR_DOCUMENT_SCHEME } from '../middleware/shared/vendor-document/doc
 import { applyHiddenWindowsMode } from './hidden-windows'
 import MenuBuilder from './menu'
 import { createAutosaveSetting } from './modules/autosave'
+import { registerExampleProjects } from './modules/examples'
 import MainProcessBridge from './modules/ipc/main'
 import { createQuitCoordinator } from './modules/lifecycle/quit-coordinator'
 import { registerPrintFonts } from './modules/print-fonts'
@@ -69,6 +70,7 @@ const updateService = createElectronUpdateService({
 // One per process too: it registers its IPC handlers once.
 const autosaveSetting = createAutosaveSetting(() => mainWindow)
 registerPrintFonts()
+registerExampleProjects()
 // The menu of the current window. macOS can create the window again, so the listener below reads this.
 let activeMenuBuilder: MenuBuilder | undefined
 // The native checkbox must show a change made from the in-app menu.
