@@ -18,9 +18,12 @@ const DisplayExampleProjects = () => {
 
   useEffect(() => {
     let live = true
-    void project.listExampleProjects?.().then((list) => {
-      if (live) setExamples(list)
-    })
+    // A platform without examples has no such method, or one that gives nothing.
+    void Promise.resolve(project.listExampleProjects?.())
+      .then((list) => {
+        if (live) setExamples(Array.isArray(list) ? list : [])
+      })
+      .catch(() => undefined)
     return () => {
       live = false
     }
