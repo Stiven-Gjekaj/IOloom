@@ -212,6 +212,23 @@ describe('generateSTCode (python)', () => {
     expect(result).toContain('std::memcpy(data_in.msg.body, __s.c_str(), (size_t)__n);')
   })
 
+  it('gives each instance of the block its own script file (upstream issue 1131)', () => {
+    // The loader writes the script, with the instance's shared memory name in it, to
+    // \`script_name\`, and Python reads the file later. With one name for every instance, the
+    // last instance overwrote the file before the others' Python read it, so every Python
+    // process attached to the last instance's memory and the others' outputs stayed zero.
+    const code = generateSTCode({
+      pouName: 'PY_SCALE',
+      allVariables: [makeScalarVar('X', 'input', 'int')],
+      processedPythonCode: 'pass',
+    })
+
+    expect(code).not.toContain('"PY_SCALE.py"')
+    expect(code).toContain('static unsigned int python_instance_count = 0;')
+    expect(code).toContain('snprintf(script_name, sizeof(script_name), "PY_SCALE_%u.py", ++python_instance_count);')
+    expect(code.indexOf('snprintf(script_name')).toBeLessThan(code.indexOf('python_block_loader(script_name'))
+  })
+
   it('publishes the live IEC output values into shared memory at startup', () => {
     const result = generateSTCode({
       pouName: 'test',
@@ -391,7 +408,7 @@ describe('generateSTCode (python)', () => {
       processedPythonCode: 'pass',
     })
 
-    expect(result).toContain('const char *script_name = "controller.py";')
+    expect(result).toContain('"controller_%u.py"')
     expect(result).toContain('const char script_template[] =')
     expect(result).toContain('python_block_loader')
   })

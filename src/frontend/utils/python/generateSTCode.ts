@@ -349,7 +349,14 @@ if first_run = false then
         char shm_name[128];
         create_shm_name(shm_name, sizeof(shm_name));
 
-        const char *script_name = "${pouName}.py";
+        // One script file for each instance (upstream issue 1131). The loader writes the
+        // script, with this instance's shared memory name in it, and Python reads the file
+        // later. With one file name for the block, the last instance overwrote it first, so
+        // each Python process attached to the last instance's memory. A static local is
+        // shared by every instance of this block, so the count numbers them.
+        static unsigned int python_instance_count = 0;
+        char script_name[160];
+        snprintf(script_name, sizeof(script_name), "${pouName}_%u.py", ++python_instance_count);
         const char script_template[] =
             "${escapedPythonCode}";
 
