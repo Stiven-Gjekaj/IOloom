@@ -806,15 +806,13 @@ describe('createEditorProjectAdapter', () => {
 
   describe('example projects (upstream issue 245)', () => {
     it('describes the example folders that the main process read', async () => {
-      ;(window.bridge as unknown as Record<string, unknown>).examplesList = jest
-        .fn()
-        .mockResolvedValue([
-          {
-            folder: 'blink',
-            projectJson: JSON.stringify({ meta: { name: 'Blink' } }),
-            mainSource: '(* Blink: a lamp. *)',
-          },
-        ])
+      ;(window.bridge as unknown as Record<string, unknown>).examplesList = jest.fn().mockResolvedValue([
+        {
+          folder: 'blink',
+          projectJson: JSON.stringify({ meta: { name: 'Blink' } }),
+          mainSource: '(* Blink: a lamp. *)',
+        },
+      ])
       await expect(adapter.listExampleProjects?.()).resolves.toEqual([
         { folder: 'blink', name: 'Blink', description: 'A lamp.' },
       ])
