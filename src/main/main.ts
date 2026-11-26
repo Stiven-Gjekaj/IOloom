@@ -41,6 +41,7 @@ import MenuBuilder from './menu'
 import { createAutosaveSetting } from './modules/autosave'
 import MainProcessBridge from './modules/ipc/main'
 import { createQuitCoordinator } from './modules/lifecycle/quit-coordinator'
+import { registerPrintFonts } from './modules/print-fonts'
 import { store } from './modules/store'
 import { createElectronUpdateService } from './modules/updater'
 import { createVendorDocumentHandler, leavesVendorDocument } from './modules/vendor-document/serve'
@@ -67,6 +68,7 @@ const updateService = createElectronUpdateService({
 })
 // One per process too: it registers its IPC handlers once.
 const autosaveSetting = createAutosaveSetting(() => mainWindow)
+registerPrintFonts()
 // The menu of the current window. macOS can create the window again, so the listener below reads this.
 let activeMenuBuilder: MenuBuilder | undefined
 // The native checkbox must show a change made from the in-app menu.

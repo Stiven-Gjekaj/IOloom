@@ -107,3 +107,8 @@ export function findFallbackFonts(candidates: string[], io: FontFileAccess): Uin
   }
   return fonts
 }
+
+/** The fallback fonts as they come over IPC, or none when the value is not a list of bytes. */
+export function asFallbackFonts(value: unknown): Uint8Array[] {
+  return Array.isArray(value) && value.every((font) => font instanceof Uint8Array) ? value : []
+}

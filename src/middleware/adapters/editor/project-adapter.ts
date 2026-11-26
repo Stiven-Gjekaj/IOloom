@@ -645,7 +645,10 @@ export function createEditorProjectAdapter(
       // rather than at module load, so they never land in the startup bundle
       // for a session that never opens the export wizard.
       const { getEmbeddedFontSet } = await import('../../../backend/shared/print/fonts/embedded-font-set')
-      return renderProjectToPdf(request, getEmbeddedFontSet())
+      const { asFallbackFonts } = await import('../../../backend/shared/print/fonts/system-fallback')
+      // System fonts for the characters that the Latin faces lack (upstream issue 1171).
+      const fallbacks = asFallbackFonts(await window.bridge.printGetFallbackFonts().catch(() => []))
+      return renderProjectToPdf(request, { ...getEmbeddedFontSet(), fallbacks })
     },
 
     async preparePdfPreviewWorker(_pdfjsLib: typeof PdfJsLib): Promise<void> {

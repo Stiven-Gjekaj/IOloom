@@ -134,6 +134,7 @@ const mockRawProjectFiles = {
 
 beforeEach(() => {
   window.bridge = {
+    printGetFallbackFonts: jest.fn().mockResolvedValue([]),
     createProject: jest.fn().mockResolvedValue(mockIpcProjectResponse),
     readProjectFiles: jest.fn().mockResolvedValue(mockRawProjectFiles),
     writeProjectFiles: jest.fn().mockResolvedValue(mockSaveResponse),
@@ -821,8 +822,29 @@ describe('createEditorProjectAdapter', () => {
 
       const result = await adapter.renderPdf(request)
 
-      expect(mockRenderProjectToPdf).toHaveBeenCalledWith(request, mockFontSet)
+      expect(mockRenderProjectToPdf).toHaveBeenCalledWith(request, { ...mockFontSet, fallbacks: [] })
       expect(result).toBe(bytes)
+    })
+
+    it('adds the system fallback fonts from the main process (upstream issue 1171)', async () => {
+      const font = new Uint8Array([0, 1, 0, 0])
+      ;(window.bridge as unknown as Record<string, unknown>).printGetFallbackFonts = jest.fn().mockResolvedValue([font])
+      mockRenderProjectToPdf.mockResolvedValue(new Uint8Array())
+      const request = {
+        projectName: 'TestProject',
+        mode: 'normal' as const,
+        pagePolicy: 'new-page-per-pou' as const,
+        page: {
+          size: 'a4' as const,
+          orientation: 'portrait' as const,
+          marginsPt: { top: 36, right: 36, bottom: 36, left: 36 },
+        },
+        pous: [],
+      }
+
+      await adapter.renderPdf(request)
+
+      expect(mockRenderProjectToPdf).toHaveBeenCalledWith(request, { ...mockFontSet, fallbacks: [font] })
     })
   })
 

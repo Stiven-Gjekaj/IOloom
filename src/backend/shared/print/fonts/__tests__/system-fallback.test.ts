@@ -9,7 +9,7 @@ import { join } from 'node:path'
 
 import fontkit from '@pdf-lib/fontkit'
 
-import { fallbackFontCandidates, findFallbackFonts, fontFromCollection } from '../system-fallback'
+import { asFallbackFonts, fallbackFontCandidates, findFallbackFonts, fontFromCollection } from '../system-fallback'
 
 const LIBERATION = new Uint8Array(
   readFileSync(join(__dirname, '../../../../../../node_modules/pdfjs-dist/standard_fonts/LiberationSans-Regular.ttf')),
@@ -83,5 +83,14 @@ describe('fallbackFontCandidates', () => {
   it('lists fonts for macOS and Linux', () => {
     expect(fallbackFontCandidates('darwin', {}).some((path: string) => path.endsWith('Arial Unicode.ttf'))).toBe(true)
     expect(fallbackFontCandidates('linux', {}).some((path: string) => path.includes('NotoSansCJK'))).toBe(true)
+  })
+})
+
+describe('asFallbackFonts', () => {
+  it('keeps a list of bytes, and gives no fonts for anything else', () => {
+    const font = new Uint8Array([1])
+    expect(asFallbackFonts([font])).toEqual([font])
+    expect(asFallbackFonts(undefined)).toEqual([])
+    expect(asFallbackFonts(['not bytes'])).toEqual([])
   })
 })
