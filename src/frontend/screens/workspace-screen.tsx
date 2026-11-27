@@ -14,6 +14,8 @@ import {
 } from '../../middleware/shared/providers'
 import { ExitIcon } from '../assets/icons/interface/Exit'
 import { ClearConsoleButton } from '../components/_atoms/buttons/console/clear-console'
+import { OnlineViewBadge } from '../components/_atoms/online-view'
+import { editorPanelBorderClass } from '../components/_atoms/online-view/editor-panel-border'
 import { BranchStatusBar } from '../components/_features/[workspace]/branches'
 import { BranchMergeView } from '../components/_features/[workspace]/branches/branch-merge-view'
 import { CommitHistoryView } from '../components/_features/[workspace]/commit-history'
@@ -593,13 +595,16 @@ const WorkspaceScreen = () => {
                     order={1}
                     minSize={15}
                     defaultSize={69}
+                    data-online-view={isDebuggerVisible ? 'true' : undefined}
                     className={cn(
-                      'relative  flex flex-1 grow flex-col overflow-hidden rounded-lg border-2 border-neutral-200 bg-white px-4 py-4 dark:border-neutral-800 dark:bg-neutral-950',
+                      'relative  flex flex-1 grow flex-col overflow-hidden rounded-lg border-2 bg-white px-4 py-4 dark:bg-neutral-950',
+                      editorPanelBorderClass(isDebuggerVisible),
                       {
                         'py-0 pb-4': isVariablesPanelCollapsed,
                       },
                     )}
                   >
+                    <OnlineViewBadge />
                     {isVariablesPanelCollapsed && (
                       <div className='flex w-full justify-center'>
                         <button
