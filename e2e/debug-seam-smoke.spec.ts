@@ -3,6 +3,8 @@
  *
  * Needs a build made with OPENPLC_E2E_DEBUG_SEAM=1; `npm run test:e2e` sets it.
  */
+import { mkdtempSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 import type { ElectronApplication, Page } from '@playwright/test'
@@ -18,9 +20,14 @@ declare global {
   }
 }
 
+/** An empty profile, so the state of the person's own profile does not change the test. */
+const USER_DATA = mkdtempSync(join(tmpdir(), 'openplc-e2e-debug-seam-'))
+
+test.afterAll(() => rmSync(USER_DATA, { recursive: true, force: true }))
+
 async function launch(): Promise<{ app: ElectronApplication; page: Page }> {
   const app = await electron.launch({
-    args: [join(__dirname, '..', 'release', 'app', 'dist', 'main', 'main.js')],
+    args: [join(__dirname, '..', 'release', 'app', 'dist', 'main', 'main.js'), `--user-data-dir=${USER_DATA}`],
     env: { ...process.env, NODE_ENV: 'production' },
   })
   const deadline = Date.now() + 60000
