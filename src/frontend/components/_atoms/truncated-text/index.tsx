@@ -49,6 +49,11 @@ const TruncatedText = ({ text, className, side = 'top', testId }: TruncatedTextP
           ref={ref}
           data-testid={testId}
           tabIndex={clipped ? 0 : undefined}
+          // Radix closes the tooltip on Escape only after a second render of its layer, and
+          // a tooltip that opens on focus can stay at one render. The trigger closes it too.
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') setOpen(false)
+          }}
           className={cn(
             'block min-w-0 truncate focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-brand',
             className,

@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { TooltipProvider } from '../../tooltip'
@@ -75,6 +75,20 @@ describe('TruncatedText', () => {
 
     expect(document.activeElement).toBe(screen.getByTestId('cell'))
     expect((await screen.findByTestId('truncated-text-tooltip')).textContent).toContain('A_VERY_LONG_IO_POINT_NAME')
+  })
+
+  it('closes the tooltip on Escape while the value keeps the focus', async () => {
+    const user = userEvent.setup()
+    renderText('A_VERY_LONG_IO_POINT_NAME')
+
+    await user.tab()
+    await user.tab()
+    await screen.findByTestId('truncated-text-tooltip')
+
+    await user.keyboard('{Escape}')
+
+    expect(document.activeElement).toBe(screen.getByTestId('cell'))
+    await waitFor(() => expect(screen.queryByTestId('truncated-text-tooltip')).toBeNull())
   })
 
   it('leaves a value that fits out of the tab order and shows no tooltip', async () => {
