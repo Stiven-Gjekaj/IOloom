@@ -8,6 +8,8 @@ import { join } from 'node:path'
 import type { ElectronApplication, Page } from '@playwright/test'
 import { _electron as electron, expect, test } from '@playwright/test'
 
+import { quitApp } from './helpers/ethercat-project'
+
 type DebugSessionSeam = { open(): void; close(): void; isOpen(): boolean }
 
 declare global {
@@ -56,7 +58,8 @@ test.describe('debug session seam', () => {
       })
       expect(closed).toBe(false)
     } finally {
-      await app.close()
+      // The app asks before it quits, so a plain close waits for ever.
+      await quitApp(app, page)
     }
   })
 })

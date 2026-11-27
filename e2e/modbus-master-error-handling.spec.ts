@@ -11,6 +11,8 @@ import { join } from 'node:path'
 import type { ElectronApplication, Page } from '@playwright/test'
 import { _electron as electron, expect, test } from '@playwright/test'
 
+import { quitApp } from './helpers/ethercat-project'
+
 const ROOT = join(tmpdir(), 'openplc-e2e-modbus-error-handling')
 const FIXTURE = join(ROOT, 'project')
 const USER_DATA = join(ROOT, 'userdata')
@@ -198,6 +200,7 @@ test('Error Handling is offered on read IO groups only', async () => {
     await page.getByRole('option', { name: 'Read Input Registers (FC 4)' }).click()
     await expect(errorHandling).toBeVisible()
   } finally {
-    await app.close()
+    // The app asks before it quits, so a plain close waits for ever.
+    await quitApp(app, page)
   }
 })
