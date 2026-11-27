@@ -50,6 +50,9 @@ const isHiddenWindowsMode = (env: NodeJS.ProcessEnv): boolean => env.IOLOOM_E2E_
  * frames. The editor draws on animation frames, so this mode also turns off the
  * background throttle of each new window.
  *
+ * A show call marks the window with `ioloomShowRequested`, so a test can see that
+ * the app asked to show it.
+ *
  * Maximize sets the size of the work area and does not show the window. The
  * layout then has the same size as on the screen. At the default size the app
  * shows its notice for small screens.
@@ -63,8 +66,12 @@ const applyHiddenWindowsMode = (
   if (!isHiddenWindowsMode(env)) return false
 
   const noop = (): void => {}
-  windowClass.prototype.show = noop
-  windowClass.prototype.showInactive = noop
+  // A test cannot ask a hidden window whether it is visible, so a hidden show marks the window.
+  const markShowRequested = function markShowRequested(this: { ioloomShowRequested?: boolean }) {
+    this.ioloomShowRequested = true
+  }
+  windowClass.prototype.show = markShowRequested
+  windowClass.prototype.showInactive = markShowRequested
   windowClass.prototype.focus = noop
   windowClass.prototype.maximize = function maximizeHidden(this: WindowClass['prototype']) {
     this.setBounds(screen.getPrimaryDisplay().workArea)

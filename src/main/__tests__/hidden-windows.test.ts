@@ -56,6 +56,19 @@ describe('applyHiddenWindowsMode', () => {
     expect(app.dock.hide).toHaveBeenCalledTimes(1)
   })
 
+  it('marks a hidden window when the app asks to show it', () => {
+    const { windowClass, app, screen } = makeElectron()
+    applyHiddenWindowsMode({ IOLOOM_E2E_HIDDEN: '1' }, windowClass, app, screen)
+
+    const shown: { ioloomShowRequested?: boolean } = {}
+    const inactive: { ioloomShowRequested?: boolean } = {}
+    windowClass.prototype.show.call(shown)
+    windowClass.prototype.showInactive.call(inactive)
+
+    expect(shown.ioloomShowRequested).toBe(true)
+    expect(inactive.ioloomShowRequested).toBe(true)
+  })
+
   it('gives a maximized hidden window the size of the work area', () => {
     const { windowClass, app, screen, workArea, setBounds } = makeElectron()
     applyHiddenWindowsMode({ IOLOOM_E2E_HIDDEN: '1' }, windowClass, app, screen)

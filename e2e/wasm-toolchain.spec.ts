@@ -51,10 +51,17 @@ async function windowByUrl(app: ElectronApplication, part: string): Promise<Page
   )
 }
 
-/** True once the main window has been shown, which the editor does only after the toolchain is ready. */
+/**
+ * True once the main window has been shown, which the editor does only after the toolchain is ready.
+ * In hidden window mode a window never becomes visible, so the mark of a show call counts.
+ */
 const mainWindowShown = (app: ElectronApplication): Promise<boolean> =>
   app.evaluate(({ BrowserWindow }) =>
-    BrowserWindow.getAllWindows().some((w) => w.webContents.getURL().includes('index.html') && w.isVisible()),
+    BrowserWindow.getAllWindows().some(
+      (w) =>
+        w.webContents.getURL().includes('index.html') &&
+        (w.isVisible() || (w as { ioloomShowRequested?: boolean }).ioloomShowRequested === true),
+    ),
   )
 
 const REQUEST = {
