@@ -1,6 +1,6 @@
 import { app } from 'electron'
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'fs'
-import { basename, extname, join } from 'path'
+import { basename, dirname, extname, join } from 'path'
 
 import type { CatalogTransportPort } from '../../../middleware/shared/ports/catalog-transport-port'
 import type { StlibArchiveDTO } from '../../../middleware/shared/ports/library-port'
@@ -13,6 +13,7 @@ import {
   prepareStlibUpload,
 } from '../../shared/library/prepare-library-upload'
 import { downloadPublicLibrary } from '../../shared/library/public-catalog-client'
+import { findStrucppDir, STRUCPP_LIBS } from '../../shared/library/strucpp-dir'
 import { validatePathId } from '../../shared/utils/path-safety'
 import { assertPathContained } from '../utils/path-containment'
 import { createDesktopCatalogTransport } from './desktop-catalog-transport'
@@ -116,7 +117,7 @@ export class LibraryManagerModule {
     if (app.isPackaged) {
       return join(process.resourcesPath, 'strucpp', 'libs')
     }
-    return join(app.getAppPath(), 'node_modules', 'strucpp', 'libs')
+    return findStrucppDir(app.getAppPath(), STRUCPP_LIBS, { parent: dirname, join, exists: existsSync })
   }
 
   // -------------------------------------------------------------------------

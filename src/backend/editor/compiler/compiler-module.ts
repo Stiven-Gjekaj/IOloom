@@ -6,7 +6,7 @@ import type { IncomingMessage } from 'node:http'
 import https from 'node:https'
 import os from 'node:os'
 import path from 'node:path'
-import { join, resolve as pathResolve, sep as pathSep } from 'node:path'
+import { dirname, join, resolve as pathResolve, sep as pathSep } from 'node:path'
 
 import { LibraryManagerModule } from '@root/backend/editor/library-manager/library-manager-module'
 import { buildUploadSnapshot } from '@root/backend/editor/project/build-upload-snapshot'
@@ -31,6 +31,7 @@ import { runLibraryBuildPipeline } from '@root/backend/shared/library/library-bu
 import { type NativePouRef, parseNativePouRefs } from '@root/backend/shared/library/native-pou-list'
 import { buildKnownPous, emitCompileErrorEvents } from '@root/backend/shared/library/program-build-helpers'
 import { runProgramBuildPipeline } from '@root/backend/shared/library/program-build-pipeline'
+import { findStrucppDir, STRUCPP_RUNTIME_INCLUDE } from '@root/backend/shared/library/strucpp-dir'
 import { loadStrucpp } from '@root/backend/shared/library/strucpp-runtime'
 import { fromSchemaShape, transpileToSt as runJsonTranspiler } from '@root/backend/shared/transpilers/st-transpiler'
 import type { KnownPou } from '@root/backend/shared/utils/PLC/split-program-st'
@@ -484,7 +485,11 @@ class CompilerModule {
     if (electronApp.isPackaged) {
       return join(process.resourcesPath, 'strucpp', 'runtime', 'include')
     }
-    return join(electronApp.getAppPath(), 'node_modules', 'strucpp', 'src', 'runtime', 'include')
+    return findStrucppDir(electronApp.getAppPath(), STRUCPP_RUNTIME_INCLUDE, {
+      parent: dirname,
+      join,
+      exists: existsSync,
+    })
   }
 
   /**
