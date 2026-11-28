@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (c) 2026 Autonomy®
 /*
-modbus_debug.cpp - OpenPLC always-on debugger function codes (0x41-0x4B)
+modbus_debug.cpp - OpenPLC always-on debugger function codes (0x41-0x4E)
 */
 
 #include "modbus_debug.h"
@@ -411,6 +411,32 @@ void plcSetState(uint8_t desired)
     mb_frame[3] = runtime_get_plc_state();
     mb_frame[4] = runtime_get_switch_position();
     mb_frame_len = 5;
+}
+
+// PDU request:  [FC][action:u8]   (0 = PAUSE, 1 = STEP one scan, 2 = RESUME)
+// PDU response: [FC][status][plc_state:u8][tick:u32 BE]
+//
+// A PAUSE holds the PLC between two scans and keeps every value. A STEP runs
+// one scan while paused. A RESUME goes back to RUN. An action that is not
+// valid in the current state answers MB_PLC_STEP_REFUSED and changes nothing.
+//
+// Like plcSetState(), the runtime applies the request inside its next cycle,
+// so `plc_state` and `tick` are as of the last cycle. The caller reads the
+// result from its next status poll (FC 0x46).
+void plcStep(uint8_t action)
+{
+    uint8_t status = MB_DEBUG_SUCCESS;
+    if (runtime_request_plc_step(action) != PLC_CTRL_OK)
+        status = MB_PLC_STEP_REFUSED;
+
+    mb_frame[1] = MB_FC_PLC_STEP;
+    mb_frame[2] = status;
+    mb_frame[3] = runtime_get_plc_state();
+    mb_frame[4] = (uint8_t)((scan_counter >> 24) & 0xFF);
+    mb_frame[5] = (uint8_t)((scan_counter >> 16) & 0xFF);
+    mb_frame[6] = (uint8_t)((scan_counter >> 8)  & 0xFF);
+    mb_frame[7] = (uint8_t)(scan_counter & 0xFF);
+    mb_frame_len = 8;
 }
 
 // Magic that must accompany a reboot-to-bootloader request, so a stray or

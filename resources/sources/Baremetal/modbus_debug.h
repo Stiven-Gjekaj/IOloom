@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (c) 2026 Autonomy®
 /*
-modbus_debug.h - OpenPLC always-on debugger function codes (0x41-0x4B)
+modbus_debug.h - OpenPLC always-on debugger function codes (0x41-0x4E)
 
 The debugger PDU handlers, dispatched from process_mbpacket. Kept ungated: the
 dispatch in modbus_pdu references them unconditionally (the always-on debugger is
@@ -39,5 +39,8 @@ void rebootToBootloader(const uint8_t *magic);
 // side-effect free (unlike 0x4C, which raises the unlock prompt on the device),
 // so the editor can poll it while waiting for the user to unlock.
 void getLockState(void);
+// FC 0x4E -- single stepping: pause the PLC between scans, run one scan, or
+// resume. `action` is PLC_STEP_PAUSE, PLC_STEP_ONCE or PLC_STEP_RESUME.
+void plcStep(uint8_t action);
 
 #endif

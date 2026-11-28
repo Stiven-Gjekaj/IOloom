@@ -115,6 +115,27 @@ uint8_t runtime_get_switch_position(void);
 // to the user rather than retrying. Returns PLC_CTRL_*.
 uint8_t runtime_request_plc_state(uint8_t desired_state);
 
+// ---------------------------------------------------------------------------
+// Single stepping (Modbus FC 0x4E).
+//
+// PAUSE holds a running PLC between two scans. It is not a STOP: the program
+// is not initialised again, the outputs keep their last values, and IEC time
+// does not move. STEP runs exactly one scan while paused. Each STEP request
+// adds one scan, up to 255. RESUME goes back to RUNNING.
+//
+// A STOP (software or mode switch) clears the pause. A RUN request through
+// runtime_request_plc_state() also clears it, so the Start button resumes.
+// ---------------------------------------------------------------------------
+
+#define PLC_STEP_PAUSE   0
+#define PLC_STEP_ONCE    1
+#define PLC_STEP_RESUME  2
+
+// Apply one PLC_STEP_* action. Returns PLC_CTRL_OK, or PLC_CTRL_INVALID for an
+// unknown action, a PAUSE while the PLC is stopped, or a STEP while it is not
+// paused.
+uint8_t runtime_request_plc_step(uint8_t action);
+
 // Re-impose forced located variables' values onto their raw storage. Call
 // after any code path that writes the image pointers directly (HAL input
 // refresh, Modbus reverse-copy) so a debugger force is not clobbered. Cheap

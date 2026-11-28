@@ -165,6 +165,9 @@ extern IEC_ULINT *lint_memory[MAX_MEMORY_LWORD];
 #define PLC_STATE_STOPPED   0
 #define PLC_STATE_RUNNING   1
 #define PLC_STATE_ERROR     2
+// Held between scans for single stepping (Modbus FC 0x4E). The program keeps
+// its values, the outputs keep their last values, and IEC time does not move.
+#define PLC_STATE_PAUSED    3
 
 //Hardware Layer (implemented in arduino.cpp HAL file, compiled as extern "C")
 #ifdef __cplusplus

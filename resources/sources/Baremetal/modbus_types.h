@@ -79,6 +79,11 @@ protocol, transport, register and debug layers agree on the same contracts.
 // programming lock is engaged. Not an error code, because the editor keeps
 // asking for a few seconds while the user clears the lock at the device.
 #define MB_REFUSED_LOCKED                0x6C
+// MB_FC_PLC_STEP only: the action is not valid in the current state (a PAUSE
+// while stopped, a STEP while not paused) or the action byte is unknown. It
+// doesn't collide with Modbus exceptions (0x01-0x04), 0x7E/0x81-0x86, nor
+// 0x87 (STATUS_READ_ONLY of the STruC++ debug dispatch).
+#define MB_PLC_STEP_REFUSED              0x88
 
 // Modbus registers struct
 // What a Modbus slave is, on this firmware: an id. The register banks that used
@@ -112,6 +117,7 @@ enum {
     MB_FC_PLC_SET_STATE       = 0x4B, // Set the runtime run/stop state
     MB_FC_REBOOT_BOOTLOADER   = 0x4C, // Reboot the device into its firmware bootloader (magic-guarded)
     MB_FC_GET_LOCK_STATE      = 0x4D, // Read the device's programming-lock state (read-only)
+    MB_FC_PLC_STEP            = 0x4E, // Pause, step one scan, or resume the PLC
 };
 
 //Exception Codes

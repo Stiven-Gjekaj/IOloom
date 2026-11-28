@@ -71,6 +71,10 @@ static uint8_t plc_state      = PLC_STATE_RUNNING;
 static uint8_t switch_position = PLC_SWITCH_RUN;
 static uint8_t last_switch     = PLC_SWITCH_RUN;
 static bool    software_stop   = false;
+// Single stepping. `software_pause` is the latch set by a PAUSE request;
+// `pending_steps` counts the scans that STEP requests asked for.
+static bool    software_pause  = false;
+static uint8_t pending_steps   = 0;
 
 // Weak default: boards with no physical mode switch always read RUN, so the
 // gate collapses to "software request only" and the boot state is RUNNING --
@@ -117,10 +121,35 @@ extern "C" uint8_t runtime_request_plc_state(uint8_t desired_state)
         // can tell the user to flip the switch instead of silently waiting.
         if (hardwareStateSwitch() == PLC_SWITCH_STOP) return PLC_CTRL_REFUSED_SWITCH_STOP;
         software_stop = false;
+        software_pause = false;
+        pending_steps = 0;
         return PLC_CTRL_OK;
     }
     if (desired_state == PLC_STATE_STOPPED) {
         software_stop = true;
+        software_pause = false;
+        pending_steps = 0;
+        return PLC_CTRL_OK;
+    }
+    return PLC_CTRL_INVALID;
+}
+
+extern "C" uint8_t runtime_request_plc_step(uint8_t action)
+{
+    if (action == PLC_STEP_PAUSE) {
+        // A stopped PLC has no scan to hold. Start it first.
+        if (software_stop || plc_state == PLC_STATE_STOPPED) return PLC_CTRL_INVALID;
+        software_pause = true;
+        return PLC_CTRL_OK;
+    }
+    if (action == PLC_STEP_ONCE) {
+        if (!software_pause) return PLC_CTRL_INVALID;
+        if (pending_steps < 255) ++pending_steps;
+        return PLC_CTRL_OK;
+    }
+    if (action == PLC_STEP_RESUME) {
+        software_pause = false;
+        pending_steps = 0;
         return PLC_CTRL_OK;
     }
     return PLC_CTRL_INVALID;
@@ -779,8 +808,15 @@ void runtime_plc_cycle()
     last_switch     = sw;
     switch_position = sw;
 
+    const bool stopped = (sw == PLC_SWITCH_STOP || software_stop);
+    // A stop always wins over a pause, and it clears the pause: after the next
+    // start the PLC runs freely again.
+    if (stopped) {
+        software_pause = false;
+        pending_steps = 0;
+    }
     const uint8_t new_state =
-        (sw == PLC_SWITCH_STOP || software_stop) ? PLC_STATE_STOPPED : PLC_STATE_RUNNING;
+        stopped ? PLC_STATE_STOPPED : (software_pause ? PLC_STATE_PAUSED : PLC_STATE_RUNNING);
 
     // Entering STOP is a cold stop: zero the outputs and re-initialise the
     // program exactly once, on the transition.
@@ -799,7 +835,10 @@ void runtime_plc_cycle()
     // normally changes them while stopped, so this is usually a no-op — except
     // in the one case that matters: a driver that discarded the store because
     // the program changed. Idempotent, so calling it on every RUN edge is safe.
-    if (new_state == PLC_STATE_RUNNING && plc_state != PLC_STATE_RUNNING) {
+    //
+    // Only from STOPPED: a pause holds the live values, so leaving it must not
+    // load the stored ones over them.
+    if (new_state == PLC_STATE_RUNNING && plc_state == PLC_STATE_STOPPED) {
         runtime_retain_load();
     }
 
@@ -810,14 +849,19 @@ void runtime_plc_cycle()
     // HAL just wrote raw input storage directly — re-impose any forced input.
     runtime_apply_located_forces();
 
-    if (plc_state == PLC_STATE_RUNNING) {
+    // A paused PLC executes a scan only when a STEP request asked for one.
+    const bool step_now = (plc_state == PLC_STATE_PAUSED && pending_steps > 0);
+    if (step_now) --pending_steps;
+    const bool execute = (plc_state == PLC_STATE_RUNNING || step_now);
+
+    if (execute) {
         for (size_t i = 0; i < total_programs; ++i) {
             if (task_divisors[i] == 0 || (scan_counter % task_divisors[i]) == 0) {
                 all_programs[i]->run();
             }
         }
         ++scan_counter;
-    } else {
+    } else if (plc_state == PLC_STATE_STOPPED) {
         // Re-zero every stopped cycle, not just on the transition: a Modbus
         // client may have written coils into the image since the last cycle.
         runtime_zero_output_image();
@@ -828,7 +872,8 @@ void runtime_plc_cycle()
 
     // 4. IEC time advances only while running, so TON/TOF/TP resume where
     //    they left off instead of jumping by the stop duration.
-    if (plc_state == PLC_STATE_RUNNING) {
+    //    A step moves time by one scan, so a timer sees each step as one scan.
+    if (execute) {
         strucpp::__CURRENT_TIME_NS += (int64_t)base_tick_ns;
     }
 
@@ -843,7 +888,7 @@ void runtime_plc_cycle()
     //    rewriting an unchanging blob for as long as the machine sits idle. The
     //    values the program stopped with are already stored by the last RUNNING
     //    cycle, and the flush on the STOP transition commits them.
-    if (plc_state == PLC_STATE_RUNNING) {
+    if (execute) {
         runtime_retain_save();
     }
 }
