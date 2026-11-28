@@ -36,6 +36,7 @@ beforeEach(() => {
       content: 'debug_vars[] = { ... }',
     }),
     debuggerPlcControl: jest.fn().mockResolvedValue({ success: true, state: 0 }),
+    debuggerPlcStep: jest.fn().mockResolvedValue({ success: true, state: 3, tick: 1 }),
   } as unknown as typeof window.bridge
 
   adapter = createEditorDebuggerAdapter()
@@ -252,6 +253,31 @@ describe('setPlcState', () => {
       success: false,
       error: 'bridge is gone',
     })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// plcStep
+// ---------------------------------------------------------------------------
+
+describe('plcStep', () => {
+  it.each([
+    ['PAUSE', 0],
+    ['STEP', 1],
+    ['RESUME', 2],
+  ] as const)('sends %s as the wire action %i', (action, wire) => {
+    void adapter.plcStep?.(action)
+    expect(window.bridge.debuggerPlcStep).toHaveBeenCalledWith(wire)
+  })
+
+  it('passes the whole acknowledgement through', async () => {
+    ;(window.bridge.debuggerPlcStep as jest.Mock).mockResolvedValue({ success: false, refused: true, state: 1 })
+    await expect(adapter.plcStep?.('STEP')).resolves.toEqual({ success: false, refused: true, state: 1 })
+  })
+
+  it('reports a rejected IPC call as a failed command instead of throwing', async () => {
+    ;(window.bridge.debuggerPlcStep as jest.Mock).mockRejectedValue(new Error('bridge is gone'))
+    await expect(adapter.plcStep?.('PAUSE')).resolves.toEqual({ success: false, error: 'bridge is gone' })
   })
 })
 

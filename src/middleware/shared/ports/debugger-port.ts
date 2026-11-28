@@ -28,7 +28,7 @@
  *   - DebugTransport interface implementations
  */
 
-import type { PlcControlResult } from '../../../backend/shared/debug/types'
+import type { PlcControlResult, PlcStepResult } from '../../../backend/shared/debug/types'
 import type { DebugSetResult, DebugVariableResult, Md5VerifyResult, Unsubscribe } from './types'
 
 export interface DebuggerPort {
@@ -101,6 +101,15 @@ export interface DebuggerPort {
    * run/stop state machine.
    */
   setPlcState?(state: 'RUNNING' | 'STOPPED'): Promise<PlcControlResult>
+
+  /**
+   * Hold the PLC between scans, run one scan, or resume (Modbus FC 0x4e).
+   *
+   * Command only, like `setPlcState`: the device status poll reports the
+   * settled state, PAUSED while held. `refused` means the action is not valid
+   * in the current state; `unsupported` means the firmware predates stepping.
+   */
+  plcStep?(action: 'PAUSE' | 'STEP' | 'RESUME'): Promise<PlcStepResult>
 
   /** Check if the debugger is currently connected. */
   isConnected(): boolean

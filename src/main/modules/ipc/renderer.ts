@@ -626,6 +626,19 @@ const rendererProcessBridge = {
     error?: string
   }> => ipcRenderer.invoke('debugger:plc-control', action),
 
+  /** FC 0x4e single stepping: 0 = pause, 1 = step one scan, 2 = resume. Reads
+   *  come from `onDevicePlcState`, which reports PAUSED (3). */
+  debuggerPlcStep: (
+    action: 0 | 1 | 2,
+  ): Promise<{
+    success: boolean
+    state?: number
+    tick?: number
+    refused?: boolean
+    unsupported?: boolean
+    error?: string
+  }> => ipcRenderer.invoke('debugger:plc-step', action),
+
   debuggerReadProgramStMd5: (
     projectPath: string,
     boardTarget: string,

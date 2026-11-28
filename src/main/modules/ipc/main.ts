@@ -68,11 +68,12 @@ import type {
   DeviceDebugChannel,
   DeviceModbusTransport,
   PlcControlResult,
+  PlcStepResult,
 } from '@root/backend/shared/debug/types'
 import { runEsiParseOp } from '@root/backend/shared/ethercat/esi-parse-ops'
 import { listPublicLibraries, PublicLibrarySchema } from '@root/backend/shared/library/public-catalog-client'
 import type { SnapshotMetadata } from '@root/backend/shared/project/project-snapshot-archive'
-import { PlcRuntimeState } from '@root/backend/shared/simulator/types'
+import { PlcRuntimeState, type PlcStepAction } from '@root/backend/shared/simulator/types'
 import { PLCProjectData } from '@root/backend/shared/types/PLC/open-plc'
 import { canonicalWatchKey, FileWatchRegistry } from '@root/backend/shared/utils/file-watch/registry'
 import { getErrorMessage } from '@root/frontend/utils/get-error-message'
@@ -1069,6 +1070,7 @@ class MainProcessBridge implements MainIpcModule {
     // ===================== DEBUGGER =====================
     this.registerHandle('debugger:verify-md5', this.handleDebuggerVerifyMd5)
     this.registerHandle('debugger:plc-control', this.handleDebuggerPlcControl)
+    this.registerHandle('debugger:plc-step', this.handleDebuggerPlcStep)
     this.registerHandle('debugger:read-program-st-md5', this.handleReadProgramStMd5)
     this.registerHandle('debugger:get-variables-list', this.handleDebuggerGetVariablesList)
     this.registerHandle('debugger:set-variable', this.handleDebuggerSetVariable)
@@ -2518,6 +2520,27 @@ class MainProcessBridge implements MainIpcModule {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error during PLC control request',
+      }
+    }
+  }
+
+  /**
+   * FC 0x4e single stepping for a baremetal target, over the one held device link.
+   * A runtime target has no stepping command, so a REST session answers `unsupported`.
+   */
+  handleDebuggerPlcStep = async (_event: IpcMainInvokeEvent, action: PlcStepAction): Promise<PlcStepResult> => {
+    this.traceDeviceLink(`step: action ${action} requested`)
+    if (this.deviceSession.getRestAddress() !== null) {
+      return { success: false, unsupported: true, error: 'This target does not support single stepping' }
+    }
+    const link = this.requireControl('single stepping')
+    if ('error' in link) return { success: false, error: link.error }
+    try {
+      return await link.client.plcStep(action)
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error during single-stepping request',
       }
     }
   }

@@ -10,7 +10,8 @@
  * auto-reconnection using stored connection parameters.
  */
 
-import type { PlcControlResult } from '../../../backend/shared/debug/types'
+import type { PlcControlResult, PlcStepResult } from '../../../backend/shared/debug/types'
+import { PlcStepAction } from '../../../backend/shared/simulator/types'
 import { getErrorMessage } from '../../../frontend/utils/get-error-message'
 import type { DebuggerPort } from '../../shared/ports/debugger-port'
 import type { DebugSetResult, DebugVariableResult, Md5VerifyResult, Unsubscribe } from '../../shared/ports/types'
@@ -73,6 +74,14 @@ export function createEditorDebuggerAdapter(): DebuggerPort {
       try {
         // Payload only. Which medium carries it is the connection manager's business.
         return await window.bridge.debuggerPlcControl(state === 'RUNNING' ? 'run' : 'stop')
+      } catch (error) {
+        return { success: false, error: getErrorMessage(error) }
+      }
+    },
+
+    async plcStep(action: 'PAUSE' | 'STEP' | 'RESUME'): Promise<PlcStepResult> {
+      try {
+        return await window.bridge.debuggerPlcStep(PlcStepAction[action])
       } catch (error) {
         return { success: false, error: getErrorMessage(error) }
       }
