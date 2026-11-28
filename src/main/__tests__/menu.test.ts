@@ -315,6 +315,29 @@ describe.each(['darwin', 'win32', 'linux'] as const)('%s autosave', (platform) =
   })
 })
 
+describe.each(['darwin', 'win32', 'linux'] as const)('%s course mode', (platform) => {
+  beforeEach(() => setPlatform(platform))
+
+  it('the Display menu toggle shows and stores the setting', async () => {
+    const courseMode = { isEnabled: jest.fn(() => false), setEnabled: jest.fn(), onChange: jest.fn() }
+    // @ts-expect-error: a BrowserWindow stand-in with only what MenuBuilder touches
+    const window: BrowserWindow = mainWindow
+    await new MenuBuilder(window, undefined, undefined, courseMode).buildMenu()
+
+    const toggle = lastMenu().get('Course Mode')
+    expect(toggle).toMatchObject({ type: 'checkbox', checked: false, enabled: true })
+    // @ts-expect-error: only `checked` of the MenuItem is read
+    toggle?.click?.({ checked: true })
+    expect(courseMode.setEnabled).toHaveBeenCalledWith(true)
+  })
+
+  it('the toggle is off when there is no setting', async () => {
+    await newBuilder().buildMenu()
+
+    expect(lastMenu().get('Course Mode')?.enabled).toBe(false)
+  })
+})
+
 describe.each(['darwin', 'win32', 'linux'] as const)('%s Recent', (platform) => {
   beforeEach(() => {
     setPlatform(platform)

@@ -21,7 +21,7 @@ export interface BooleanSetting {
 }
 
 /** The keys of the editor settings that hold one boolean. */
-export type BooleanSettingKey = 'autosave'
+export type BooleanSettingKey = 'autosave' | 'course_mode'
 
 export interface BooleanSettingOptions {
   key: BooleanSettingKey

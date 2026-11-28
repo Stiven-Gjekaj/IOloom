@@ -39,6 +39,7 @@ import { VENDOR_DOCUMENT_SCHEME } from '../middleware/shared/vendor-document/doc
 import { applyHiddenWindowsMode } from './hidden-windows'
 import MenuBuilder from './menu'
 import { createAutosaveSetting } from './modules/autosave'
+import { createCourseModeSetting } from './modules/course-mode'
 import { registerExampleProjects } from './modules/examples'
 import MainProcessBridge from './modules/ipc/main'
 import { createQuitCoordinator } from './modules/lifecycle/quit-coordinator'
@@ -69,12 +70,14 @@ const updateService = createElectronUpdateService({
 })
 // One per process too: it registers its IPC handlers once.
 const autosaveSetting = createAutosaveSetting(() => mainWindow)
+const courseModeSetting = createCourseModeSetting(() => mainWindow)
 registerPrintFonts()
 registerExampleProjects()
 // The menu of the current window. macOS can create the window again, so the listener below reads this.
 let activeMenuBuilder: MenuBuilder | undefined
 // The native checkbox must show a change made from the in-app menu.
 autosaveSetting.onChange(() => void activeMenuBuilder?.buildMenu())
+courseModeSetting.onChange(() => void activeMenuBuilder?.buildMenu())
 const quitCoordinator = createQuitCoordinator({
   platform: process.platform,
   getWindow: () => mainWindow,
@@ -427,7 +430,7 @@ const createMainWindow = async () => {
   // mainWindow.webContents.send('editor:getBaseTypes', _editorService.getBaseTypes())
 
   // Handles the creation of the menu
-  const menuBuilder = new MenuBuilder(mainWindow, updateService, autosaveSetting)
+  const menuBuilder = new MenuBuilder(mainWindow, updateService, autosaveSetting, courseModeSetting)
   void menuBuilder.buildMenu()
   activeMenuBuilder = menuBuilder
 

@@ -28,6 +28,8 @@ const StoreSchema = z.object({
   auto_update_check: z.boolean(),
   // Autosave every 10 minutes (upstream issue 443). On by default.
   autosave: z.boolean(),
+  // Course mode hides the features that the automation course does not use. Off by default.
+  course_mode: z.boolean(),
 })
 
 export { StoreSchema, ThemeSchema }

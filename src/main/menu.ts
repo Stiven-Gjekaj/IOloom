@@ -3,6 +3,7 @@ import { BrowserWindow, Menu, MenuItemConstructorOptions, nativeTheme, shell } f
 
 import { ProjectService } from '../backend/editor/services'
 import type { AutosaveSetting } from './modules/autosave'
+import type { CourseModeSetting } from './modules/course-mode'
 import { store } from './modules/store'
 import type { UpdateService } from './modules/updater'
 
@@ -22,6 +23,7 @@ export default class MenuBuilder {
   private projectService: ProjectService
   private updates: UpdateService | undefined
   private autosave: AutosaveSetting | undefined
+  private courseMode: CourseModeSetting | undefined
   private projectOpen = false
   /** Whether a debug session is open, which makes the editing menu items read-only. */
   private debuggerActive = false
@@ -48,11 +50,29 @@ export default class MenuBuilder {
     { role: 'toggleDevTools' },
   ]
 
-  constructor(mainWindow: BrowserWindow, updates?: UpdateService, autosave?: AutosaveSetting) {
+  constructor(
+    mainWindow: BrowserWindow,
+    updates?: UpdateService,
+    autosave?: AutosaveSetting,
+    courseMode?: CourseModeSetting,
+  ) {
     this.mainWindow = mainWindow
     this.projectService = new ProjectService(mainWindow)
     this.updates = updates
     this.autosave = autosave
+    this.courseMode = courseMode
+  }
+
+  /** The course mode toggle. English only, like the autosave toggle. */
+  private courseModeItem(): MenuItemConstructorOptions {
+    const courseMode = this.courseMode
+    return {
+      label: 'Course Mode',
+      type: 'checkbox',
+      checked: courseMode?.isEnabled() ?? false,
+      enabled: courseMode !== undefined,
+      click: (item) => courseMode?.setEnabled(item.checked),
+    }
   }
 
   /** The autosave toggle. English only, like the update toggle: menu.json is shared with the web editor. */
@@ -563,6 +583,7 @@ export default class MenuBuilder {
           sublabel: this.themeSublabel(),
           click: () => this.updateAppTheme(),
         },
+        this.courseModeItem(),
         ...this.developerMenuItems(),
       ],
     }
@@ -888,6 +909,7 @@ export default class MenuBuilder {
             sublabel: this.themeSublabel(),
             click: () => this.updateAppTheme(),
           },
+          this.courseModeItem(),
           ...this.developerMenuItems(),
         ],
       },
