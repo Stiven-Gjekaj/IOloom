@@ -7,6 +7,7 @@ export {
   useAutosave,
   useCapabilities,
   useCompiler,
+  useCourseModePort,
   useDebugger,
   useDevice,
   useEdgeAccount as useEdgeAccountPort,

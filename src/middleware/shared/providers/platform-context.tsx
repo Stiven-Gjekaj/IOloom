@@ -149,6 +149,10 @@ export function useAutosave() {
   return usePlatform().autosave
 }
 
+export function useCourseModePort() {
+  return usePlatform().courseMode
+}
+
 export function useLibrary() {
   return usePlatform().library
 }

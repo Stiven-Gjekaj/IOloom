@@ -2,6 +2,7 @@ import type { AcceleratorPort } from '../ports/accelerator-port'
 import type { AIPort } from '../ports/ai-port'
 import type { AppUpdatePort } from '../ports/app-update-port'
 import type { AutosavePort } from '../ports/autosave-port'
+import type { CourseModePort } from '../ports/course-mode-port'
 import type { CompilerPort } from '../ports/compiler-port'
 import type { DebuggerPort } from '../ports/debugger-port'
 import type { DevicePort } from '../ports/device-port'
@@ -54,6 +55,8 @@ export interface PlatformPorts {
   appUpdate?: AppUpdatePort
   // Desktop only: the autosave setting. Absent on web, which does not autosave.
   autosave?: AutosavePort
+  // Desktop only: the course mode setting. Absent on web, where course mode stays off.
+  courseMode?: CourseModePort
   // Required when `capabilities.hasStLSP` is true.
   stlibSource?: StlibSourcePort
 }

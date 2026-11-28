@@ -419,6 +419,10 @@ const rendererProcessBridge = {
   autosaveSetEnabled: (enabled: boolean) => ipcRenderer.send('autosave:set-enabled', enabled),
   onAutosaveChanged: (callback: (enabled: unknown) => void) =>
     subscribe('autosave:changed', (_event, enabled) => callback(enabled)),
+  courseModeGetEnabled: (): Promise<unknown> => ipcRenderer.invoke('course-mode:get-enabled'),
+  courseModeSetEnabled: (enabled: boolean) => ipcRenderer.send('course-mode:set-enabled', enabled),
+  onCourseModeChanged: (callback: (enabled: unknown) => void) =>
+    subscribe('course-mode:changed', (_event, enabled) => callback(enabled)),
   requestQuitApp: () => ipcRenderer.send('app:request-quit'),
   quitRequested: (callback: IpcRendererCallbacks) => {
     const unsubscribe = subscribe('app:quit-requested', callback)
