@@ -35,6 +35,7 @@ const createWorkspaceSlice: StateCreator<WorkspaceSlice, [], [], WorkspaceSlice>
       searchTerm: '',
       timestampFormat: 'full',
     },
+    courseMode: false,
     // Debug state
     isDebuggerVisible: false,
     debuggerTargetIp: null,
@@ -258,6 +259,13 @@ const createWorkspaceSlice: StateCreator<WorkspaceSlice, [], [], WorkspaceSlice>
       )
     },
     // Debug actions
+    setCourseMode: (enabled: boolean) => {
+      setState(
+        produce(({ workspace }: WorkspaceSlice) => {
+          workspace.courseMode = enabled
+        }),
+      )
+    },
     setDebuggerVisible: (isVisible: boolean) => {
       setState(
         produce(({ workspace }: WorkspaceSlice) => {

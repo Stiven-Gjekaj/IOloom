@@ -84,6 +84,8 @@ export type WorkspaceState = {
     plcLogs: PlcLogs
     plcLogsLastId: number | null
     plcFilters: PlcFilters
+    /** Course mode hides the features that the automation course does not use (roadmap Q1). */
+    courseMode: boolean
     // Debug state (union of editor + web fields)
     isDebuggerVisible: boolean
     debuggerTargetIp: string | null
@@ -208,6 +210,7 @@ export type WorkspaceActions = {
   setPlcLevelFilter: (level: 'debug' | 'info' | 'warning' | 'error', enabled: boolean) => void
   setPlcSearchTerm: (term: string) => void
   setPlcTimestampFormat: (format: 'full' | 'time' | 'none') => void
+  setCourseMode: (enabled: boolean) => void
   // Debug actions
   setDebuggerVisible: (isVisible: boolean) => void
   setDebuggerTargetIp: (targetIp: string | null) => void
