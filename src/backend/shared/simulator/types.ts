@@ -17,6 +17,10 @@ export enum ModbusFunctionCode {
    *  which already reports the state — there is deliberately no second FC for
    *  querying it. */
   PLC_SET_STATE = 0x4b,
+  /** Single stepping: pause the PLC between scans, run one scan, or resume.
+   *  The action is a `PlcStepAction`. Firmware without it answers the Modbus
+   *  exception form, so an old device never takes it for a stop. */
+  PLC_STEP = 0x4e,
 }
 
 export enum ModbusDebugResponse {
@@ -42,6 +46,9 @@ export enum ModbusDebugResponse {
    *  what keeps an older editor build, or an OPC-UA client, from writing
    *  through to it. */
   READ_ONLY = 0x87,
+  /** PLC_STEP only: the action is not valid in the current state (a pause while
+   *  stopped, a step while not paused). Nothing changed on the target. */
+  STEP_REFUSED = 0x88,
 }
 
 /** Runtime states reported by DEBUG_GET_STATUS and PLC_SET_STATE (and by
@@ -50,6 +57,16 @@ export enum PlcRuntimeState {
   STOPPED = 0,
   RUNNING = 1,
   ERROR = 2,
+  /** Held between two scans for single stepping (FC 0x4e). The program keeps
+   *  its values and the outputs keep their last values. Baremetal only. */
+  PAUSED = 3,
+}
+
+/** The action byte of PLC_STEP (FC 0x4e). */
+export enum PlcStepAction {
+  PAUSE = 0,
+  STEP = 1,
+  RESUME = 2,
 }
 
 /** Mode-switch positions. Boards with no physical switch always report RUN, so

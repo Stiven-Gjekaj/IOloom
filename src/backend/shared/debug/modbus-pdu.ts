@@ -26,6 +26,9 @@
  *   plcSetState request:  [FC=0x4b] [state: U8]   (0 = STOP, 1 = RUN)
  *   plcSetState response: [FC=0x4b] [status] [plcState: U8] [switchPosition: U8]
  *
+ *   plcStep request:  [FC=0x4e] [action: U8]   (0 = PAUSE, 1 = STEP, 2 = RESUME)
+ *   plcStep response: [FC=0x4e] [status] [plcState: U8] [tick: U32BE]
+ *
  *   writeLicense request:  [FC=0x49] [len: U16BE] [blob...]
  *   writeLicense response: [FC=0x49] [status]
  *
@@ -56,7 +59,7 @@
  */
 
 import { detectTargetEndian, type TargetEndian } from '../../../frontend/utils/endian'
-import { ModbusDebugResponse, ModbusFunctionCode, PlcRuntimeState } from '../simulator/types'
+import { ModbusDebugResponse, ModbusFunctionCode, PlcRuntimeState, PlcStepAction } from '../simulator/types'
 import type {
   DebugAnchorResult,
   DebugDeviceIdResult,
@@ -68,6 +71,7 @@ import type {
   DebugVersionResult,
   Md5ProbeResult,
   PlcControlResult,
+  PlcStepResult,
 } from './types'
 
 // ---------------------------------------------------------------------------
@@ -630,6 +634,60 @@ export function parsePlcSetStateResponse(data: Uint8Array): PlcControlResult {
   if (status === (ModbusDebugResponse.REFUSED_BY_SWITCH as number)) {
     result.refusedBySwitch = true
     result.error = 'Refused: the hardware mode switch is in STOP'
+  } else if (!result.success) {
+    result.error = statusError(status)
+  }
+  return result
+}
+
+// ---------------------------------------------------------------------------
+// FC 0x4e — single stepping
+//
+// Command only, like FC 0x4b. The state is read from the status poll (FC 0x46),
+// which reports PAUSED (3) while the PLC is held between scans.
+// ---------------------------------------------------------------------------
+
+export function buildPlcStepRequest(action: PlcStepAction): Uint8Array {
+  const pdu = alloc(2)
+  writeU8(pdu, 0, ModbusFunctionCode.PLC_STEP)
+  writeU8(pdu, 1, action)
+  return pdu
+}
+
+/**
+ * Parse a single-stepping acknowledgement.
+ *
+ * The caller must tell three outcomes apart:
+ *   - success: the target accepted the action.
+ *   - `refused`: the action is not valid in the current state. Nothing changed.
+ *   - `unsupported`: the target answered the Modbus exception form, so its
+ *     firmware was built before single stepping.
+ */
+export function parsePlcStepResponse(data: Uint8Array): PlcStepResult {
+  if (data.length < 1) {
+    return { success: false, error: 'Response too short' }
+  }
+
+  const fc = readU8(data, 0)
+  if (fc === (ModbusFunctionCode.PLC_STEP as number) + 0x80) {
+    return { success: false, unsupported: true, error: 'Firmware does not implement single stepping' }
+  }
+  if (fc !== (ModbusFunctionCode.PLC_STEP as number)) {
+    return { success: false, error: 'Function code mismatch' }
+  }
+  if (data.length < 7) {
+    return { success: false, error: 'Response too short' }
+  }
+
+  const status = readU8(data, 1)
+  const result: PlcStepResult = {
+    success: status === (ModbusDebugResponse.SUCCESS as number),
+    state: readU8(data, 2),
+    tick: readU32BE(data, 3),
+  }
+  if (status === (ModbusDebugResponse.STEP_REFUSED as number)) {
+    result.refused = true
+    result.error = 'Refused: pause a running PLC before you step it'
   } else if (!result.success) {
     result.error = statusError(status)
   }

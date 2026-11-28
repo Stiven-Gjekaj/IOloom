@@ -358,3 +358,23 @@ export interface PlcControlResult {
   unsupported?: boolean
   error?: string
 }
+
+/**
+ * Result of a single-stepping command (FC 0x4e `PLC_STEP`).
+ *
+ * Like `PlcControlResult`, `state` and `tick` are as of the target's last scan:
+ * the runtime applies the action inside its next scan, so the settled values
+ * come from the next status poll.
+ */
+export interface PlcStepResult {
+  success: boolean
+  state?: number
+  /** The scan counter. A step advances it by one. */
+  tick?: number
+  /** The action is not valid in the current state, for example a step while
+   *  the PLC runs freely. Nothing changed on the target. */
+  refused?: boolean
+  /** Firmware predates single stepping. Drives a "rebuild and upload" message. */
+  unsupported?: boolean
+  error?: string
+}
