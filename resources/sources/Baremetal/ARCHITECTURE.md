@@ -83,7 +83,7 @@ composite gates in `modbus_config.h`:
    Step 2 accepts **two** slave ids on this port: the Modbus server's, and
    `MB_EDITOR_SLAVE` for the editor's own link. A frame that matched only the
    editor's id must carry an editor function code (`mb_pdu_is_editor_fc()`,
-   `0x41`-`0x4B`) or it is dropped in silence — the channel is private, and an
+   `0x41`-`0x4E`) or it is dropped in silence — the channel is private, and an
    exception would tell a bus scanner the address is live. When the two ids are
    equal, which is the default, the server's branch matches first and this costs
    nothing.
@@ -120,8 +120,38 @@ header (no CRC) instead of RTU framing.
    - add the FC's request length to `mb_pdu_request_len()`;
    - if the FC should bypass CRC on RTU, add it to `mb_pdu_skips_crc()`.
 3. Add the FC constant to the enum in **`modbus_types.h`**.
+4. If the new FC is above the last editor FC, move the upper limit of
+   `mb_pdu_is_editor_fc()` to it.
 
 That is the whole surface. `modbus_serial.*` and `modbus_tcp.*` are untouched.
+
+## Single stepping (`0x4E`)
+
+The editor can hold the PLC between two scans and run one scan at a time. The
+runtime glue (`arduino_runtime_glue.cpp`) owns the state. `modbus_debug.cpp`
+only forwards the request.
+
+| Action byte | Name   | Valid when             | Effect                              |
+|-------------|--------|------------------------|-------------------------------------|
+| `0`         | PAUSE  | the PLC is not stopped | The state becomes PAUSED (`3`).     |
+| `1`         | STEP   | a pause is requested   | The next cycle runs one scan.       |
+| `2`         | RESUME | always                 | The state becomes RUNNING again.    |
+
+The reply is `[FC][status][plc_state][tick:u32 BE]`. An action that is not
+valid answers `MB_PLC_STEP_REFUSED` (`0x88`) and changes nothing. Firmware
+without `0x4E` answers the Modbus exception form, so the editor tells the user
+to build and upload again.
+
+A pause is not a stop:
+
+- The program is not initialised again.
+- The outputs keep their last values.
+- IEC time does not move, so a timer sees each step as one scan.
+- The inputs are still read in each cycle.
+
+Each STEP request adds one scan, up to 255. A stop (from the editor or from
+the mode switch) clears the pause, and so does a RUN request (`0x4B`). Thus
+the Start button also resumes a paused PLC.
 
 ## Serial and TCP in the same build
 
