@@ -150,6 +150,7 @@ export const SIMULATOR_CAPABILITIES: TargetCapabilities = {
   isInProcessSimulator: true,
   nativeRetainStore: false,
   plcStateControl: false,
+  scanStepping: true,
   directUsbUpload: true,
   // Licensing is never a property of a TARGET FAMILY: a VPP is what is
   // sold, so only a VPP manifest can turn this on. Every preset leaves it
@@ -179,6 +180,7 @@ export const RUNTIME_V3_CAPABILITIES: TargetCapabilities = {
   // was this flag.
   nativeRetainStore: false,
   plcStateControl: true,
+  scanStepping: false,
   directUsbUpload: false,
   // Licensing is never a property of a TARGET FAMILY: a VPP is what is
   // sold, so only a VPP manifest can turn this on. Every preset leaves it
@@ -208,6 +210,7 @@ export const RUNTIME_V4_CAPABILITIES: TargetCapabilities = {
   isInProcessSimulator: false,
   nativeRetainStore: true,
   plcStateControl: true,
+  scanStepping: false,
   directUsbUpload: false,
   // Licensing is never a property of a TARGET FAMILY: a VPP is what is
   // sold, so only a VPP manifest can turn this on. Every preset leaves it
@@ -243,6 +246,7 @@ export const ARDUINO_CLI_CAPABILITIES: TargetCapabilities = {
   isInProcessSimulator: false,
   nativeRetainStore: false,
   plcStateControl: true,
+  scanStepping: true,
   directUsbUpload: true,
   // Licensing is never a property of a TARGET FAMILY: a VPP is what is
   // sold, so only a VPP manifest can turn this on. Every preset leaves it

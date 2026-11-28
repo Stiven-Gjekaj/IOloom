@@ -246,6 +246,12 @@ export interface TargetCapabilities {
    *  Stop a silent no-op on a target where it had always worked. */
   plcStateControl: boolean
 
+  /** Target can hold the PLC between scans and run one scan at a time
+   *  (Modbus FC 0x4e). True for the baremetal firmware, the Simulator
+   *  included, because the editor builds that firmware itself. False for
+   *  Runtime v3 and v4: their REST API has no stepping command. */
+  scanStepping: boolean
+
   /** The target's runtime ships a BUILT-IN retain store the project can
    *  configure — the file-backed one in runtime v4. True only there: on
    *  baremetal the store is whatever the board's driver provides and nothing in

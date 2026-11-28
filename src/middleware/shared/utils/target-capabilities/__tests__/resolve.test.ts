@@ -25,6 +25,16 @@ describe('resolveTargetCapabilities', () => {
     expect(resolveTargetCapabilities({ compiler: 'simulator' })).toMatchObject(SIMULATOR_CAPABILITIES)
   })
 
+  it('offers single stepping on the baremetal firmware only', () => {
+    // The editor builds the baremetal firmware (the Simulator included), so it
+    // carries FC 0x4e. The Runtime v3 and v4 REST APIs have no stepping command.
+    expect(resolveTargetCapabilities({ compiler: 'simulator' }).scanStepping).toBe(true)
+    expect(resolveTargetCapabilities({ compiler: 'arduino-cli' }).scanStepping).toBe(true)
+    expect(resolveTargetCapabilities({ compiler: 'openplc-compiler' }).scanStepping).toBe(false)
+    expect(RUNTIME_V3_CAPABILITIES.scanStepping).toBe(false)
+    expect(resolveTargetCapabilities(undefined).scanStepping).toBe(false)
+  })
+
   it('returns Runtime v4 preset for compiler="openplc-compiler" (non-VPP)', () => {
     expect(resolveTargetCapabilities({ compiler: 'openplc-compiler' })).toMatchObject(RUNTIME_V4_CAPABILITIES)
   })

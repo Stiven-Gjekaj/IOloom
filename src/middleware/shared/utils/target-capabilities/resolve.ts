@@ -75,6 +75,7 @@ const EMPTY_CAPABILITIES: TargetCapabilities = {
   isInProcessSimulator: false,
   nativeRetainStore: false,
   plcStateControl: false,
+  scanStepping: false,
   directUsbUpload: false,
   isLicensable: false,
 }
