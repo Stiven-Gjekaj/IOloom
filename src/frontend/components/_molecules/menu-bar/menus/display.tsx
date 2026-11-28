@@ -1,7 +1,7 @@
 import * as MenuPrimitive from '@radix-ui/react-menubar'
 import { useEffect, useState } from 'react'
 
-import { useCapabilities, useTheme, useWindow } from '../../../../../middleware/shared/providers'
+import { useCapabilities, useCourseModePort, useTheme, useWindow } from '../../../../../middleware/shared/providers'
 import { i18n } from '../../../../locales/i18n'
 import { DIAGNOSTICS_TAB_NAME, openDiagnosticsTab } from '../../../../services/io-diagnostics/open-tab'
 import { requestAppRefresh } from '../../../../services/refresh-app'
@@ -28,6 +28,8 @@ export const DisplayMenu = () => {
   const store = useOpenPLCStoreApi()
   const capabilities = useCapabilities()
   const windowPort = useWindow()
+  const courseModePort = useCourseModePort()
+  const courseMode = useOpenPLCStore((state) => state.workspace.courseMode)
 
   const { TRIGGER, CONTENT, ITEM, ACCELERATOR, SEPARATOR } = MenuClasses
 
@@ -113,6 +115,17 @@ export const DisplayMenu = () => {
               </span>
             </MenuPrimitive.Item>
           </div>
+          {courseModePort && (
+            <MenuPrimitive.CheckboxItem
+              className={ITEM}
+              checked={courseMode}
+              onCheckedChange={(checked) => courseModePort.setEnabled(checked)}
+              onSelect={(event) => event.preventDefault()}
+            >
+              <span>Course Mode</span>
+              <MenuPrimitive.ItemIndicator className={ACCELERATOR}>✓</MenuPrimitive.ItemIndicator>
+            </MenuPrimitive.CheckboxItem>
+          )}
           {capabilities.isDevMode && (
             <>
               <MenuPrimitive.Separator className={SEPARATOR} />

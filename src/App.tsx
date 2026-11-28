@@ -27,6 +27,7 @@ import { AIChatPanel } from './frontend/components/_features/[workspace]/ai-chat
 import { AcuExhaustionModal } from './frontend/components/_features/[workspace]/ai-settings-panel'
 import { setPythonLspWorkerUrl } from './frontend/components/_features/[workspace]/editor/monaco/python-lsp'
 import { AppLayout } from './frontend/components/_templates/app-layout'
+import { connectCourseMode, useCourseModePorts } from './frontend/hooks/use-course-mode'
 import { StartScreen } from './frontend/screens/start-screen'
 import { WorkspaceScreen } from './frontend/screens/workspace-screen'
 import { trackAcuExhausted, trackUpgradeCtaClicked } from './frontend/services/ai/telemetry'
@@ -204,6 +205,9 @@ void import('monaco-editor').then((monaco) => {
   bootStLsp(appStore, editorPorts, monaco)
 })
 
+// Course mode lives in the main process; the store follows it for the life of the window.
+connectCourseMode(appStore, editorPorts.courseMode)
+
 if (process.env.OPENPLC_E2E_DEBUG_SEAM === '1') {
   void import('./frontend/services/testing/debug-session-seam').then(({ installDebugSessionSeam }) => {
     installDebugSessionSeam(appStore, window)
@@ -230,13 +234,15 @@ function AppContent() {
     setMenuProjectOpen(projectPath !== '')
   }, [projectPath])
 
+  const ports = useCourseModePorts(editorPorts)
+
   const isEditingLocked = useOpenPLCStore(selectIsEditingLocked)
   useEffect(() => {
     setMenuDebuggerActive(isEditingLocked)
   }, [isEditingLocked])
 
   return (
-    <PlatformProvider ports={editorPorts}>
+    <PlatformProvider ports={ports}>
       <AiBillingNotice />
       {/* Without this provider `useChatPanel()` answers null and the chat button opens nothing. */}
       <ExtensionPanelProvider panels={{ ChatPanel: EditorChatPanel }}>

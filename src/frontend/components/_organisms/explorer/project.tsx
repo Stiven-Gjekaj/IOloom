@@ -85,6 +85,8 @@ const Project = () => {
   // behind this exact predicate.
   const targetCaps = useTargetCapabilities()
   const canHostRemoteIo = targetCaps.modbusTcpRemote || targetCaps.ethercat
+  // Course mode hides the servers and the remote devices, also the ones the project already has.
+  const courseMode = useOpenPLCStore((s) => s.workspace.courseMode)
 
   // Get VPP vendor screens from the currently selected board
   const deviceBoard = useOpenPLCStore((s) => s.deviceDefinitions.configuration.deviceBoard)
@@ -551,7 +553,7 @@ const Project = () => {
            *  lack local serial ports (e.g. orchestrator-only / web
            *  builds), per the fix in d257e2a07; libraries still hide
            *  it via the `projectCaps.hasServers` capability check. */}
-          {projectCaps.hasServers && (
+          {projectCaps.hasServers && !courseMode && (
             <ProjectTreeBranch branchTarget='server'>
               {[...(servers || [])]
                 .sort((a, b) => a.name.localeCompare(b.name))
@@ -580,7 +582,7 @@ const Project = () => {
               board-switch warning promises they are "disabled during
               compilation", not removed, so hiding saved data would contradict
               what the user just accepted. */}
-          {projectCaps.hasRemoteDevices && (canHostRemoteIo || (remoteDevices?.length ?? 0) > 0) && (
+          {projectCaps.hasRemoteDevices && (canHostRemoteIo || (!courseMode && (remoteDevices?.length ?? 0) > 0)) && (
             <ProjectTreeBranch branchTarget='remote-device'>
               {[...(remoteDevices || [])]
                 .sort((a, b) => a.name.localeCompare(b.name))

@@ -40,6 +40,8 @@ const CreatePLCElement = () => {
   // hides them behind this same predicate). Unlike the tree branch, which
   // keeps already-configured devices visible, creation is refused outright.
   const targetCaps = useTargetCapabilities()
+  // Course mode hides the servers (Modbus, OPC UA, S7), so it offers none.
+  const courseMode = useOpenPLCStore((state) => state.workspace.courseMode)
   const CreatePLCElementTypes: CreatePLCElementType[] = (
     [
       'function',
@@ -59,7 +61,7 @@ const CreatePLCElement = () => {
       case 'program':
         return projectCaps.hasPrograms
       case 'server':
-        return projectCaps.hasServers
+        return projectCaps.hasServers && !courseMode
       case 'remote-device':
         return projectCaps.hasRemoteDevices && (targetCaps.modbusTcpRemote || targetCaps.ethercat)
       default:
