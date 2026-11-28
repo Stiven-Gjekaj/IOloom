@@ -1,5 +1,6 @@
 /** The online view of the program (upstream issue 536, IOloom #10). */
-import { createStoreWrapper, createTestStore } from '@root/frontend/store/testing'
+import { createStoreWrapper, createTestPorts, createTestStore } from '@root/frontend/store/testing'
+import { WEB_CAPABILITIES } from '@root/middleware/shared/ports/platform-capabilities'
 import { act, render, screen } from '@testing-library/react'
 
 import { editorPanelBorderClass } from '../editor-panel-border'
@@ -8,7 +9,9 @@ import { OnlineViewBadge } from '../index'
 describe('OnlineViewBadge', () => {
   it('shows "Online" while a debug session is open, and nothing after it closes', () => {
     const store = createTestStore()
-    render(<OnlineViewBadge />, { wrapper: createStoreWrapper(store) })
+    render(<OnlineViewBadge />, {
+      wrapper: createStoreWrapper(store, createTestPorts({ capabilities: WEB_CAPABILITIES })),
+    })
     expect(screen.queryByTestId('online-view-badge')).toBeNull()
 
     act(() => store.getState().workspaceActions.setDebuggerVisible(true))
