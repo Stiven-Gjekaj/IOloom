@@ -1,9 +1,11 @@
 import {
   buildPlcSetStateRequest,
+  buildPlcStepRequest,
   buildReadLicenseRequest,
   buildWriteLicenseRequest,
   isGetListOverflowException,
   parsePlcSetStateResponse,
+  parsePlcStepResponse,
   parseReadLicenseResponse,
   parseWriteLicenseResponse,
 } from '@root/backend/shared/debug/modbus-pdu'
@@ -13,10 +15,11 @@ import type {
   DebugStatusResult,
   Md5ProbeResult,
   PlcControlResult,
+  PlcStepResult,
 } from '@root/backend/shared/debug/types'
 import { detectTargetEndian } from '@root/frontend/utils/endian'
 
-import { ModbusDebugResponse, ModbusFunctionCode, PlcRuntimeState } from './types'
+import { ModbusDebugResponse, ModbusFunctionCode, PlcRuntimeState, type PlcStepAction } from './types'
 
 export interface SerialPortLike {
   isOpen: boolean
@@ -618,6 +621,27 @@ export class ModbusRtuClient {
         return { success: false, error: `Invalid response: too short (${response.length} bytes)` }
       }
       return parsePlcSetStateResponse(response.subarray(7))
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  }
+
+  /**
+   * FC 0x4e -- pause the PLC between scans, run one scan, or resume.
+   *
+   * Command only, like `setPlcState()`: the target applies the action inside
+   * its next scan, and `getStatus()` reports the settled state.
+   */
+  async plcStep(action: PlcStepAction): Promise<PlcStepResult> {
+    try {
+      // buildPlcStepRequest returns [FC][action]; assembleRequest writes the FC
+      // and the slave id itself, so hand it only the trailing payload.
+      const pdu = buildPlcStepRequest(action)
+      const response = await this.sendRequest(this.assembleRequest(ModbusFunctionCode.PLC_STEP, pdu.subarray(1)))
+      if (response.length < 8) {
+        return { success: false, error: `Invalid response: too short (${response.length} bytes)` }
+      }
+      return parsePlcStepResponse(response.subarray(7))
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : String(error) }
     }

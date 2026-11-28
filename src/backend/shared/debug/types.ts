@@ -1,4 +1,4 @@
-import type { PlcRuntimeState } from '../simulator/types'
+import type { PlcRuntimeState, PlcStepAction } from '../simulator/types'
 
 /**
  * Debug Transport Interface
@@ -224,6 +224,10 @@ export interface DeviceChannelTransport {
   /** Run/stop command (FC 0x4b). Reads go through `getStatus()`. Optional for
    *  the same reason as `getStatus`. */
   setPlcState?(state: PlcRuntimeState.RUNNING | PlcRuntimeState.STOPPED): Promise<PlcControlResult>
+  /** Single stepping (FC 0x4e): pause between scans, run one scan, or resume.
+   *  Optional for the same reason as `setPlcState`: it is a baremetal control
+   *  operation, and the runtime-v4 WebSocket does not carry it. */
+  plcStep?(action: PlcStepAction): Promise<PlcStepResult>
   /** Read the stored VPP license blob (FC 0x4A). Optional here because not every
    *  medium carries it — but unlike run/stop, every medium that CAN is expected
    *  to: licensing is a property of the device, not of the target family, so the
@@ -315,6 +319,7 @@ export interface DeviceModbusTransport
   getAnchor?: never
   getStatus(): Promise<DebugStatusResult>
   setPlcState(state: PlcRuntimeState.RUNNING | PlcRuntimeState.STOPPED): Promise<PlcControlResult>
+  plcStep(action: PlcStepAction): Promise<PlcStepResult>
   readLicense(): Promise<DebugLicenseReadResult>
   writeLicense(blob: Uint8Array): Promise<DebugLicenseWriteResult>
   /**

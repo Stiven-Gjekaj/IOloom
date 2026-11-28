@@ -2,11 +2,13 @@ import {
   buildGetDeviceIdRequest,
   buildGetStatusRequest,
   buildPlcSetStateRequest,
+  buildPlcStepRequest,
   buildReadLicenseRequest,
   buildWriteLicenseRequest,
   parseGetDeviceIdResponse,
   parseGetStatusResponse,
   parsePlcSetStateResponse,
+  parsePlcStepResponse,
   parseReadLicenseResponse,
   parseWriteLicenseResponse,
 } from '@root/backend/shared/debug/modbus-pdu'
@@ -18,8 +20,9 @@ import type {
   DeviceModbusTransport,
   Md5ProbeResult,
   PlcControlResult,
+  PlcStepResult,
 } from '@root/backend/shared/debug/types'
-import { PlcRuntimeState } from '@root/backend/shared/simulator/types'
+import { PlcRuntimeState, type PlcStepAction } from '@root/backend/shared/simulator/types'
 import { detectTargetEndian } from '@root/frontend/utils/endian'
 import { getErrorMessage } from '@root/frontend/utils/get-error-message'
 import { Socket } from 'net'
@@ -40,6 +43,8 @@ export enum ModbusFunctionCode {
   /** Set the runtime run/stop state. Reads go through DEBUG_GET_STATUS (0x46),
    *  which already reports it. */
   PLC_SET_STATE = 0x4b,
+  /** Pause, step one scan, or resume. Mirrors `backend/shared/simulator/types.ts`. */
+  PLC_STEP = 0x4e,
 }
 
 export enum ModbusDebugResponse {
@@ -59,6 +64,8 @@ export enum ModbusDebugResponse {
    *  Mirrors `STATUS_READ_ONLY` in STruC++'s `debug_dispatch.hpp`, and the copy
    *  of this enum in `backend/shared/simulator/types.ts`. */
   READ_ONLY = 0x87,
+  /** PLC_STEP only: the action is not valid in the current state. */
+  STEP_REFUSED = 0x88,
 }
 
 interface ModbusTcpClientOptions {
@@ -510,6 +517,27 @@ export class ModbusTcpClient implements DeviceModbusTransport {
         return { success: false, error: 'Transaction ID mismatch' }
       }
       return parsePlcSetStateResponse(Uint8Array.prototype.slice.call(data, 7))
+    } catch (error) {
+      return { success: false, error: getErrorMessage(error) }
+    }
+  }
+
+  /**
+   * FC 0x4e -- pause the PLC between scans, run one scan, or resume. Command
+   * only; reads go through `getStatus()`.
+   */
+  async plcStep(action: PlcStepAction): Promise<PlcStepResult> {
+    if (!this.socket) return { success: false, error: 'Not connected to target' }
+    try {
+      const { request, transactionId } = this.buildTcpFrame(buildPlcStepRequest(action))
+      const data = await this.sendTcpRequest(request)
+      if (data.length < 8) {
+        return { success: false, error: `Invalid response: too short (${data.length} bytes)` }
+      }
+      if (data.readUInt16BE(0) !== transactionId) {
+        return { success: false, error: 'Transaction ID mismatch' }
+      }
+      return parsePlcStepResponse(Uint8Array.prototype.slice.call(data, 7))
     } catch (error) {
       return { success: false, error: getErrorMessage(error) }
     }

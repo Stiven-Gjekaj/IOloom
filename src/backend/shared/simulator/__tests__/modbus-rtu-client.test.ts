@@ -7,7 +7,7 @@
  */
 
 import { ModbusRtuClient, type SerialPortLike } from '../modbus-rtu-client'
-import { ModbusDebugResponse, ModbusFunctionCode, PlcRuntimeState, PlcSwitchPosition } from '../types'
+import { ModbusDebugResponse, ModbusFunctionCode, PlcRuntimeState, PlcStepAction, PlcSwitchPosition } from '../types'
 
 // jsdom polyfill
 if (typeof globalThis.TextEncoder === 'undefined') {
@@ -1165,6 +1165,78 @@ describe('ModbusRtuClient', () => {
     it('returns error on timeout', async () => {
       await connectClient()
       const result = await client.setPlcState(PlcRuntimeState.STOPPED)
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('timeout')
+    })
+  })
+
+  // -----------------------------------------------------------------------
+  // plcStep (FC 0x4e)
+  //
+  // The end-to-end coverage lives in plc-step-e2e.test.ts, which only runs
+  // when it is pointed at built firmware.
+  // -----------------------------------------------------------------------
+  describe('plcStep', () => {
+    /** `[status][plcState][tick:u32 BE]`, the FC 0x4e acknowledgement payload. */
+    function ackPayload(status: number, state: number, tick: number): Uint8Array {
+      return new Uint8Array([
+        status,
+        state,
+        (tick >>> 24) & 0xff,
+        (tick >>> 16) & 0xff,
+        (tick >>> 8) & 0xff,
+        tick & 0xff,
+      ])
+    }
+
+    it.each([
+      ['PAUSE', PlcStepAction.PAUSE, 0],
+      ['STEP', PlcStepAction.STEP, 1],
+      ['RESUME', PlcStepAction.RESUME, 2],
+    ])('sends %s as action byte %i and returns the acknowledged state', async (_name, action, byte) => {
+      await connectClient()
+      const written: number[][] = []
+      port._interceptWrite = (data: Uint8Array) => {
+        written.push(Array.from(data))
+        setTimeout(
+          () =>
+            port._emit(
+              'data',
+              buildResponse(
+                1,
+                ModbusFunctionCode.PLC_STEP,
+                ackPayload(ModbusDebugResponse.SUCCESS, PlcRuntimeState.PAUSED, 42),
+              ),
+            ),
+          0,
+        )
+      }
+
+      const result = await client.plcStep(action)
+
+      expect(written[0][1]).toBe(ModbusFunctionCode.PLC_STEP)
+      expect(written[0][2]).toBe(byte)
+      expect(result).toEqual({ success: true, state: PlcRuntimeState.PAUSED, tick: 42 })
+    })
+
+    it('surfaces a step that the state refuses', async () => {
+      await connectClient()
+      autoRespond(
+        buildResponse(
+          1,
+          ModbusFunctionCode.PLC_STEP,
+          ackPayload(ModbusDebugResponse.STEP_REFUSED, PlcRuntimeState.RUNNING, 3),
+        ),
+      )
+
+      const result = await client.plcStep(PlcStepAction.STEP)
+
+      expect(result).toMatchObject({ success: false, refused: true, state: PlcRuntimeState.RUNNING })
+    })
+
+    it('returns error on timeout', async () => {
+      await connectClient()
+      const result = await client.plcStep(PlcStepAction.PAUSE)
       expect(result.success).toBe(false)
       expect(result.error).toContain('timeout')
     })

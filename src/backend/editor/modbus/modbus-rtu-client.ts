@@ -4,12 +4,14 @@ import {
   buildGetDeviceIdRequest,
   buildGetStatusRequest,
   buildPlcSetStateRequest,
+  buildPlcStepRequest,
   buildReadLicenseRequest,
   buildWriteLicenseRequest,
   isGetListOverflowException,
   parseGetDeviceIdResponse,
   parseGetStatusResponse,
   parsePlcSetStateResponse,
+  parsePlcStepResponse,
   parseReadLicenseResponse,
   parseWriteLicenseResponse,
 } from '@root/backend/shared/debug/modbus-pdu'
@@ -21,8 +23,9 @@ import type {
   DeviceModbusTransport,
   Md5ProbeResult,
   PlcControlResult,
+  PlcStepResult,
 } from '@root/backend/shared/debug/types'
-import { PlcRuntimeState } from '@root/backend/shared/simulator/types'
+import { PlcRuntimeState, type PlcStepAction } from '@root/backend/shared/simulator/types'
 import { detectTargetEndian } from '@root/frontend/utils/endian'
 import { getErrorMessage } from '@root/frontend/utils/get-error-message'
 import { SerialPort } from 'serialport'
@@ -742,6 +745,25 @@ export class ModbusRtuClient implements DeviceModbusTransport {
         return { success: false, error: `Invalid response: too short (${response.length} bytes)` }
       }
       return parsePlcSetStateResponse(Uint8Array.prototype.slice.call(response, 7))
+    } catch (error) {
+      return { success: false, error: getErrorMessage(error) }
+    }
+  }
+
+  /**
+   * FC 0x4e -- pause the PLC between scans, run one scan, or resume. Command
+   * only; reads go through `getStatus()`.
+   */
+  async plcStep(action: PlcStepAction): Promise<PlcStepResult> {
+    try {
+      const pdu = buildPlcStepRequest(action)
+      const request = this.assembleRequest(ModbusFunctionCode.PLC_STEP, Buffer.from(pdu.subarray(1)))
+      const response = await this.sendRequest(request)
+
+      if (response.length < 8) {
+        return { success: false, error: `Invalid response: too short (${response.length} bytes)` }
+      }
+      return parsePlcStepResponse(Uint8Array.prototype.slice.call(response, 7))
     } catch (error) {
       return { success: false, error: getErrorMessage(error) }
     }
