@@ -96,6 +96,9 @@ A signal is one PLC input or output, for example a sensor or a lamp.
 IOloom is for design and simulation on a laptop.
 It does not connect to a real PLC.
 
+Course mode, in the Display menu, hides the features that are out of scope
+for the course. It hides screens only, so a project keeps its settings.
+
 Out of scope:
 
 - Real PLC hardware and the download of programs to a device.
