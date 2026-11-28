@@ -1012,7 +1012,9 @@ export interface DeviceConfiguration {
   targetDevice?: ProjectTargetDevice
 }
 
-export type PlcStatus = 'INIT' | 'RUNNING' | 'STOPPED' | 'ERROR' | 'EMPTY' | 'TRANSITIONING' | 'UNKNOWN'
+/** `PAUSED` comes only from a baremetal target: the PLC is held between two
+ *  scans for single stepping (Modbus FC 0x4e). */
+export type PlcStatus = 'INIT' | 'RUNNING' | 'STOPPED' | 'PAUSED' | 'ERROR' | 'EMPTY' | 'TRANSITIONING' | 'UNKNOWN'
 
 /** `name` falls back to `plc-task-<idx>` when the .so doesn't expose one. */
 export interface TaskTimingStats {

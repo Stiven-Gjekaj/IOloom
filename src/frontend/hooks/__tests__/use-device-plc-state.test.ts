@@ -105,6 +105,13 @@ describe('useDevicePlcState', () => {
     expect(spies.setPlcRuntimeStatus).toHaveBeenCalledWith('ERROR')
   })
 
+  it('maps the PAUSED state of single stepping', () => {
+    renderPlcState()
+    pushed!({ port: '/dev/x', plcState: 3, switchPosition: 1 })
+
+    expect(spies.setPlcRuntimeStatus).toHaveBeenCalledWith('PAUSED')
+  })
+
   it('leaves the status untouched when the firmware reports no state', () => {
     // Firmware predating the run/stop state machine omits the field. Inventing a
     // status would make the button lie, so the hook writes nothing.

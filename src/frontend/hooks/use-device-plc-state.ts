@@ -30,6 +30,8 @@ function toPlcStatus(state: number | undefined): PlcStatus | null {
       return 'STOPPED'
     case PlcRuntimeState.ERROR:
       return 'ERROR'
+    case PlcRuntimeState.PAUSED:
+      return 'PAUSED'
     default:
       // Firmware predating the run/stop state machine omits the field. Leave the
       // status untouched rather than inventing one — the button then behaves as
